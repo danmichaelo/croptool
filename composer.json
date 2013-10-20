@@ -1,0 +1,17 @@
+{
+    "name": "danmichaelo/croptool",
+    "description": "CropTool for Wikimedia Commons",
+    "require": {
+        "shuber/curl": "master-dev",
+        "ext-yaml": "*",
+        "lib-curl": "*"
+
+    },
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Dan Michael O. Heggø",
+            "email": "danmichaelo@gmail.com"
+        }
+    ]
+}

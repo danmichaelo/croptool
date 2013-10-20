@@ -1,0 +1,5 @@
+config.yml
+composer.lock
+data/*
+public_html/files/*
+vendor
