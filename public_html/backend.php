@@ -19,6 +19,7 @@ class CropTool {
 
         $this->botUser = $config['user'];
         $this->botPass = $config['pass'];
+        $this->pathToJpegTran = $config['jpegtran'];
 
         $this->curl = new Curl;
         $this->curl->cookie_file = '../data/cookiejar.txt';
@@ -138,7 +139,7 @@ class CropTool {
         );
 
         if ($cm === 'lossless') {
-            $cmd = 'jpegtran -copy all -crop ' . escapeshellarg($dim) . ' ' . escapeshellarg($src_path) .' > ' . escapeshellarg($dest_path);
+            $cmd = $this->pathToJpegTran . ' -copy all -crop ' . escapeshellarg($dim) . ' ' . escapeshellarg($src_path) .' > ' . escapeshellarg($dest_path);
             $cmd_res = exec($cmd, $output, $return_var);
             $res['lossless'] = true;
 

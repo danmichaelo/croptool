@@ -19,7 +19,7 @@ service('LoginService', ['$http', '$rootScope', function($http, $rootScope) {
         $rootScope.$broadcast('loginStatusChanged', response);
     };
 
-    $http.get('/backend.php?checkLogin').success(this.checkLogin);
+    $http.get('backend.php?checkLogin').success(this.checkLogin);
 
 }]).
 
@@ -119,7 +119,7 @@ controller('AppCtrl', ['$scope', '$http', '$timeout', 'LoginService', function($
 
         $scope.status = 'Please wait while fetching image and metadata... This might take some time depending on the filesize of the image...';
 
-        $http.get('/backend.php?lookup=1&title=' + encodeURIComponent($scope.title)).
+        $http.get('backend.php?lookup=1&title=' + encodeURIComponent($scope.title)).
         success(function(response) {
 
             console.log(response);
@@ -150,7 +150,7 @@ controller('AppCtrl', ['$scope', '$http', '$timeout', 'LoginService', function($
 
         $scope.status = 'Please wait while cropping...';
 
-        $http.post('/backend.php', {
+        $http.post('backend.php', {
             title: $scope.title,
             cropmethod: $scope.cropmethod,
             x: $scope.crop_dim.x,
@@ -177,7 +177,7 @@ controller('AppCtrl', ['$scope', '$http', '$timeout', 'LoginService', function($
 
         $scope.status = 'Please wait while saving...';
 
-        $http.post('/backend.php', {
+        $http.post('backend.php', {
             title: $scope.title,
             overwrite: $scope.overwrite,
             filename: $scope.newFilename,

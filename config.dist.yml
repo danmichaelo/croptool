@@ -1,2 +1,3 @@
 user: USERNAME
 pass: PASSWORD
+jpegtran: PATH_TO_JPEGTRAN
