@@ -1,3 +1,38 @@
+<?php
+
+error_reporting(E_ALL);
+ini_set('display_errors', '1');
+
+$params = session_get_cookie_params();
+session_set_cookie_params(
+    $params['lifetime'],
+    dirname( $_SERVER['SCRIPT_NAME'] )
+);
+
+session_start();
+
+require('../oauth.php');
+
+
+if (isset($_GET['title'])) {
+    $_SESSION['title'] = $_GET['title'];
+}
+
+// Fetch the access token if this is the callback from requesting authorization
+if ( isset( $_GET['oauth_verifier'] ) && $_GET['oauth_verifier'] ) {
+
+    $oauth = new OAuthConsumer;
+    header('Location: ./?title=' . $_SESSION['title']);
+    exit;
+
+}
+
+
+//$oauth = new OAuthConsumer;
+// echo $oauth->doEdit();
+// die('');
+
+?>
 <!doctype html>
 <html ng-app="croptool">
 <head>
@@ -11,7 +46,7 @@
   <script src="//code.jquery.com/jquery-1.10.1.min.js"></script>
   <script src="//netdna.bootstrapcdn.com/bootstrap/3.0.0/js/bootstrap.min.js"></script>
   <script src="js/jquery.Jcrop.js"></script>
-  <script src="//ajax.googleapis.com/ajax/libs/angularjs/1.2.0-rc.3/angular.min.js"></script>
+  <script src="//ajax.googleapis.com/ajax/libs/angularjs/1.2.2/angular.min.js"></script>
   <script src="crop.js"></script>
 
 </head>
@@ -19,9 +54,9 @@
 
 <div class="container">
 
-    <div ng-show="loggedinas" style="float:right; padding:.3em 0;" ng-controller="LoginCtrl">
+    <div ng-show="user" style="float:right; padding:.3em 0;" ng-controller="LoginCtrl">
         <div class="panel-body">
-            Logged in as {{loggedinas}} using TUSC.
+            Logged in as {{user.name}} using {{user.method}}.
             <a href ng-click="logout()">Log out</a>
         </div>
     </div>
@@ -44,8 +79,9 @@
 
         <div ng-controller="LoginCtrl" >
 
+            <form class="form-inline panel panel-primary" role="form" ng-show="!user" ng-submit="tuscLogin()">
 
-            <form class="form-inline panel panel-primary" role="form" ng-show="!loggedinas" ng-submit="login()">
+                <!--
 
                 <div class="panel-heading">
                     <i class="icon-lock"></i> Log in using TUSC
@@ -75,13 +111,33 @@
                 </div>
             </form>
 
+        -->
+
+            <form class="form-inline panel panel-primary" role="form" ng-show="!user">
+
+                <div class="panel-heading">
+                    <i class="icon-lock"></i> Authorization needed
+                </div>
+                <div class="panel-body">
+
+                    <p>
+                        Click "Authorize" to go to a secure Wikimedia OAuth server where you can authorize
+                        the use of this tool with your Wikimedia Commons account.
+                    </p>
+
+                    <button type="submit" class="btn btn-primary" ng-click="oauthLogin()">Authorize</button>
+                    <!--<button type="submit" class="btn btn-default" ng-click="logout()">Logout</button>
+-->
+                </div>
+            </form>
+
         </div>
 
         <!-- ********************************************************************************************************
              Crop form
              **************************************************************************************************** -->
 
-        <form ng-submit="preview()" ng-show="loggedinas && !cropresults" class="panel panel-default form-inline" role="form">
+        <form ng-submit="preview()" ng-show="user && !cropresults" class="panel panel-default form-inline" role="form">
 
             <div class="panel-heading">
                 <i class="icon-info-sign"></i>
@@ -263,7 +319,7 @@
     <p style="text-align:center">
         Tool by <a href="//commons.wikimedia.org/wiki/User:Danmichaelo">User:Danmichaelo</a> using <a href="//github.com/tapmodo/Jcrop">Jcrop</a>
         and inspired by <a href="//commons.wikimedia.org/wiki/User:Cropbot">Cropbot</a>.
-        MIT license. Source and issue tracker available <a href="//github.com/danmichaelo/cropcrop">on GitHub</a>.
+        MIT license. Report bugs <a href="//github.com/danmichaelo/croptool">on GitHub</a>.
     </p>
 
 </div>

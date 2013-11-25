@@ -2,9 +2,11 @@
 
 //error_reporting(E_ALL);
 //ini_set('display_errors', '1');
+
 session_start();
 
 require('../vendor/autoload.php');
+require('../oauth.php');
 
 class CropTool {
 
@@ -13,18 +15,29 @@ class CropTool {
         $this->api_url ='https://commons.wikimedia.org/w/api.php';
         $this->log_file = '../data/log.txt';
         $this->count_file = '../data/count.txt';
-        $this->config_file = '../config.yml';
+        $this->config_file = '../config.json';
 
-        $config = yaml_parse(file_get_contents($this->config_file));
+        $config = json_decode(file_get_contents($this->config_file));
 
-        $this->botUser = $config['user'];
-        $this->botPass = $config['pass'];
-        $this->pathToJpegTran = $config['jpegtran'];
+        $this->botUser = $config->user;
+        $this->botPass = $config->pass;
+        $this->pathToJpegTran = $config->jpegtran;
 
         $this->curl = new Curl;
         $this->curl->cookie_file = '../data/cookiejar.txt';
         $this->curl->user_agent = 'CropTool (+tools.wmflabs.org/croptool)';
         $this->curl->follow_redirects = false;
+
+        $this->oauth = new OAuthConsumer;
+    }
+
+    public function checkOauthLogin()
+    {
+        if ($this->oauth->isAuthorized()) {
+            return array('user' => $this->oauth->getUsername());
+        } else {
+            return array('error' => $this->oauth->authError);
+        }
     }
 
     public function checkTuscLogin()
@@ -34,6 +47,14 @@ class CropTool {
         } else {
             return false;
         }
+    }
+
+    public function checkLogin()
+    {
+        return array(
+            'oauth' => $this->checkOauthLogin(),
+            'tusc' => $this->checkTuscLogin()
+        );
     }
 
     public function tuscLogin($user, $pass)
@@ -55,21 +76,28 @@ class CropTool {
         return array('success' => false);
     }
 
-    public function tuscLogout()
+    public function logout()
     {
-         unset($_SESSION['tusclogin']);
-        return array();
+        session_destroy();
+        return array(
+            'oauth' => $this->checkOauthLogin(),
+            'tusc' => $this->checkTuscLogin()
+        );
     }
 
     public function apiRequest($args)
     {
         $args['format'] = 'json';
-        return json_decode($this->curl->post($this->api_url, $args));
+        if ($this->oauth->isAuthorized()) {
+            return $this->oauth->doApiQuery($args);
+        } else {
+            return json_decode($this->curl->post($this->api_url, $args));
+        }
     }
 
     private function apiImageInfo($title)
     {
-        if (!$this->checkTuscLogin()) {
+        if (!$this->isAuthorized()) {
             return array('error' => 'not_logged_in');
         }
 
@@ -92,7 +120,7 @@ class CropTool {
 
     public function doCrop($input) {
 
-        if (!$this->checkTuscLogin()) {
+        if (!$this->isAuthorized()) {
             return array('error' => 'not_logged_in');
         }
 
@@ -105,8 +133,8 @@ class CropTool {
         $sha1 = $response->imageinfo[0]->sha1;
         $ext = $this->getFileExt($response->imageinfo[0]->mime);
         $src_path = dirname(__FILE__) . '/files/' . $sha1 . $ext;
-        $dest_name = '/files/' . $sha1 . '_cropped' . $ext;
-        $dest_path = dirname(__FILE__) . $dest_name;
+        $dest_name = 'files/' . $sha1 . '_cropped' . $ext;
+        $dest_path = dirname(__FILE__) . '/' . $dest_name;
 
         $new_width = intval($input->w);
         $new_height = intval($input->h);
@@ -122,16 +150,6 @@ class CropTool {
         }
 
         /*
-        $targ_w = $targ_h = 150;
-        $jpeg_quality = 90;
-
-        $img_r = imagecreatefromjpeg($src_path);
-        $dst_r = imagecreatetruecolor($new_width, $new_height);
-
-        list($width, $height) = getimagesize($src_path);
-
-        imagecopyresampled($dst_r, $img_r, 0, 0, $new_x, $new_y, $new_width, $new_height, $new_width, $new_height);
-        imagejpeg($dst_r, null, $jpeg_quality);
         */
 
         $res = array(
@@ -144,16 +162,43 @@ class CropTool {
             $res['lossless'] = true;
 
         } else if ($cm === 'exact') {
-            $cmd = 'convert ' . escapeshellarg($src_path) . ' -crop ' . escapeshellarg($dim) . ' ' . escapeshellarg($dest_path);
-            $cmd_res = exec($cmd, $output, $return_var);
+            #$cmd = 'convert ' . escapeshellarg($src_path) . ' -crop ' . escapeshellarg($dim) . ' ' . escapeshellarg($dest_path);
+            #$cmd_res = exec($cmd, $output, $return_var);
+
+            $targ_w = $targ_h = 150;
+            $jpeg_quality = 90;
+
+            $img_r = imagecreatefromjpeg($src_path);
+            $dst_r = imagecreatetruecolor($new_width, $new_height);
+
+            list($width, $height) = getimagesize($src_path);
+
+            imagecopyresampled($dst_r, $img_r, 0, 0, $new_x, $new_y, $new_width, $new_height, $new_width, $new_height);
+            imagejpeg($dst_r, $dest_path, $jpeg_quality);
+
+            #die("Output: $output, return var: $return_var");
+            #
+            $cmd_res = "";
+            $return_var = 0;
 
         } else {
             die('unknown crop method');
         }
+        chmod($dest_path, 0664);
 
-        if ($cmd_res != "") {
+        if ($cmd_res != "" || $return_var != 0) {
             $res['error'] = $cmd_res;
-            $res['return_var'] = $return_var;
+            if (empty($cmd_res)) {
+                switch ($return_var) {
+                    case 127:
+                        $res['error'] = 'jpegtran not found';
+                        break;
+                    default:
+                        $res['error'] = 'Unknown error ' . $return_var;
+                        break;
+
+                }
+            }
         } else {
             $s = getimagesize($dest_path);
             $res['name'] = $dest_name;
@@ -165,13 +210,32 @@ class CropTool {
 
     }
 
+    public function isAuthorized()
+    {
+        if ($this->oauth->isAuthorized()) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    public function getUsername()
+    {
+        if ($this->oauth->isAuthorized()) {
+            return $this->oauth->getUsername();
+        } else {
+            return undefined;
+        }
+    }
+
     private function getUploadToken($title)
     {
 
-        if (!$this->checkTuscLogin()) {
+        if (!$this->isAuthorized()) {
             return array('error' => 'not_logged_in');
         }
 
+        /*
         // STEP 1:
 
         $response = $this->apiRequest(array(
@@ -190,6 +254,7 @@ class CropTool {
           'lgpassword' => $this->botPass,
           'lgtoken' => $token
         ));
+        */
 
         // STEP 3:
 
@@ -210,11 +275,10 @@ class CropTool {
 
     public function upload($input) {
 
-        $auth = $this->checkTuscLogin();
-        if (!$auth) {
+        if (!$this->isAuthorized()) {
             return array('error' => 'not_logged_in');
         }
-        $user = $auth['user'];
+        $user = $this->getUsername();
 
         $title = $input->title;
         $response = $this->apiImageInfo($title);
@@ -232,10 +296,9 @@ class CropTool {
             'action' => 'upload',
             'format' => 'json',
             'token' => $token,
-
-            // < PHP 5.5: 'file' => '@' . $path
-            // PHP 5.5:
-            'file' => new CURLFile($path)
+            'file' => (version_compare(PHP_VERSION, '5.5.0') >= 0)
+                ? new CURLFile($path)
+                : '@' . $path
         );
 
         if ($input->overwrite == 'overwrite') {
@@ -276,6 +339,9 @@ class CropTool {
         $cnt ++;
         file_put_contents($this->count_file, $cnt);
 
+        // print_r($response);
+        //     [body] => {"servedby":"mw1202","error":{"code":"fileexists-forbidden","info":"A file with name \"Hubert_Dolez.jpg\" already exists, and cannot be overwritten.","filekey":"11t6pa776pf8.43jfs5.3174940.jpg","sessionkey":"11t6pa776pf8.43jfs5.3174940.jpg","invalidparameter":"filename"}}
+
         return json_decode($response)->upload;
     }
 
@@ -292,7 +358,7 @@ class CropTool {
     public function fetchImage($title)
     {
 
-        if (!$this->checkTuscLogin()) {
+        if (!$this->isAuthorized()) {
             return array('error' => 'not_logged_in');
         }
 
@@ -316,8 +382,8 @@ class CropTool {
 
         // 2. Get original file
 
-        $orig_name = '/files/' . $sha1 . $ext;
-        $abs_path = dirname(__FILE__) . $orig_name;
+        $orig_name = 'files/' . $sha1 . $ext;
+        $abs_path = dirname(__FILE__) . '/' . $orig_name;
 
         $r = array(
             'original' => array(
@@ -334,6 +400,7 @@ class CropTool {
             $r['original']['cached'] = false;
             $data = $this->curl->get($image_url);
             file_put_contents($abs_path, $data);
+            chmod($abs_path, 0664);
         }
 
         // 3. Get thumb
@@ -346,8 +413,8 @@ class CropTool {
             );
             $thumb_url = 'https://commons.wikimedia.org/w/thumb.php?' . http_build_query($args);
 
-            $thumb_name = '/files/' . $sha1 . '_thumb' . $ext;
-            $abs_path = dirname(__FILE__) . $thumb_name;
+            $thumb_name = 'files/' . $sha1 . '_thumb' . $ext;
+            $abs_path = dirname(__FILE__) . '/' . $thumb_name;
 
             $r['thumb'] = array(
                 'cached' => true,
@@ -359,6 +426,8 @@ class CropTool {
                 $r['thumb']['cached'] = false;
                 $data = $this->curl->get($thumb_url);
                 file_put_contents($abs_path, $data);
+                chmod($abs_path, 0664);
+
             }
 
             $s = getimagesize($abs_path);
@@ -391,7 +460,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST')
         echo json_encode($ct->tuscLogin($_POST['username'], $_POST['password']));
 
     } else if (isset($_POST['logout'])) {
-        echo json_encode($ct->tuscLogout());
+        echo json_encode($ct->logout());
 
     } else {
         echo json_encode($ct->doCrop($input));
@@ -403,7 +472,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST')
 
 if (isset($_GET['checkLogin'])) {
     header('Content-type: application/json');
-    echo json_encode($ct->checkTuscLogin());
+    echo json_encode($ct->checkLogin());
     exit;
 }
 

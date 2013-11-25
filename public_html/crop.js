@@ -11,11 +11,14 @@ service('LoginService', ['$http', '$rootScope', function($http, $rootScope) {
 
     this.checkLogin = function(response) {
         console.log(response);
-        if (response.user) {
-            that.user = response.user;
+        if (response.oauth.user) {
+            that.user = { name: response.oauth.user, method: 'OAuth' };
+        } else if (response.tusc.user) {
+            that.user = { name: response.tusc.user, method: 'TUSC' };
         } else {
             that.user = undefined;
         }
+        that.loginResponse = response;
         $rootScope.$broadcast('loginStatusChanged', response);
     };
 
@@ -25,14 +28,14 @@ service('LoginService', ['$http', '$rootScope', function($http, $rootScope) {
 
 controller('LoginCtrl', ['$scope', 'LoginService', function($scope, LoginService) {
 
-    $scope.loggedinas = LoginService.user;
+    $scope.user = LoginService.user;
 
-    $scope.login = function() {
+    $scope.tuscLogin = function() {
         $.post('backend.php', { username: $scope.username, password: $scope.password}).
         success(function(response) {
             LoginService.checkLogin(response);
-            $scope.loggedinas = LoginService.user;
-            if (!$scope.loggedinas) {
+            $scope.user = LoginService.user;
+            if (!$scope.user) {
                 $scope.loginerror = "Login failed";
             } else {
                 $scope.loginerror = undefined;
@@ -41,19 +44,26 @@ controller('LoginCtrl', ['$scope', 'LoginService', function($scope, LoginService
         });
     };
 
+    $scope.oauthLogin = function() {
+        window.location.href = './backend.php?action=authorize';
+    };
+
     $scope.logout = function() {
         $.post('backend.php', { logout: true }).
         success(function(response) {
             LoginService.checkLogin(response);
-            $scope.loggedinas = LoginService.user;
+            $scope.user = LoginService.user;
             $scope.$apply();
         });
     };
 
     $scope.$on('loginStatusChanged', function(response) {
 
-        console.log('Login status changed: ' + LoginService.user);
-        $scope.loggedinas = LoginService.user;
+        console.log('Login status changed: ' + (LoginService.user ? 'logged in' : 'not logged in'));
+        $scope.user = LoginService.user;
+        if (LoginService.loginResponse.oauth.error) {
+            $scope.oautherror = LoginService.loginResponse.oauth.error.code + ' : ' + LoginService.loginResponse.oauth.error.info;
+        }
 
     });
 
@@ -107,7 +117,7 @@ controller('AppCtrl', ['$scope', '$http', '$timeout', 'LoginService', function($
         console.log('Login status changed: ' + LoginService.user);
 
         $scope.status = '';
-        $scope.loggedinas = LoginService.user;
+        $scope.user = LoginService.user;
 
         if (LoginService.user) {
             fetchImage();
