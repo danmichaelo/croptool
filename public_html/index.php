@@ -36,7 +36,7 @@ if ( isset( $_GET['oauth_verifier'] ) && $_GET['oauth_verifier'] ) {
 <!doctype html>
 <html ng-app="croptool">
 <head>
-  <title>CropCrop</title>
+  <title>CropTool</title>
   <meta http-equiv="Content-type" content="text/html;charset=UTF-8">
 
   <link rel="stylesheet" type="text/css" href="//netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap.min.css">
@@ -64,7 +64,7 @@ if ( isset( $_GET['oauth_verifier'] ) && $_GET['oauth_verifier'] ) {
 
     <h1 style="padding:.4em 0; margin: 0 0 .3em 0;">
         <i class="icon-crop"></i>
-        CropCrop
+        CropTool
     </h1>
 
     <div class="alert alert-danger" ng-show="!title">
@@ -325,7 +325,7 @@ if ( isset( $_GET['oauth_verifier'] ) && $_GET['oauth_verifier'] ) {
         made using <a href="//github.com/tapmodo/Jcrop">Jcrop</a> and <a href="http://www.angularjs.org/">AngularJS</a>,
         inspired by <a href="//commons.wikimedia.org/wiki/User:Cropbot">Cropbot</a>.
         MIT license. 
-        Please report bugs <a href="//github.com/danmichaelo/cropcrop">on GitHub</a>.
+        Please report bugs <a href="//github.com/danmichaelo/croptool">on GitHub</a>.
     </footer>
 
 </body>

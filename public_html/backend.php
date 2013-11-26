@@ -25,7 +25,7 @@ class CropTool {
 
         $this->curl = new Curl;
         $this->curl->cookie_file = '../data/cookiejar.txt';
-        $this->curl->user_agent = 'CropCrop (+tools.wmflabs.org/cropcrop)';
+        $this->curl->user_agent = 'CropTool (+tools.wmflabs.org/croptool)';
         $this->curl->follow_redirects = false;
 
         $this->oauth = new OAuthConsumer;
@@ -322,12 +322,12 @@ class CropTool {
 
             $args['filename'] = $title;
             $args['ignorewarnings'] = 1;
-            $args['comment'] = 'Cropped ' . ($cropPercentX ?: ' < 1') . ' % horizontally and ' . ($cropPercentY ?: '< 1') . ' % vertically using CropCrop.';
+            $args['comment'] = 'Cropped ' . ($cropPercentX ?: ' < 1') . ' % horizontally and ' . ($cropPercentY ?: '< 1') . ' % vertically using CropTool.';
             
         } else {
 
             $args['filename'] = $input->filename;
-            $args['comment'] = 'Cropped version of [[File:' . $title . ']] using CropCrop.';
+            $args['comment'] = 'Cropped version of [[File:' . $title . ']] using CropTool.';
 
             $tpl = '{{Extracted from|' . $title . '}}';
             if ($x = mb_stripos($wikitext, "[[Category:") !== false) {
@@ -354,7 +354,7 @@ class CropTool {
                 $response2 = $this->apiRequest(array(
                     'action' => 'edit',
                     'format' => 'json',
-                    'summary' => 'Border removed using CropCrop',
+                    'summary' => 'Border removed using CropTool',
                     'token' => $token,
                     'title' => 'File:' . $title,
                     'text' => $wikitext2
