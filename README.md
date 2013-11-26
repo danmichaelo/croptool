@@ -1,9 +1,9 @@
-CropCrop
+CropTool
 ===========================
 
 Tool for cropping images at Wikimedia Commons.
 
-CropCrop uses [Jcrop](//github.com/tapmodo/Jcrop), [AngularJS](//angularjs.org/) and Sean Huber's [Curl wrapper for php](//github.com/shuber/curl).
+CropTool uses [Jcrop](//github.com/tapmodo/Jcrop), [AngularJS](//angularjs.org/) and Sean Huber's [Curl wrapper for php](//github.com/shuber/curl).
 
 Setup:
 
