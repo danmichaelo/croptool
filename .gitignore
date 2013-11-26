@@ -1,4 +1,4 @@
-config.yml
+config.json
 composer.lock
 data/*
 public_html/files/*
