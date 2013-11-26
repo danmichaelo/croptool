@@ -42,6 +42,7 @@ if ( isset( $_GET['oauth_verifier'] ) && $_GET['oauth_verifier'] ) {
   <link rel="stylesheet" type="text/css" href="//netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap.min.css">
   <link rel="stylesheet" href="css/jquery.Jcrop.css" type="text/css">
   <link rel="stylesheet" type="text/css" href="//netdna.bootstrapcdn.com/font-awesome/3.2.1/css/font-awesome.min.css">
+  <link rel="stylesheet" href="site.css" type="text/css">
 
   <script src="//code.jquery.com/jquery-1.10.1.min.js"></script>
   <script src="//netdna.bootstrapcdn.com/bootstrap/3.0.0/js/bootstrap.min.js"></script>
@@ -56,7 +57,7 @@ if ( isset( $_GET['oauth_verifier'] ) && $_GET['oauth_verifier'] ) {
 
     <div ng-show="user" style="float:right; padding:.3em 0;" ng-controller="LoginCtrl">
         <div class="panel-body">
-            Logged in as {{user.name}} using {{user.method}}.
+            Authorized as {{user.name}} using {{user.method}}.
             <a href ng-click="logout()">Log out</a>
         </div>
     </div>
@@ -218,7 +219,7 @@ if ( isset( $_GET['oauth_verifier'] ) && $_GET['oauth_verifier'] ) {
              Preview form
              **************************************************************************************************** -->
 
-        <form ng-submit="upload()" ng-show="!status && cropresults" class="panel panel-default form-inline" role="form">
+        <form ng-submit="upload()" ng-show="!status && cropresults && !uploadresults" class="panel panel-default form-inline" role="form">
 
             <div class="panel-heading">
                 <i class="icon-info-sign"></i>
@@ -252,6 +253,9 @@ if ( isset( $_GET['oauth_verifier'] ) && $_GET['oauth_verifier'] ) {
                 <p>
                     <i class="icon-warning-sign"></i> Please make sure you are familiar with
                     <a href="https://commons.wikimedia.org/wiki/Commons:Overwriting existing files">Commons:Overwriting existing files</a>.
+                </p>
+                <p ng-non-bindable>
+                    <i class="icon-info-sign"></i> Note that the templates <tt>{{crop}}</tt> and <tt>{{remove border}}</tt> will be removed if found.
                 </p>
                     <div class="form-group">
                         <label class="radio-inline">
@@ -296,11 +300,11 @@ if ( isset( $_GET['oauth_verifier'] ) && $_GET['oauth_verifier'] ) {
                     {{status}}
                 </div>
 
-                <p ng-show="!uploadresults.error">
+                <p ng-show="uploadresults.result == 'Success'">
                     Cropped image uploaded successfully!<br /><br />
 
-                    Please inspect the result by going to <a href="{{uploadresults.imageinfo.uploadresults}}">{{descriptionUrl}}</a>
-                    and refresh the page.
+                    Please inspect the result by going to <a href="{{uploadresults.imageinfo.descriptionurl}}">{{uploadresults.filename}}</a>,
+                    and refresh the page if needed.
                     Report any anomalies, so that they can be fixed.
                 </p>
 
@@ -312,17 +316,17 @@ if ( isset( $_GET['oauth_verifier'] ) && $_GET['oauth_verifier'] ) {
         </div>
     </div>
 
-    <div ng-show="status">
-        {{status}}
-    </div>
 
-    <p style="text-align:center">
-        Tool by <a href="//commons.wikimedia.org/wiki/User:Danmichaelo">User:Danmichaelo</a> using <a href="//github.com/tapmodo/Jcrop">Jcrop</a>
-        and inspired by <a href="//commons.wikimedia.org/wiki/User:Cropbot">Cropbot</a>.
-        MIT license. Report bugs <a href="//github.com/danmichaelo/croptool">on GitHub</a>.
-    </p>
-
+    <div class="push"></div>
 </div>
+
+<footer>    
+        Tool by <a href="//commons.wikimedia.org/wiki/User:Danmichaelo">Danmichaelo</a>, 
+        made using <a href="//github.com/tapmodo/Jcrop">Jcrop</a> and <a href="http://www.angularjs.org/">AngularJS</a>,
+        inspired by <a href="//commons.wikimedia.org/wiki/User:Cropbot">Cropbot</a>.
+        MIT license. 
+        Please report bugs <a href="//github.com/danmichaelo/cropcrop">on GitHub</a>.
+    </footer>
 
 </body>
 

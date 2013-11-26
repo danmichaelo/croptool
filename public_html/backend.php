@@ -1,7 +1,7 @@
 <?php
 
-//error_reporting(E_ALL);
-//ini_set('display_errors', '1');
+error_reporting(E_ALL);
+ini_set('display_errors', '1');
 
 session_start();
 
@@ -25,7 +25,7 @@ class CropTool {
 
         $this->curl = new Curl;
         $this->curl->cookie_file = '../data/cookiejar.txt';
-        $this->curl->user_agent = 'CropTool (+tools.wmflabs.org/croptool)';
+        $this->curl->user_agent = 'CropCrop (+tools.wmflabs.org/cropcrop)';
         $this->curl->follow_redirects = false;
 
         $this->oauth = new OAuthConsumer;
@@ -85,13 +85,13 @@ class CropTool {
         );
     }
 
-    public function apiRequest($args)
+    public function apiRequest($args, $multipart = false)
     {
         $args['format'] = 'json';
         if ($this->oauth->isAuthorized()) {
-            return $this->oauth->doApiQuery($args);
+            return $this->oauth->doApiQuery($args, $multipart);
         } else {
-            return json_decode($this->curl->post($this->api_url, $args));
+            return json_decode($this->curl->post($this->api_url, $args, $multipart));
         }
     }
 
@@ -228,7 +228,7 @@ class CropTool {
         }
     }
 
-    private function getUploadToken($title)
+    private function getEditToken($title)
     {
 
         if (!$this->isAuthorized()) {
@@ -285,52 +285,84 @@ class CropTool {
         if ($response === false) {
             die('File was not found');
         }
-
+ 
         $sha1 = $response->imageinfo[0]->sha1;
         $ext = $this->getFileExt($response->imageinfo[0]->mime);
+        $orig_path = dirname(__FILE__) . '/files/' . $sha1 . $ext;
         $path = dirname(__FILE__) . '/files/' . $sha1 . '_cropped' . $ext;
 
-        $token = $this->getUploadToken($title);
+        $s1 = getimagesize($orig_path);
+        $s2 = getimagesize($path);
+        $cropPercentX = round(($s1[0]-$s2[0]) / $s1[0] * 100);
+        $cropPercentY = round(($s1[1]-$s2[1]) / $s1[1] * 100);
+
+        $response = $this->apiRequest(array(
+            'action' => 'parse',
+            'prop' => 'wikitext',
+            'format' => 'json',
+            'page' => 'File:' . $title
+        ));
+
+        $wikitext = $response->parse->wikitext->{'*'};
+
+        
+        $token = $this->getEditToken($title);
 
         $args = array(
             'action' => 'upload',
             'format' => 'json',
             'token' => $token,
+            //'file' => $imData,
             'file' => (version_compare(PHP_VERSION, '5.5.0') >= 0)
                 ? new CURLFile($path)
                 : '@' . $path
         );
 
         if ($input->overwrite == 'overwrite') {
-            $args['filename'] = 'File:' . $title;
+
+            $args['filename'] = $title;
             $args['ignorewarnings'] = 1;
-            $args['comment'] = 'Cropped by [[User:' . $user . ']] using CropTool.';
-
+            $args['comment'] = 'Cropped ' . ($cropPercentX ?: ' < 1') . ' % horizontally and ' . ($cropPercentY ?: '< 1') . ' % vertically using CropCrop.';
+            
         } else {
-            $args['filename'] = 'File:' . $input->filename;
-            $args['comment'] = 'Cropped version of [[File:' . $title . ']]. Cropped by [[User:' . $user . ']] using CropTool.';
 
-            $response = $this->apiRequest(array(
-                'action' => 'parse',
-                'prop' => 'wikitext',
-                'format' => 'json',
-                'page' => 'File:' . $title
-            ));
+            $args['filename'] = $input->filename;
+            $args['comment'] = 'Cropped version of [[File:' . $title . ']] using CropCrop.';
 
-            $tpl = '{{Extracted from|' . $title . '|operator=' . $user . '}}';
-
-            $wikitext = $response->parse->wikitext->{'*'};
+            $tpl = '{{Extracted from|' . $title . '}}';
             if ($x = mb_stripos($wikitext, "[[Category:") !== false) {
                 $wikitext = mb_substr($wikitext, 0, $x) . $tpl . "\n" . mb_substr($wikitext, $x);
             } else {
                 $wikitext .= $tpl;
             }
             $args['text'] = $wikitext;
+
         }
 
-        $this->curl->headers['Content-Type'] = 'multipart/form-data';
+        //$this->curl->headers['Content-Type'] = 'multipart/form-data';
         //$this->curl['Content-Disposition'] = $title;
-        $response = $this->curl->post($this->api_url, $args, 'multipart/form-data');
+        $response = $this->apiRequest($args, true);
+
+        if ($response->upload->result == 'Success' && $input->overwrite == 'overwrite') {
+            $wikitext2 = preg_replace('/{{crop}}\s*/i', '', $wikitext);
+            $wikitext2 = preg_replace('/{{remove border}}\s*/i', '', $wikitext2);
+
+            if ($wikitext != $wikitext2) {
+
+                $token = $this->getEditToken($title);
+
+                $response2 = $this->apiRequest(array(
+                    'action' => 'edit',
+                    'format' => 'json',
+                    'summary' => 'Border removed using CropCrop',
+                    'token' => $token,
+                    'title' => 'File:' . $title,
+                    'text' => $wikitext2
+                ));
+
+            }
+
+        }
 
         $line = $args['filename'] . "\t" . $user . "\n";
         file_put_contents($this->log_file, $line, FILE_APPEND);
@@ -342,7 +374,7 @@ class CropTool {
         // print_r($response);
         //     [body] => {"servedby":"mw1202","error":{"code":"fileexists-forbidden","info":"A file with name \"Hubert_Dolez.jpg\" already exists, and cannot be overwritten.","filekey":"11t6pa776pf8.43jfs5.3174940.jpg","sessionkey":"11t6pa776pf8.43jfs5.3174940.jpg","invalidparameter":"filename"}}
 
-        return json_decode($response)->upload;
+        return $response->upload;
     }
 
 

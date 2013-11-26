@@ -179,13 +179,19 @@ controller('AppCtrl', ['$scope', '$http', '$timeout', 'LoginService', function($
             } else {
                 $scope.cropresults = response;
             }
+        }).
+        error(function(response, status, headers) {
+            $scope.status = 'An error occured: ' + status + ' ' + response;
+
         });
+
 
     };
 
     $scope.upload = function() {
 
         $scope.status = 'Please wait while saving...';
+        $scope.uploadresults = { status: 'Working' };
 
         $http.post('backend.php', {
             title: $scope.title,
@@ -198,7 +204,7 @@ controller('AppCtrl', ['$scope', '$http', '$timeout', 'LoginService', function($
             console.log(response);
 
             if (response.result === 'Success') {
-                $scope.status = 'Upload of cropped image successful!';
+                $scope.status = '';
                 $scope.uploadresults = response; //.imageinfo.descriptionurl;
 
             } else {
@@ -207,6 +213,10 @@ controller('AppCtrl', ['$scope', '$http', '$timeout', 'LoginService', function($
                     $scope.status += ' ' + response.error.info;
                 }
             }
+
+        }).
+        error(function(response, status, headers) {
+            $scope.status = 'An error occured: ' + status + ' ' + response;
 
         });
 

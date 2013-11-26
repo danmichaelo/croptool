@@ -118,7 +118,7 @@ class OAuthConsumer {
             'format' => 'json',
             'action' => 'query',
             'meta' => 'userinfo',
-        ), $ch );
+        ) );
 
         if ( isset( $res->error->code ) && $res->error->code === 'mwoauth-invalid-authorization' ) {
 
@@ -372,10 +372,10 @@ class OAuthConsumer {
      * Send an API query with OAuth authorization
      *
      * @param array $post Post data
-     * @param object $ch Curl handle
+     * @param string $enctype Encoding type
      * @return array API results
      */
-    function doApiQuery( $post, &$ch = null ) {
+    function doApiQuery( $post, $multipart = false ) {
 
         $headerArr = array(
             // OAuth information
@@ -388,32 +388,44 @@ class OAuthConsumer {
             // We're using secret key signatures here.
             'oauth_signature_method' => $this->signatureMethod,
         );
-        $signature = $this->signRequest( 'POST', $this->apiUrl, $post + $headerArr );
+
+        $ch = curl_init();
+
+        curl_setopt( $ch, CURLOPT_POST, true );
+        if ($multipart == true) {
+            $signature = $this->signRequest( 'POST', $this->apiUrl, $headerArr );
+            curl_setopt( $ch, CURLOPT_POSTFIELDS, $post );
+        } else {
+            $signature = $this->signRequest( 'POST', $this->apiUrl, $post + $headerArr );
+            curl_setopt( $ch, CURLOPT_POSTFIELDS, http_build_query($post) );
+        }
         $headerArr['oauth_signature'] = $signature;
 
         $header = array();
         foreach ( $headerArr as $k => $v ) {
             $header[] = rawurlencode( $k ) . '="' . rawurlencode( $v ) . '"';
         }
-        $header = 'Authorization: OAuth ' . join( ', ', $header );
+        $header = array('Authorization: OAuth ' . join( ', ', $header ));
 
-        if ( !$ch ) {
-            $ch = curl_init();
-        }
-        curl_setopt( $ch, CURLOPT_POST, true );
         curl_setopt( $ch, CURLOPT_URL, $this->apiUrl );
-        curl_setopt( $ch, CURLOPT_POSTFIELDS, http_build_query( $post ) );
-        curl_setopt( $ch, CURLOPT_HTTPHEADER, array( $header ) );
+        curl_setopt( $ch, CURLOPT_HTTPHEADER, $header );
         //curl_setopt( $ch, CURLOPT_SSL_VERIFYPEER, false );
         curl_setopt( $ch, CURLOPT_USERAGENT, $this->gUserAgent );
         curl_setopt( $ch, CURLOPT_HEADER, 0 );
         curl_setopt( $ch, CURLOPT_RETURNTRANSFER, 1 );
         $data = curl_exec( $ch );
+        $info = curl_getinfo($ch);
+        curl_close($ch);
         if ( !$data ) {
             header( "HTTP/1.1 500 Internal Server Error" );
             echo 'Curl error: ' . htmlspecialchars( curl_error( $ch ) );
             exit(0);
         }
+
+        //print_r($info);
+        //print_r($post);
+        //print_r($data);
+        //die;
         return json_decode( $data );
     }
 
@@ -440,7 +452,7 @@ class OAuthConsumer {
             'format' => 'json',
             'action' => 'query',
             'meta' => 'userinfo',
-        ), $ch );
+        ) );
 
         if ( isset( $res->error->code ) && $res->error->code === 'mwoauth-invalid-authorization' ) {
             // We're not authorized!
@@ -466,7 +478,7 @@ class OAuthConsumer {
             'format' => 'json',
             'action' => 'tokens',
             'type' => 'edit',
-        ), $ch );
+        ) );
         if ( !isset( $res->tokens->edittoken ) ) {
             header( "HTTP/1.1 500 Internal Server Error" );
             echo 'Bad API response: <pre>' . htmlspecialchars( var_export( $res, 1 ) ) . '</pre>';
@@ -485,7 +497,7 @@ class OAuthConsumer {
             'summary' => '/* Hello, world */ Hello from OAuth!',
             'watchlist' => 'nochange',
             'token' => $token,
-        ), $ch );
+        ) );
 
         echo 'API edit result: <pre>' . htmlspecialchars( var_export( $res, 1 ) ) . '</pre>';
         echo '<hr>';
