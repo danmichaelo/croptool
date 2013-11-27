@@ -1,7 +1,7 @@
 CropTool
 ===========================
 
-Tool for cropping images at Wikimedia Commons.
+Tool for cropping images at Wikimedia Commons. The current official installation lives at http://tools.wmflabs.org/croptool/ 
 
 CropTool uses [Jcrop](//github.com/tapmodo/Jcrop), [AngularJS](//angularjs.org/) and Sean Huber's [Curl wrapper for php](//github.com/shuber/curl).
 
