@@ -29,6 +29,7 @@ service('LoginService', ['$http', '$rootScope', function($http, $rootScope) {
 controller('LoginCtrl', ['$scope', 'LoginService', function($scope, LoginService) {
 
     $scope.user = LoginService.user;
+    $scope.ready = false;
 
     $scope.tuscLogin = function() {
         $.post('backend.php', { username: $scope.username, password: $scope.password}).
@@ -61,6 +62,7 @@ controller('LoginCtrl', ['$scope', 'LoginService', function($scope, LoginService
 
         console.log('Login status changed: ' + (LoginService.user ? 'logged in' : 'not logged in'));
         $scope.user = LoginService.user;
+        $scope.ready = true;
         if (LoginService.loginResponse.oauth.error) {
             $scope.oautherror = LoginService.loginResponse.oauth.error.code + ' : ' + LoginService.loginResponse.oauth.error.info;
         }
@@ -80,7 +82,6 @@ controller('AppCtrl', ['$scope', '$http', '$timeout', 'LoginService', function($
         return results == null ? "" : decodeURIComponent(results[1].replace(/\+/g, " "));
     }
 
-    $scope.loggedin = LoginService.loggedin;
     $scope.title = getParameterByName('title').replace(/_/g, ' ');
 
     var p = $scope.title.lastIndexOf('.');
@@ -114,7 +115,7 @@ controller('AppCtrl', ['$scope', '$http', '$timeout', 'LoginService', function($
     $scope.$on('loginStatusChanged', function(response) {
 
 
-        console.log('Login status changed: ' + LoginService.user);
+        console.log('[appctrl] Login status changed: ' + LoginService.user);
 
         $scope.status = '';
         $scope.user = LoginService.user;

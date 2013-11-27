@@ -68,7 +68,7 @@ if ( isset( $_GET['oauth_verifier'] ) && $_GET['oauth_verifier'] ) {
     </h1>
 
     <div class="alert alert-danger" ng-show="!title">
-        No title given
+        No title given. To use this tool, please follow the instructions at <a href="//commons.wikimedia.org/wiki/CropTool">//commons.wikimedia.org/wiki/CropTool</a>.
     </div>
 
 
@@ -80,9 +80,9 @@ if ( isset( $_GET['oauth_verifier'] ) && $_GET['oauth_verifier'] ) {
 
         <div ng-controller="LoginCtrl" >
 
-            <form class="form-inline panel panel-primary" role="form" ng-show="!user" ng-submit="tuscLogin()">
-
                 <!--
+            <form class="form-inline panel panel-primary" role="form" <er" ng-submit="tuscLogin()">
+
 
                 <div class="panel-heading">
                     <i class="icon-lock"></i> Log in using TUSC
@@ -114,7 +114,7 @@ if ( isset( $_GET['oauth_verifier'] ) && $_GET['oauth_verifier'] ) {
 
         -->
 
-            <form class="form-inline panel panel-primary" role="form" ng-show="!user">
+            <form class="form-inline panel panel-primary" role="form" ng-show="ready && !user">
 
                 <div class="panel-heading">
                     <i class="icon-lock"></i> Authorization needed
