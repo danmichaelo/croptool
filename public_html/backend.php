@@ -79,6 +79,8 @@ class CropTool {
     public function logout()
     {
         session_destroy();
+        $_SESSION = array();
+        $this->oauth = new OAuthConsumer;
         return array(
             'oauth' => $this->checkOauthLogin(),
             'tusc' => $this->checkTuscLogin()
@@ -491,7 +493,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST')
     } else if (isset($_POST['username']) && isset($_POST['password'])) {
         echo json_encode($ct->tuscLogin($_POST['username'], $_POST['password']));
 
-    } else if (isset($_POST['logout'])) {
+    } else if (isset($_GET['action']) && ($_GET['action'] == 'logout')) {
         echo json_encode($ct->logout());
 
     } else {

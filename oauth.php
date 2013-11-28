@@ -96,10 +96,6 @@ class OAuthConsumer {
                 $this->doAuthorizationRedirect();
                 return;
 
-            case 'logout':
-                $this->doLogout();
-                return;
-
             /*case 'edit':
                 $this->doEdit();
                 break;

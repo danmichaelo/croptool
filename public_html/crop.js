@@ -18,6 +18,7 @@ service('LoginService', ['$http', '$rootScope', function($http, $rootScope) {
         } else {
             that.user = undefined;
         }
+        console.log(that.user);
         that.loginResponse = response;
         $rootScope.$broadcast('loginStatusChanged', response);
     };
@@ -26,13 +27,13 @@ service('LoginService', ['$http', '$rootScope', function($http, $rootScope) {
 
 }]).
 
-controller('LoginCtrl', ['$scope', 'LoginService', function($scope, LoginService) {
+controller('LoginCtrl', ['$scope', '$http', 'LoginService', function($scope, $http, LoginService) {
 
     $scope.user = LoginService.user;
     $scope.ready = false;
 
     $scope.tuscLogin = function() {
-        $.post('backend.php', { username: $scope.username, password: $scope.password}).
+        $http.post('backend.php', { username: $scope.username, password: $scope.password}).
         success(function(response) {
             LoginService.checkLogin(response);
             $scope.user = LoginService.user;
@@ -41,7 +42,6 @@ controller('LoginCtrl', ['$scope', 'LoginService', function($scope, LoginService
             } else {
                 $scope.loginerror = undefined;
             }
-            $scope.$apply();
         });
     };
 
@@ -50,11 +50,11 @@ controller('LoginCtrl', ['$scope', 'LoginService', function($scope, LoginService
     };
 
     $scope.logout = function() {
-        $.post('backend.php', { logout: true }).
+        $http.post('backend.php?action=logout').
         success(function(response) {
+            console.log('LOGOUT');
             LoginService.checkLogin(response);
             $scope.user = LoginService.user;
-            $scope.$apply();
         });
     };
 
