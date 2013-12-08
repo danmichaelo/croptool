@@ -2,6 +2,7 @@
 $domains = array(
 	'catdown' => 'Catdown.i18n.php',
 	'commonshelper2' => 'Commonshelper2.i18n.php',
+	'croptool' => 'Croptool.i18n.php',
 	'general' => 'General.i18n.php',
 	'getwikiapi' => 'Getwikiapi.i18n.php',
 	'jarry' => 'Jarry.i18n.php',
