@@ -75,8 +75,8 @@ controller('LoginCtrl', ['$scope', '$http', 'LoginService', function($scope, $ht
 
 controller('AppCtrl', ['$scope', '$http', '$timeout', 'LoginService', function($scope, $http, $timeout, LoginService) {
 
-    var jcrop_api;
-
+    var jcrop_api,
+        everPushedSomething = false;
     function getParameterByName(name) {
         name = name.replace(/[\[]/, "\\\[").replace(/[\]]/, "\\\]");
         var regex = new RegExp("[\\?&]" + name + "=([^&#]*)"),
@@ -156,8 +156,16 @@ controller('AppCtrl', ['$scope', '$http', '$timeout', 'LoginService', function($
         });
     }
 
-    $scope.setTitle = function(filename) {
+    $scope.setTitle = function(filename, updateHistory) {
+
+        if (updateHistory !== false) {
+            var newUrl = location.href.split('?', 1)[0] + (filename ? '?title=' + encodeURIComponent(filename) : '');
+            window.history.pushState(null, null, newUrl);
+            everPushedSomething = true;
+        }
+
         if (!filename) {
+            console.log('show title form');
             if (jcrop_api) {
                 jcrop_api.destroy();
                 $('#cropbox').removeAttr('style');
@@ -246,7 +254,21 @@ controller('AppCtrl', ['$scope', '$http', '$timeout', 'LoginService', function($
     };
 
     $scope.filename = getParameterByName('title');
-    $scope.setTitle(getParameterByName('title'));
+
+    window.addEventListener('popstate', function(e) {
+
+        if (!everPushedSomething) {
+            // Chrome and Safari always emit a popstate event on page load, but Firefox doesn't.
+            // If we've newer pushed anything, we assume this event was called on page load and ignore it.
+            return;
+        }
+        $scope.$apply(function() {
+            console.log('LOCATION CHANGED: ' + getParameterByName('title'));
+            $scope.setTitle(getParameterByName('title'), false);
+        });
+    });
+
+    $scope.setTitle(getParameterByName('title'), false);
 
     $scope.status = 'Checking login';
 
