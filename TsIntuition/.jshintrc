@@ -1,0 +1,27 @@
+{
+	// Enforcing
+	"bitwise": true,
+	"camelcase": false,
+	"curly": true,
+	"eqeqeq": true,
+	"immed": true,
+	"latedef": true,
+	"newcap": true,
+	"noarg": true,
+	"noempty": true,
+	"nonew": true,
+	"quotmark": "single",
+	"trailing": true,
+	"undef": true,
+	"unused": true,
+	// Environment
+	"browser": true,
+	// Legacy
+	"onevar": true,
+	"nomen": true,
+	"white": true,
+
+	"predef": [
+		"jQuery"
+	]
+}

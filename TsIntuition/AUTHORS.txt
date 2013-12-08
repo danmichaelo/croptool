@@ -1,0 +1,10 @@
+Authors ordered by first contribution.
+
+Timo Tijhof <krinklemail@gmail.com>
+Siebrand Mazeland <s.mazeland@xs4all.nl>
+Raimond Spekking <raimond.spekking@gmail.com>
+Jan Luca Naumann <jan@jans-seite.de>
+Sam Reed <reedy@wikimedia.org>
+Platonides <platonides@gmail.com>
+Maarten Dammers <maarten@mdammers.nl>
+Niklas Laxström <niklas.laxstrom@gmail.com>

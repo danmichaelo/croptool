@@ -1,0 +1,57 @@
+= 0.1.3 =
+: In development
+
+== Changes ==
+* Rename TsIntuitionUtil::return_dump to TsIntuitionUtil::returnDump.
+* Deprecate global function _().
+* Rename hook 'TsIntuition_inithook' to 'intuitionHookInit'.
+  Old one still works, though only one will run (if both are
+  defined, the new one is used).
+
+
+= 0.1.2 =
+: April 1, 2013
+
+== New features ==
+* Textdomains may now also define the $url in the definition file. (r85286)
+* Added an About-area on the index page of the tool which shows all textdomains and (where
+  possible) linked to the tool.
+* Implemented TsIntuition::msgExists() and TsIntuition:getDomainInfo()
+* Added demonstration sandboxes in /public_html/demo/ (r85471)
+
+== Text domains ==
+* Added: MonumentsAPI <http://toolserver.org/~erfgoed/api/>
+* Added: Recent Anonymous Activity <http://toolserver.org/~krinkle/recentAnonymousActivity/>
+
+== Changes ==
+* Dashboard sections converted to Tabs with jQuery UI (r85260)
+* Domains are now registered in Domains.php instead of a static array in the class (r85396)
+* TranslationStats-graph in the about-tab (r85471)
+* Introduced new 'suppressfatal' option (r85471)
+* Introduced new 'suppressbrackets' option (r85471)
+* Dashboard moved to http://toolserver.org/~intuition/
+
+
+= 0.1.1 =
+: April 3, 2011
+
+== New features ==
+* Added a clear-cookies and renew-cookies action (r84981, r85246)
+* Confirmation messages after clearing or renewing cookies (r84981)
+* PremadeToolserverTextdomains class has been written for TransateWiki
+
+== Text domains ==
+* Added: OrphanTalk2 <http://toolserver.org/~krinkle/OrphanTalk2/>
+
+== Changes ==
+* SVN revision id is now visible in the header (r84942)
+* PremadeToolserverTextdomains moved to /exensions/Translate per convention (r85117)
+* Requesting an undefined message triggers a TsIntution error on E_NOTICE level (r85052)
+
+= 0.1.0 =
+: March 28, 2011
+First version in Wikimedia SVN.
+
+= 0.0.1 =
+: March 23, 2011
+Initial version on toolserver only.

@@ -1,0 +1,11 @@
+# Intuition
+public_html/logs
+scripts/*.out
+LocalConfig.php
+
+# Node
+node_modules/
+npm-debug.log
+
+# OSX
+.DS_Store
