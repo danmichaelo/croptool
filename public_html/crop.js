@@ -160,6 +160,7 @@ controller('AppCtrl', ['$scope', '$http', '$timeout', 'LoginService', function($
         if (!filename) {
             if (jcrop_api) {
                 jcrop_api.destroy();
+                $('#cropbox').removeAttr('style');
             }
             $scope.title = '';
             //$scope.filename = '';
