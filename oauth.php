@@ -51,6 +51,18 @@ class OAuthConsumer {
     public function __construct()
     {
 
+        $params = session_get_cookie_params();
+        session_set_cookie_params(
+            $params['lifetime'],
+            dirname( $_SERVER['SCRIPT_NAME'] )
+        );
+
+        session_start();
+
+        if (isset($_GET['title'])) {
+            $_SESSION['title'] = $_GET['title'];
+        }
+
         // Setup the session cookie
         //session_name( 'OAuthHelloWorld' );
 
@@ -87,6 +99,8 @@ class OAuthConsumer {
         // Fetch the access token if this is the callback from requesting authorization
         if ( isset( $_GET['oauth_verifier'] ) && $_GET['oauth_verifier'] ) {
             $this->fetchAccessToken();
+            header('Location: ./?title=' . $_SESSION['title']);
+            exit;
         }
 
         // Take any requested action
@@ -104,6 +118,7 @@ class OAuthConsumer {
 
         $this->authorized = $this->checkAuthorization();
 
+        session_write_close();
     }
 
     private function checkAuthorization()
@@ -283,15 +298,14 @@ class OAuthConsumer {
 
     }
 
-    private function doLogout()
+    public function doLogout()
     {
-        $title = '';
-        if (isset($_SESSION['title'])) {
-            $title = $_SESSION['title'];
-        }
+        session_start();
         session_destroy();
-        $url = './?title=' . $title;
-        header( "Location: $url" );
+        $_SESSION = array();
+        $this->authorized = false;
+        $this->username = '';
+        session_write_close();
     }
 
     /**

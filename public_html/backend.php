@@ -3,8 +3,6 @@
 error_reporting(E_ALL);
 ini_set('display_errors', '1');
 
-session_start();
-
 require('../vendor/autoload.php');
 require('../oauth.php');
 
@@ -78,9 +76,8 @@ class CropTool {
 
     public function logout()
     {
-        session_destroy();
-        $_SESSION = array();
         $this->oauth = new OAuthConsumer;
+        $this->oauth->doLogout();
         return array(
             'oauth' => $this->checkOauthLogin(),
             'tusc' => $this->checkTuscLogin()

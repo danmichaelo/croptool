@@ -3,27 +3,15 @@
 error_reporting(E_ALL);
 ini_set('display_errors', '1');
 
-$params = session_get_cookie_params();
-session_set_cookie_params(
-    $params['lifetime'],
-    dirname( $_SERVER['SCRIPT_NAME'] )
-);
-
-session_start();
 
 require('../oauth.php');
 
 
-if (isset($_GET['title'])) {
-    $_SESSION['title'] = $_GET['title'];
-}
 
 // Fetch the access token if this is the callback from requesting authorization
 if ( isset( $_GET['oauth_verifier'] ) && $_GET['oauth_verifier'] ) {
 
     $oauth = new OAuthConsumer;
-    header('Location: ./?title=' . $_SESSION['title']);
-    exit;
 
 }
 
