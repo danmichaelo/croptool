@@ -4,7 +4,8 @@ error_reporting(E_ALL);
 ini_set('display_errors', '1');
 
 
-require('../vendor/autoload.php');
+require('../TsIntuition/ToolStart.php'); // for testing
+//require('/home/project/intuition/src/Intuition/ToolStart.php');
 require('../oauth.php');
 
 
@@ -15,29 +16,19 @@ if ( isset( $_GET['oauth_verifier'] ) && $_GET['oauth_verifier'] ) {
 
 }
 
-
-// Docs at
+// Localization using TsIntuition
 // https://github.com/Krinkle/TsIntuition/wiki/Documentation
 
-// 1) Init $I18N
-$I18N = new TsIntuition( 'general' /* name of textdomain here */ );
-
-// 2) Register some interesting messages
-$I18N->setMsgs( array(
-    'notitle' => 'No title given. To use this tool, please follow the instructions at $1.'
+$I18N = new TsIntuition(array(
+    'domain' => 'croptool',
 ));
 
-
-
-//$oauth = new OAuthConsumer;
-// echo $oauth->doEdit();
-// die('');
 
 ?>
 <!doctype html>
 <html ng-app="croptool">
 <head>
-  <title>CropTool</title>
+  <title><?php echo $I18N->msg( 'title' ); ?></title>
   <meta http-equiv="Content-type" content="text/html;charset=UTF-8">
 
   <link rel="stylesheet" type="text/css" href="//netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap.min.css">
@@ -56,16 +47,20 @@ $I18N->setMsgs( array(
 
 <div class="container">
 
+    <!-- ********************************************************************************************************
+        Header
+        **************************************************************************************************** -->
+
     <div ng-show="user" style="float:right; padding:.3em 0;" ng-controller="LoginCtrl">
         <div class="panel-body">
-            Authorized as {{user.name}} using {{user.method}}.
-            <a href ng-click="logout()">Log out</a>
+            <?php echo $I18N->msg( 'logged-in', array('variables' => array('{{user.name}}'))); ?>.
+            <a href ng-click="logout()"><?php echo $I18N->msg( 'logout' ); ?></a>
         </div>
     </div>
 
     <h1 style="padding:.4em 0; margin: 0 0 .3em 0;">
         <i class="icon-crop"></i>
-        CropTool
+        <?php echo $I18N->msg( 'title' ); ?>
     </h1>
 
     <!-- ********************************************************************************************************
@@ -77,18 +72,20 @@ $I18N->setMsgs( array(
         <form class="form-inline panel panel-primary" role="form">
 
             <div class="panel-heading">
-                <i class="icon-lock"></i> Authorization needed
+                <i class="icon-lock"></i>
+                <?php echo $I18N->msg( 'loginform-header' ); ?>
             </div>
+
             <div class="panel-body">
 
                 <p>
-                    To use CropTool you need to connect it to your Wikimedia Commons account.
-                    This process is secure and your password will not be given to CropTool.
+                    <?php echo $I18N->msg( 'loginform-help' ); ?>
                 </p>
 
-                <button type="submit" class="btn btn-primary" ng-click="oauthLogin()">Connect</button>
-                <!--<button type="submit" class="btn btn-default" ng-click="logout()">Logout</button>
--->
+                <button type="submit" class="btn btn-primary" ng-click="oauthLogin()">
+                    <?php echo $I18N->msg( 'loginform-submit-button' ); ?>
+                </button>
+
             </div>
         </form>
 
@@ -98,30 +95,40 @@ $I18N->setMsgs( array(
         If authorized, but no title given, show "enter title form"
         **************************************************************************************************** -->
 
+    <div ng-show="user && !title && !busy">
+
         <div class="panel panel-primary">
 
             <div class="panel-heading">
-                Crop what?
+                <?php echo $I18N->msg( 'titleform-header' ); ?>
             </div>
             <div class="panel-body">
 
                 <p>
-                    Enter a filename for a Wikimedia Commons image you would like to crop:
+                    <?php echo $I18N->msg( 'titleform-help' ); ?>
                 </p>
 
-                <form role="form" ng-submit="titleFromFilename(filename)">
+                <form role="form" ng-submit="setTitle(filename)">
 
                     <div class="row">
 
                         <div class="form-group col-sm-8">
-                            <label class="sr-only" for="filename">Filename</label>
-                            <input type="text" class="form-control" placeholder="Filename" ng-model="filename">
+                            <label class="sr-only" for="filename">
+                                <?php echo $I18N->msg( 'titleform-filename-label' ); ?>
+                            </label>
+                            <input type="text" ng-model="filename" class="form-control" placeholder="<?php echo $I18N->msg( 'titleform-filename-label' ); ?>">
                         </div>
 
                         <div class="col-sm-4">
-                            <button type="submit" class="btn btn-primary">Open</button>
+                            <button type="submit" class="btn btn-primary">
+                                <?php echo $I18N->msg( 'titleform-submit-button' ); ?>
+                            </button>
                         </div>
 
+                    </div>
+
+                    <div style="color:red;" ng-show="metadata.error">
+                        {{metadata.error}}
                     </div>
 
                 </form>
@@ -129,8 +136,31 @@ $I18N->setMsgs( array(
             </div>
 
             <div class="panel-footer">
-                Tip: You can also add a link to open CropTool directly from a media file at Wikimedia Commons.
-                See <a href="//commons.wikimedia.org/wiki/CropTool">instructions</a>.
+                <?php echo $I18N->msg( 'titleform-footer', array('variables' => array('//commons.wikimedia.org/wiki/CropTool'))); ?>
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- ********************************************************************************************************
+        Fetching image data and metadata
+        **************************************************************************************************** -->
+
+    <div ng-show="user && !title && busy">
+
+        <div class="panel panel-primary">
+
+            <div class="panel-heading">
+                <?php echo $I18N->msg( 'fetching-progress-title' ); ?>
+            </div>
+            <div class="panel-body">
+
+                <p>
+                    <?php echo $I18N->msg( 'fetching-progress-body' ); ?>
+                </p>
+                <img src="spinner.gif" alt="Spinner" style="width:220px; height:20px;">
+
             </div>
 
         </div>
@@ -150,12 +180,12 @@ $I18N->setMsgs( array(
         <form ng-submit="preview()" ng-show="!cropresults" class="panel panel-default form-inline" role="form">
 
             <div class="panel-heading">
-                <i class="icon-info-sign"></i>
-                File: <a href="{{metadata.description}}">{{title}}</a>.
-
+                <i class="icon-camera-retro"></i>
+                <a href="{{metadata.description}}">{{title}}</a>.
                 Original: {{metadata.original.width}} x {{metadata.original.height}} px.
                 <span ng-show="metadata.thumb">Thumbnail size: {{metadata.thumb.width}} x {{metadata.thumb.height}} px</span>
 
+                <a href ng-click="setTitle()" style="float:right;">Crop another file</a>
             </div>
 
             <div class="panel-body">

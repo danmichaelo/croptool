@@ -75,6 +75,8 @@ controller('LoginCtrl', ['$scope', '$http', 'LoginService', function($scope, $ht
 
 controller('AppCtrl', ['$scope', '$http', '$timeout', 'LoginService', function($scope, $http, $timeout, LoginService) {
 
+    var jcrop_api;
+
     function getParameterByName(name) {
         name = name.replace(/[\[]/, "\\\[").replace(/[\]]/, "\\\]");
         var regex = new RegExp("[\\?&]" + name + "=([^&#]*)"),
@@ -104,39 +106,39 @@ controller('AppCtrl', ['$scope', '$http', '$timeout', 'LoginService', function($
 
     $scope.$on('loginStatusChanged', function(response) {
 
-
         console.log('[appctrl] Login status changed: ' + LoginService.user);
 
         $scope.status = '';
         $scope.user = LoginService.user;
 
-        if (LoginService.user) {
-            fetchImage();
-        }
-
     });
 
-    function fetchImage () {
+    function fetchImage (title) {
 
-        if (!$scope.title) {
+        if (!title) {
             console.log('No title given, nothing to fetch');
             return;
         }
 
-        $scope.status = 'Please wait while fetching image and metadata... This might take some time depending on the filesize of the image...';
+        $scope.busy = true;
 
-        $http.get('backend.php?lookup=1&title=' + encodeURIComponent($scope.title)).
+        $http.get('backend.php?lookup=1&title=' + encodeURIComponent(title)).
         success(function(response) {
 
+            $scope.busy = false;
             console.log(response);
-
-            $scope.status = '';
 
             $scope.metadata = response;
 
             if (!response.error) {
+
+                $scope.title = title;
+                var p = title.lastIndexOf('.');
+                $scope.newFilename = title.substr(0, p) + ' (cropped)' + title.substr(p);
+
                 $timeout(function() {
                     console.log('Enabling Jcrop');
+
                     $('#cropbox').Jcrop({
                         onSelect: function(c) {
                             $scope.$apply(function() { updateCoords(c); });
@@ -144,25 +146,32 @@ controller('AppCtrl', ['$scope', '$http', '$timeout', 'LoginService', function($
                         onRelease: function() {
                             $scope.$apply(function() { $scope.crop_dim = undefined; });
                         }
+                    }, function() {
+                        jcrop_api = this;
                     });
+
                 }, 200);
             }
 
         });
     }
 
-    $scope.titleFromFilename = function(filename) {
-        console.log('titleFromFilename: ' + filename);
-        $scope.title = filename
+    $scope.setTitle = function(filename) {
+        if (!filename) {
+            if (jcrop_api) {
+                jcrop_api.destroy();
+            }
+            $scope.title = '';
+            //$scope.filename = '';
+            $scope.newFilename = '';
+            $scope.metadata = null;
+            return;
+        }
+        var title = filename
             .replace(/_/g, ' ')
             .replace(/^File:/, '');
 
-        var p = $scope.title.lastIndexOf('.');
-        $scope.newFilename = $scope.title.substr(0, p) + ' (cropped)' + $scope.title.substr(p);
-
-        if (LoginService.user) {
-            fetchImage();
-        }
+        fetchImage(title);
     }
 
     $scope.preview = function() {
@@ -235,7 +244,8 @@ controller('AppCtrl', ['$scope', '$http', '$timeout', 'LoginService', function($
 
     };
 
-    $scope.titleFromFilename(getParameterByName('title'));
+    $scope.filename = getParameterByName('title');
+    $scope.setTitle(getParameterByName('title'));
 
     $scope.status = 'Checking login';
 
