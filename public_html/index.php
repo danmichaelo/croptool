@@ -72,17 +72,23 @@ $I18N = new TsIntuition(array(
         <form class="form-inline panel panel-primary" role="form">
 
             <div class="panel-heading">
-                <i class="icon-lock"></i>
                 <?php echo $I18N->msg( 'loginform-header' ); ?>
             </div>
 
             <div class="panel-body">
 
                 <p>
+                    <?php echo $I18N->msg( 'loginform-blurb', array('variables' => array(
+                        '//commons.wikimedia.org/wiki/CropTool'
+                    ))); ?>
+                </p>
+
+                <p>
                     <?php echo $I18N->msg( 'loginform-help' ); ?>
                 </p>
 
                 <button type="submit" class="btn btn-primary" ng-click="oauthLogin()">
+                    <i class="icon-lock"></i>
                     <?php echo $I18N->msg( 'loginform-submit-button' ); ?>
                 </button>
 
