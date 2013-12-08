@@ -4,8 +4,8 @@ error_reporting(E_ALL);
 ini_set('display_errors', '1');
 
 
+require('../vendor/autoload.php');
 require('../oauth.php');
-
 
 
 // Fetch the access token if this is the callback from requesting authorization
@@ -14,6 +14,19 @@ if ( isset( $_GET['oauth_verifier'] ) && $_GET['oauth_verifier'] ) {
     $oauth = new OAuthConsumer;
 
 }
+
+
+// Docs at
+// https://github.com/Krinkle/TsIntuition/wiki/Documentation
+
+// 1) Init $I18N
+$I18N = new TsIntuition( 'general' /* name of textdomain here */ );
+
+// 2) Register some interesting messages
+$I18N->setMsgs( array(
+    'notitle' => 'No title given. To use this tool, please follow the instructions at $1.'
+));
+
 
 
 //$oauth = new OAuthConsumer;
@@ -55,7 +68,6 @@ if ( isset( $_GET['oauth_verifier'] ) && $_GET['oauth_verifier'] ) {
         CropTool
     </h1>
 
-
     <!-- ********************************************************************************************************
         If not authorized, show "login form"
         **************************************************************************************************** -->
@@ -85,8 +97,6 @@ if ( isset( $_GET['oauth_verifier'] ) && $_GET['oauth_verifier'] ) {
     <!-- ********************************************************************************************************
         If authorized, but no title given, show "enter title form"
         **************************************************************************************************** -->
-
-    <div ng-show="user && !title">
 
         <div class="panel panel-primary">
 
@@ -132,7 +142,6 @@ if ( isset( $_GET['oauth_verifier'] ) && $_GET['oauth_verifier'] ) {
         **************************************************************************************************** -->
 
     <div ng-show="user && title">
-
 
         <!-- ********************************************************************************************************
              Crop form
@@ -326,6 +335,9 @@ if ( isset( $_GET['oauth_verifier'] ) && $_GET['oauth_verifier'] ) {
         inspired by <a href="//commons.wikimedia.org/wiki/User:Cropbot">Cropbot</a>.
         MIT license. 
         Please report bugs <a href="//github.com/danmichaelo/croptool">on GitHub</a>.
+
+        <!--<?php echo $I18N->getFooterLine( 'croptool' ); ?>-->
+
     </footer>
 
 </body>
