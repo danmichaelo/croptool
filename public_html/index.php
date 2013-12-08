@@ -11,7 +11,9 @@ session_set_cookie_params(
 
 session_start();
 
+require('../TsIntuition/ToolStart.php');
 require('../oauth.php');
+
 
 
 if (isset($_GET['title'])) {
@@ -26,6 +28,19 @@ if ( isset( $_GET['oauth_verifier'] ) && $_GET['oauth_verifier'] ) {
     exit;
 
 }
+
+
+// Docs at
+// https://github.com/Krinkle/TsIntuition/wiki/Documentation
+
+// 1) Init $I18N
+$I18N = new TsIntuition( 'general' /* name of textdomain here */ );
+
+// 2) Register some interesting messages
+$I18N->setMsgs( array(
+    'notitle' => 'No title given. To use this tool, please follow the instructions at $1.'
+));
+
 
 
 //$oauth = new OAuthConsumer;
@@ -68,10 +83,12 @@ if ( isset( $_GET['oauth_verifier'] ) && $_GET['oauth_verifier'] ) {
     </h1>
 
     <div class="alert alert-danger" ng-show="!title">
-        No title given. To use this tool, please follow the instructions at <a href="//commons.wikimedia.org/wiki/CropTool">//commons.wikimedia.org/wiki/CropTool</a>.
+        <?php echo $I18N->msg('notitle', array('variables' => array(
+            '<a href="//commons.wikimedia.org/wiki/CropTool">//commons.wikimedia.org/wiki/CropTool</a>'))); ?>
     </div>
-
-
+<!--
+<?php echo $I18N->msg( 'welcome' ); ?>
+-->
     <div ng-show="title">
 
         <!-- ********************************************************************************************************
@@ -326,6 +343,9 @@ if ( isset( $_GET['oauth_verifier'] ) && $_GET['oauth_verifier'] ) {
         inspired by <a href="//commons.wikimedia.org/wiki/User:Cropbot">Cropbot</a>.
         MIT license. 
         Please report bugs <a href="//github.com/danmichaelo/croptool">on GitHub</a>.
+
+        <!--<?php echo $I18N->getFooterLine( 'croptool' ); ?>-->
+
     </footer>
 
 </body>
