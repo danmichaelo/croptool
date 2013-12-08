@@ -55,78 +55,90 @@ if ( isset( $_GET['oauth_verifier'] ) && $_GET['oauth_verifier'] ) {
         CropTool
     </h1>
 
-    <div class="alert alert-danger" ng-show="!title">
-        No title given. To use this tool, please follow the instructions at <a href="//commons.wikimedia.org/wiki/CropTool">//commons.wikimedia.org/wiki/CropTool</a>.
+
+    <!-- ********************************************************************************************************
+        If not authorized, show "login form"
+        **************************************************************************************************** -->
+
+    <div ng-controller="LoginCtrl" ng-show="ready && !user">
+
+        <form class="form-inline panel panel-primary" role="form">
+
+            <div class="panel-heading">
+                <i class="icon-lock"></i> Authorization needed
+            </div>
+            <div class="panel-body">
+
+                <p>
+                    To use CropTool you need to connect it to your Wikimedia Commons account.
+                    This process is secure and your password will not be given to CropTool.
+                </p>
+
+                <button type="submit" class="btn btn-primary" ng-click="oauthLogin()">Connect</button>
+                <!--<button type="submit" class="btn btn-default" ng-click="logout()">Logout</button>
+-->
+            </div>
+        </form>
+
     </div>
 
+    <!-- ********************************************************************************************************
+        If authorized, but no title given, show "enter title form"
+        **************************************************************************************************** -->
 
-    <div ng-show="title">
+    <div ng-show="user && !title">
 
-        <!-- ********************************************************************************************************
-             Login form
-             **************************************************************************************************** -->
+        <div class="panel panel-primary">
 
-        <div ng-controller="LoginCtrl" >
+            <div class="panel-heading">
+                Crop what?
+            </div>
+            <div class="panel-body">
 
-                <!--
-            <form class="form-inline panel panel-primary" role="form" <er" ng-submit="tuscLogin()">
+                <p>
+                    Enter a filename for a Wikimedia Commons image you would like to crop:
+                </p>
 
+                <form role="form" ng-submit="titleFromFilename(filename)">
 
-                <div class="panel-heading">
-                    <i class="icon-lock"></i> Log in using TUSC
-                </div>
-                <div class="panel-body">
+                    <div class="row">
 
-                    <p>
-                        Don't have a TUSC account? <a href="https://tools.wmflabs.org/tusc/">Register here</a>.
-                        Please note that you can not <em>not</em> use your normal Wikimedia credentials!
-                    </p>
+                        <div class="form-group col-sm-8">
+                            <label class="sr-only" for="filename">Filename</label>
+                            <input type="text" class="form-control" placeholder="Filename" ng-model="filename">
+                        </div>
 
-                    <div class="alert alert-danger" ng-show="loginerror">
-                        {{loginerror}}
+                        <div class="col-sm-4">
+                            <button type="submit" class="btn btn-primary">Open</button>
+                        </div>
+
                     </div>
 
-                    <div class="form-group">
-                        <label class="sr-only" for="username">Username</label>
-                        <input id="username" type="text" ng-model="username" class="form-control" placeholder="Username">
-                    </div>
+                </form>
 
-                    <div class="form-group">
-                        <label class="sr-only" for="password">Password</label>
-                        <input id="password" type="password" ng-model="password" class="form-control" placeholder="Password">
-                    </div>
+            </div>
 
-                    <button type="submit" class="btn btn-primary">Login</button>
-                </div>
-            </form>
-
-        -->
-
-            <form class="form-inline panel panel-primary" role="form" ng-show="ready && !user">
-
-                <div class="panel-heading">
-                    <i class="icon-lock"></i> Authorization needed
-                </div>
-                <div class="panel-body">
-
-                    <p>
-                        Click "Authorize" to go to a secure Wikimedia OAuth server where you can authorize
-                        the use of this tool with your Wikimedia Commons account.
-                    </p>
-
-                    <button type="submit" class="btn btn-primary" ng-click="oauthLogin()">Authorize</button>
-                    <!--<button type="submit" class="btn btn-default" ng-click="logout()">Logout</button>
--->
-                </div>
-            </form>
+            <div class="panel-footer">
+                Tip: You can also add a link to open CropTool directly from a media file at Wikimedia Commons.
+                See <a href="//commons.wikimedia.org/wiki/CropTool">instructions</a>.
+            </div>
 
         </div>
+
+    </div>
+
+    <!-- ********************************************************************************************************
+        If authorized and given a title
+        **************************************************************************************************** -->
+
+    <div ng-show="user && title">
+
 
         <!-- ********************************************************************************************************
              Crop form
              **************************************************************************************************** -->
 
-        <form ng-submit="preview()" ng-show="user && !cropresults" class="panel panel-default form-inline" role="form">
+        <form ng-submit="preview()" ng-show="!cropresults" class="panel panel-default form-inline" role="form">
 
             <div class="panel-heading">
                 <i class="icon-info-sign"></i>

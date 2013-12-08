@@ -82,11 +82,6 @@ controller('AppCtrl', ['$scope', '$http', '$timeout', 'LoginService', function($
         return results == null ? "" : decodeURIComponent(results[1].replace(/\+/g, " "));
     }
 
-    $scope.title = getParameterByName('title').replace(/_/g, ' ');
-
-    var p = $scope.title.lastIndexOf('.');
-    $scope.newFilename = $scope.title.substr(0, p) + ' (cropped)' + $scope.title.substr(p);
-
     function updateCoords(c) {
         var ratio = [1,1];
         if ($scope.metadata.thumb) {
@@ -107,11 +102,6 @@ controller('AppCtrl', ['$scope', '$http', '$timeout', 'LoginService', function($
         //$('#cropped_size').html(new_size[0] + 'x' + new_size[1] + ' px, x offset: ' + new_offset[0] + ' px, y offset: ' + new_offset[1] + ' px');
     }
 
-    $scope.status = 'Checking login';
-
-    $scope.cropmethod = "lossless";
-    $scope.overwrite = "overwrite";
-
     $scope.$on('loginStatusChanged', function(response) {
 
 
@@ -128,6 +118,11 @@ controller('AppCtrl', ['$scope', '$http', '$timeout', 'LoginService', function($
 
     function fetchImage () {
 
+        if (!$scope.title) {
+            console.log('No title given, nothing to fetch');
+            return;
+        }
+
         $scope.status = 'Please wait while fetching image and metadata... This might take some time depending on the filesize of the image...';
 
         $http.get('backend.php?lookup=1&title=' + encodeURIComponent($scope.title)).
@@ -139,18 +134,35 @@ controller('AppCtrl', ['$scope', '$http', '$timeout', 'LoginService', function($
 
             $scope.metadata = response;
 
-            $timeout(function() {
-                console.log('Enabling Jcrop');
-                $('#cropbox').Jcrop({
-                    onSelect: function(c) {
-                        $scope.$apply(function() { updateCoords(c); });
-                    },
-                    onRelease: function() {
-                        $scope.$apply(function() { $scope.crop_dim = undefined; });
-                    }
-                });
-            }, 200);
+            if (!response.error) {
+                $timeout(function() {
+                    console.log('Enabling Jcrop');
+                    $('#cropbox').Jcrop({
+                        onSelect: function(c) {
+                            $scope.$apply(function() { updateCoords(c); });
+                        },
+                        onRelease: function() {
+                            $scope.$apply(function() { $scope.crop_dim = undefined; });
+                        }
+                    });
+                }, 200);
+            }
+
         });
+    }
+
+    $scope.titleFromFilename = function(filename) {
+        console.log('titleFromFilename: ' + filename);
+        $scope.title = filename
+            .replace(/_/g, ' ')
+            .replace(/^File:/, '');
+
+        var p = $scope.title.lastIndexOf('.');
+        $scope.newFilename = $scope.title.substr(0, p) + ' (cropped)' + $scope.title.substr(p);
+
+        if (LoginService.user) {
+            fetchImage();
+        }
     }
 
     $scope.preview = function() {
@@ -222,5 +234,13 @@ controller('AppCtrl', ['$scope', '$http', '$timeout', 'LoginService', function($
         });
 
     };
+
+    $scope.titleFromFilename(getParameterByName('title'));
+
+    $scope.status = 'Checking login';
+
+    $scope.cropmethod = "lossless";
+    $scope.overwrite = "overwrite";
+
 
 }]);
