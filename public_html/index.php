@@ -139,11 +139,11 @@ $I18N->setMsgs( array(
                 <div class="panel-body">
 
                     <p>
-                        Click "Authorize" to go to a secure Wikimedia OAuth server where you can authorize
-                        the use of this tool with your Wikimedia Commons account.
+                        To use CropTool you need to connect it to your Wikimedia Commons account. 
+                        This process is secure and your password will not be given to CropTool.
                     </p>
 
-                    <button type="submit" class="btn btn-primary" ng-click="oauthLogin()">Authorize</button>
+                    <button type="submit" class="btn btn-primary" ng-click="oauthLogin()">Connect</button>
                     <!--<button type="submit" class="btn btn-default" ng-click="logout()">Logout</button>
 -->
                 </div>
