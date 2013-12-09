@@ -329,11 +329,13 @@ class CropTool {
             $args['comment'] = 'Cropped version of [[File:' . $title . ']] using [[Commons:CropTool|CropTool]].';
 
             $tpl = '{{Extracted from|' . $title . '}}';
-            if ($x = mb_stripos($wikitext, "[[Category:") !== false) {
+            $x = mb_stripos($wikitext, "[[category:");
+            if ($x !== false) {
                 $wikitext = mb_substr($wikitext, 0, $x) . $tpl . "\n" . mb_substr($wikitext, $x);
             } else {
                 $wikitext .= $tpl;
             }
+            //$wikitext .= "\n[[Category:Test uploads]]";
             $args['text'] = $wikitext;
 
         }
