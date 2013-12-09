@@ -51,10 +51,14 @@ class OAuthConsumer {
     public function __construct()
     {
 
-        $params = session_get_cookie_params();
+        $twoYears = 60 * 60 * 24 * 365 * 2;
+        session_name('croptool');
         session_set_cookie_params(
-            $params['lifetime'],
-            dirname( $_SERVER['SCRIPT_NAME'] )
+            $twoYears,
+            dirname( $_SERVER['SCRIPT_NAME'] ),
+            'tools.wmflabs.org',
+            true,  // only secure (https)
+            true   // httponly
         );
 
         session_start();
