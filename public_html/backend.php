@@ -321,12 +321,12 @@ class CropTool {
 
             $args['filename'] = $title;
             $args['ignorewarnings'] = 1;
-            $args['comment'] = 'Cropped ' . ($cropPercentX ?: ' < 1') . ' % horizontally and ' . ($cropPercentY ?: '< 1') . ' % vertically using CropTool.';
+            $args['comment'] = 'Cropped ' . ($cropPercentX ?: ' < 1') . ' % horizontally and ' . ($cropPercentY ?: '< 1') . ' % vertically using [[Commons:CropTool|CropTool]].';
             
         } else {
 
             $args['filename'] = $input->filename;
-            $args['comment'] = 'Cropped version of [[File:' . $title . ']] using CropTool.';
+            $args['comment'] = 'Cropped version of [[File:' . $title . ']] using [[Commons:CropTool|CropTool]].';
 
             $tpl = '{{Extracted from|' . $title . '}}';
             if ($x = mb_stripos($wikitext, "[[Category:") !== false) {
@@ -353,7 +353,7 @@ class CropTool {
                 $response2 = $this->apiRequest(array(
                     'action' => 'edit',
                     'format' => 'json',
-                    'summary' => 'Border removed using CropTool',
+                    'summary' => 'Border removed using [[Commons:CropTool|CropTool]]',
                     'token' => $token,
                     'title' => 'File:' . $title,
                     'text' => $wikitext2
