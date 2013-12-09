@@ -79,7 +79,7 @@ $I18N = new TsIntuition(array(
 
                 <p>
                     <?php echo $I18N->msg( 'loginform-blurb', array('variables' => array(
-                        '//commons.wikimedia.org/wiki/CropTool'
+                        '//commons.wikimedia.org/wiki/Commons:CropTool'
                     ))); ?>
                 </p>
 
@@ -142,7 +142,7 @@ $I18N = new TsIntuition(array(
             </div>
 
             <div class="panel-footer">
-                <?php echo $I18N->msg( 'titleform-footer', array('variables' => array('//commons.wikimedia.org/wiki/CropTool'))); ?>
+                <?php echo $I18N->msg( 'titleform-footer', array('variables' => array('//commons.wikimedia.org/wiki/Commons:CropTool'))); ?>
             </div>
 
         </div>
