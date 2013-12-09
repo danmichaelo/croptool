@@ -3,6 +3,11 @@
 error_reporting(E_ALL);
 ini_set('display_errors', '1');
 
+if (isset($_SERVER['HTTP_X_FORWARDED_PROTO']) && $_SERVER['HTTP_X_FORWARDED_PROTO'] == 'http') {
+    $redirect = "https://" . $_SERVER['HTTP_X_FORWARDED_SERVER'] . $_SERVER['REQUEST_URI'];
+    header("Location: $redirect");
+    exit;
+}
 
 require('../TsIntuition/ToolStart.php'); // for testing
 //require('/home/project/intuition/src/Intuition/ToolStart.php');

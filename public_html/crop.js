@@ -75,10 +75,6 @@ controller('LoginCtrl', ['$scope', '$http', 'LoginService', function($scope, $ht
 
 controller('AppCtrl', ['$scope', '$http', '$timeout', 'LoginService', function($scope, $http, $timeout, LoginService) {
 
-    // Temporary solution until I figure out how to make lighttp redirect correctly
-    if (window.location.protocol != "https:") {
-        window.location.href = "https:" + window.location.href.substring(window.location.protocol.length);
-    }
 
     var jcrop_api,
         everPushedSomething = false;
