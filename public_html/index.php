@@ -123,11 +123,14 @@ $I18N = new TsIntuition(array(
 
                     <div class="row">
 
-                        <div class="form-group col-sm-8">
+                        <div class="form-group col-sm-8" ng-class="{ 'has-error': exists[filename] === false, 'has-success': exists[filename] === true }">
                             <label class="sr-only" for="filename">
                                 <?php echo $I18N->msg( 'titleform-filename-label' ); ?>
                             </label>
                             <input type="text" ng-model="filename" class="form-control" placeholder="<?php echo $I18N->msg( 'titleform-filename-label' ); ?>">
+                            <span class="help-block" ng-show="exists[filename] === false">
+                                <?php echo $I18N->msg( 'titleform-filename-not-found', array('variables' => array('{{filename}}')) ); ?>
+                            </span>
                         </div>
 
                         <div class="col-sm-4">
@@ -318,9 +321,14 @@ $I18N = new TsIntuition(array(
                         </label>
                     </div>
 
-                    <div class="form-group">
-                        <label class="sr-only" for="newFilename">New filename</label>
-                        <input id="newFilename" type="text" value="{{title}}" ng-show="overwrite=='rename'" ng-model="newFilename" class="form-control" style="width: 400px;">
+                    <div class="form-group" ng-show="overwrite=='rename'" ng-class="{ 'has-error': exists[newFilename] === true, 'has-success': exists[newFilename] === false }">
+                        <label class="sr-only" for="newFilename">
+                            <?php echo $I18N->msg( 'cropform-new-filename' ); ?>
+                        </label>
+                        <input id="newFilename" type="text" class="form-control" style="width: 400px;" ng-model="newFilename">
+                        <span class="help-block" ng-show="exists[newFilename] === true">
+                            <?php echo $I18N->msg( 'cropform-new-filename-exists', array('variables' => array('{{newFilename}}')) ); ?>
+                        </span>
                     </div>
 
                 </div>

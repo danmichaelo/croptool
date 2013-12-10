@@ -469,6 +469,25 @@ class CropTool {
         return $r;
     }
 
+    public function pageExists($title)
+    {
+
+        $response = $this->apiRequest(array(
+            'action' => 'query',
+            'prop' => 'pageprops',
+            'format' => 'json',
+            'titles' => 'File:' . $title
+        ));
+
+        foreach ($response->query->pages as $pageid => $page) {
+          if ($pageid == '-1') {
+            return false;
+          }
+          return true;
+        }
+
+    }
+
 }
 
 
@@ -504,6 +523,15 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST')
 if (isset($_GET['checkLogin'])) {
     header('Content-type: application/json');
     echo json_encode($ct->checkLogin());
+    exit;
+}
+
+if (isset($_GET['pageExists'])) {
+    header('Content-type: application/json');
+    echo json_encode(array(
+        'exists' => $ct->pageExists($_GET['pageExists']),
+        'filename' => $_GET['pageExists']
+    ));
     exit;
 }
 

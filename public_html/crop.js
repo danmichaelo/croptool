@@ -73,8 +73,7 @@ controller('LoginCtrl', ['$scope', '$http', 'LoginService', function($scope, $ht
 
 }]).
 
-controller('AppCtrl', ['$scope', '$http', '$timeout', 'LoginService', function($scope, $http, $timeout, LoginService) {
-
+controller('AppCtrl', ['$scope', '$http', '$timeout', '$q', 'LoginService', function($scope, $http, $timeout, $q, LoginService) {
 
     var jcrop_api,
         everPushedSomething = false;
@@ -275,6 +274,68 @@ controller('AppCtrl', ['$scope', '$http', '$timeout', 'LoginService', function($
 
     $scope.cropmethod = "lossless";
     $scope.overwrite = "overwrite";
+
+
+    // On filename change, check with the MediaWiki API if the file exists.
+    // Delay 500 ms before checking in case the user is in the process of typing.
+    // Code below might eventually better be separated out into a directive or something.
+
+    var canceler;
+
+    $scope.exists = [];
+
+    function pageExists(filename) {
+
+        var title = filename
+            .replace(/_/g, ' ')
+            .replace(/^File:/, '');
+
+        if (!canceler) {
+            console.log('nothing to abort');
+        } else if (canceler && canceler.resolve) {
+            // Aborts the $http request if it isn't finished.
+            console.log('abort http');
+            canceler.resolve();
+        } else {
+            // Abort the timer
+            console.log('abort timer');
+            $timeout.cancel(canceler);
+        }
+
+        if (title == '') {
+            canceler = null;
+            return;
+        }
+
+        canceler = $timeout(function() {
+
+            canceler = $q.defer();
+
+            $http.get('backend.php?pageExists=' + encodeURIComponent(title), {
+                timeout: canceler.promise,
+            }).success(function(response) {
+                $scope.exists[response.filename] = response.exists;
+                canceler = null;
+            });
+
+        }, 300);
+    }
+
+    $scope.$watch('filename', function() {
+
+        if ($scope.filename !== undefined && $scope.exists[$scope.filename] === undefined) {
+            pageExists($scope.filename);
+        }
+
+    });
+
+    $scope.$watch('newFilename', function() {
+
+        if ($scope.newFilename !== undefined && $scope.exists[$scope.newFilename] === undefined) {
+            pageExists($scope.newFilename);
+        }
+
+    });
 
 
 }]);

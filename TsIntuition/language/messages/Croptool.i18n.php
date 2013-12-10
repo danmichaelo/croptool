@@ -29,9 +29,13 @@ $messages['en'] = array(
 	'titleform-filename-label' => 'Filename',
 	'titleform-submit-button' => 'Open',
 	'titleform-footer' => 'Tip: You can open CropTool directly from a media file at Wikimedia Commons. <a href="$1">Learn more</a>.',
+	'titleform-filename-not-found' => 'File «$1» not found.',
 
 	'fetching-progress-title' => 'Fetching image',
 	'fetching-progress-body' => 'Please wait while fetching image data and metadata... This might take some time depending on the filesize of the image...',
+
+	'cropform-new-filename' => 'New filename',
+	'cropform-new-filename-exists' => 'File «$1» already exists.',
 
 );
 
