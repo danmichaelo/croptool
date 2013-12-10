@@ -314,7 +314,7 @@ controller('AppCtrl', ['$scope', '$http', '$timeout', '$q', 'LoginService', func
             $http.get('backend.php?pageExists=' + encodeURIComponent(title), {
                 timeout: canceler.promise,
             }).success(function(response) {
-                $scope.exists[response.filename] = response.exists;
+                $scope.exists[filename] = response.exists;
                 canceler = null;
             });
 
