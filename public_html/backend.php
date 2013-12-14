@@ -15,6 +15,19 @@ class CropTool {
         $this->count_file = '../data/count.txt';
         $this->config_file = '../config.json';
 
+        $this->hostname = isset($_SERVER['HTTP_X_FORWARDED_SERVER'])
+                ? $_SERVER['HTTP_X_FORWARDED_SERVER']
+                : $_SERVER['SERVER_NAME'];
+
+        session_name('croptool');
+        session_set_cookie_params(
+            0,
+            dirname( $_SERVER['SCRIPT_NAME'] ),
+            $this->hostname
+        );
+
+        session_start();
+
         $config = json_decode(file_get_contents($this->config_file));
 
         $this->botUser = $config->user;
@@ -182,6 +195,7 @@ class CropTool {
         } else {
             die('unknown crop method');
         }
+
         chmod($dest_path, 0664);
 
         if ($cmd_res != "" || $return_var != 0) {
@@ -525,26 +539,20 @@ if (isset($_GET['checkLogin'])) {
     header('Content-type: application/json');
     echo json_encode($ct->checkLogin());
     exit;
-}
 
-if (isset($_GET['pageExists'])) {
+} else if (isset($_GET['pageExists'])) {
     header('Content-type: application/json');
     echo json_encode(array(
         'exists' => $ct->pageExists($_GET['pageExists']),
         'filename' => $_GET['pageExists']
     ));
     exit;
-}
 
+} else if (isset($_GET['title'])) {
+    $title = $_GET['title'];
 
-if (!isset($_GET['title'])) {
-  print "Please provide a title";
-  die;
-}
-$title = $_GET['title'];
-
-
-if (isset($_GET['lookup'])) {
-    echo json_encode($ct->fetchImage($title));
-    exit;
+    if (isset($_GET['lookup'])) {
+        echo json_encode($ct->fetchImage($title));
+        exit;
+    }
 }

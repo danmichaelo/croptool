@@ -11,15 +11,7 @@ if (isset($_SERVER['HTTP_X_FORWARDED_PROTO']) && $_SERVER['HTTP_X_FORWARDED_PROT
 
 require('../TsIntuition/ToolStart.php'); // for testing
 //require('/home/project/intuition/src/Intuition/ToolStart.php');
-require('../oauth.php');
-
-
-// Fetch the access token if this is the callback from requesting authorization
-if ( isset( $_GET['oauth_verifier'] ) && $_GET['oauth_verifier'] ) {
-
-    $oauth = new OAuthConsumer;
-
-}
+require('backend.php');
 
 // Localization using TsIntuition
 // https://github.com/Krinkle/TsIntuition/wiki/Documentation

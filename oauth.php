@@ -72,19 +72,6 @@ class OAuthConsumer {
     public function __construct()
     {
 
-        $this->hostname = isset($_SERVER['HTTP_X_FORWARDED_SERVER'])
-                ? $_SERVER['HTTP_X_FORWARDED_SERVER']
-                : $_SERVER['SERVER_NAME'];
-
-        session_name('croptool');
-        session_set_cookie_params(
-            0,
-            dirname( $_SERVER['SCRIPT_NAME'] ),
-            $this->hostname
-        );
-
-        session_start();
-
         if (isset($_GET['title'])) {
             // Store the title, so we can retrieve if after
             // having having authenticated at the OAuth endpoint
