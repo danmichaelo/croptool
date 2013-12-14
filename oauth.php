@@ -1,5 +1,7 @@
 <?php
 
+require_once('Cryptastic.php');
+
 // See also: http://oauth.googlecode.com/svn/code/php/OAuth.php
 
 class OAuthConsumer {
@@ -48,17 +50,16 @@ class OAuthConsumer {
 
     private $username = ''; // username of the authorized user
 
+    private $cipher;
+
     public function __construct()
     {
 
-        $twoYears = 60 * 60 * 24 * 365 * 2;
         session_name('croptool');
         session_set_cookie_params(
-            $twoYears,
+            0,
             dirname( $_SERVER['SCRIPT_NAME'] ),
-            'tools.wmflabs.org',
-            true,  // only secure (https)
-            true   // httponly
+            'tools.wmflabs.org'
         );
 
         session_start();
@@ -89,15 +90,34 @@ class OAuthConsumer {
         $this->gUserAgent = $ini['agent'];
         $this->gConsumerKey = $ini['consumerKey'];
         $this->gConsumerSecret = $ini['consumerSecret'];
+        $this->cookieKey = base64_decode($ini['localPassphrase']);
+
+        $this->cipher = new Cryptastic();
 
         // Load the user token (request or access) from the session
         $this->gTokenKey = '';
         $this->gTokenSecret = '';
         //session_start();
-        if ( isset( $_SESSION['tokenKey'] ) ) {
+
+
+
+        // Grab request token from SESSION
+        if ( isset( $_SESSION['mwKey'] ) && isset( $_SESSION['mwSecret'] ) ) {
+            $this->gTokenKey = $_SESSION['mwKey'];
+            $this->gTokenSecret = $_SESSION['mwSecret'];
+            unset($_SESSION['mwKey']);
+            unset($_SESSION['mwSecret']);
+
+        // Grab permanent token from COOKIE
+        } else if ( isset( $_COOKIE['mwKey'] ) && isset( $_COOKIE['mwSecret'] ) ) {
+            $this->gTokenKey = $this->cipher->decrypt($_COOKIE['mwKey'], $this->cookieKey, true);
+            $this->gTokenSecret = $this->cipher->decrypt($_COOKIE['mwSecret'], $this->cookieKey, true);
+        }
+
+        /*if ( isset( $_SESSION['tokenKey'] ) ) {
             $this->gTokenKey = $_SESSION['tokenKey'];
             $this->gTokenSecret = $_SESSION['tokenSecret'];
-        }
+        }*/
         //session_write_close();
 
         // Fetch the access token if this is the callback from requesting authorization
@@ -122,7 +142,7 @@ class OAuthConsumer {
 
         $this->authorized = $this->checkAuthorization();
 
-        session_write_close();
+        //session_write_close();
     }
 
     private function checkAuthorization()
@@ -163,17 +183,15 @@ class OAuthConsumer {
      */
     private function fetchAccessToken() {
 
-        $requestToken = $_GET['oauth_token'];
-
         $url = $this->mwOAuthUrl . '/token';
         $url .= strpos( $url, '?' ) ? '&' : '?';
         $url .= http_build_query( array(
             'format' => 'json',
-            'oauth_verifier' => $_GET['oauth_verifier'],
 
             // OAuth information
             'oauth_consumer_key' => $this->gConsumerKey,
             'oauth_token' => $this->gTokenKey, // request token
+            'oauth_verifier' => $_GET['oauth_verifier'],
             'oauth_version' => '1.0',
             'oauth_nonce' => md5( microtime() . mt_rand() ),
             'oauth_timestamp' => time(),
@@ -213,9 +231,37 @@ class OAuthConsumer {
 
         // Save the access token
         //session_start();
-        $_SESSION['tokenKey'] = $this->gTokenKey = $token->key;
-        $_SESSION['tokenSecret'] = $this->gTokenSecret = $token->secret;
-        //session_write_close();
+
+        $twoYears = time() + 60 * 60 * 24 * 365 * 2;
+
+        $this->gTokenKey = $token->key;
+        if (!setcookie('mwKey',
+            $this->cipher->encrypt($this->gTokenKey, $this->cookieKey, true),
+            $twoYears,
+            dirname( $_SERVER['SCRIPT_NAME'] ),
+            'tools.wmflabs.org',
+            true,  // only secure (https)
+            true   // httponly
+        )) {
+            header( "HTTP/1.1 500 Internal Server Error" );
+            echo 'Failed to store key';
+            exit(0);
+        }
+
+        $this->gTokenSecret = $token->secret; // 40 bytes
+        if (!setcookie('mwSecret',
+            $this->cipher->encrypt($this->gTokenSecret, $this->cookieKey, true), // ~ 150 bytes
+            $twoYears,
+            dirname( $_SERVER['SCRIPT_NAME'] ),
+            'tools.wmflabs.org',
+            true,  // only secure (https)
+            true   // httponly
+        )) {
+            header( "HTTP/1.1 500 Internal Server Error" );
+            echo 'Failed to store secret. Length: ' . strlen($this->cipher->encrypt($this->gTokenSecret, $this->cookieKey, true));
+            exit(0);
+        }
+
     }
 
     /**
@@ -304,12 +350,12 @@ class OAuthConsumer {
 
     public function doLogout()
     {
-        session_start();
+        //session_start();
         session_destroy();
         $_SESSION = array();
         $this->authorized = false;
         $this->username = '';
-        session_write_close();
+        //session_write_close();
     }
 
     /**
@@ -366,9 +412,9 @@ class OAuthConsumer {
 
         // Now we have the request token, we need to save it for later.
         //session_start();
-        $_SESSION['tokenKey'] = $token->key;
-        $_SESSION['tokenSecret'] = $token->secret;
-        session_write_close();
+
+        $_SESSION['mwKey'] = $token->key;
+        $_SESSION['mwSecret'] = $token->secret; // What do we need this for?
 
         // Then we send the user off to authorize
         $url = $this->mwOAuthUrl . '/authorize';
