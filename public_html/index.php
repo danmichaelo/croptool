@@ -56,8 +56,10 @@ $I18N = new TsIntuition(array(
     </div>
 
     <h1 style="padding:.4em 0; margin: 0 0 .3em 0;">
-        <i class="icon-crop"></i>
-        <?php echo $I18N->msg( 'title' ); ?>
+        <a href ng-click="setTitle()">
+            <i class="icon-crop"></i>
+            <?php echo $I18N->msg( 'title' ); ?>
+        </a>
     </h1>
 
     <!-- ********************************************************************************************************
@@ -190,8 +192,6 @@ $I18N = new TsIntuition(array(
                 <a href="{{metadata.description}}">{{title}}</a>.
                 Original: {{metadata.original.width}} x {{metadata.original.height}} px.
                 <span ng-show="metadata.thumb">Thumbnail size: {{metadata.thumb.width}} x {{metadata.thumb.height}} px</span>
-
-                <a href ng-click="setTitle()" style="float:right;">Crop another file</a>
             </div>
 
             <div class="panel-body">
