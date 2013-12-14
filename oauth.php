@@ -7,32 +7,28 @@ require_once('Cryptastic.php');
 class OAuthConsumer {
 
     /**
-     * Set this to point to a file (outside the webserver root!) containing the
-     * following keys:
+     * A file containing the following keys:
      * - agent: The HTTP User-Agent to use
      * - consumerKey: The "consumer token" given to you when registering your app
      * - consumerSecret: The "secret token" given to you when registering your app
+     * - localPassphrase: The (base64 encoded) key used for encrypting cookie content
      */
     protected $inifile = '../oauth.ini';
 
     /**
-     * Set this to the Special:OAuth URL.
+     * The Special:OAuth URL.
      * Note that /wiki/Special:OAuth sometimes fails, while
      * index.php?title=Special:OAuth works fine.
      */
     protected $mwOAuthUrl = 'https://www.mediawiki.org/w/index.php?title=Special:OAuth';
 
-    protected $rsaPrivateKeyFile = '../mykey.pem';
-
-    protected $rsaPublicKeyFile = '../mykey.public';
-
     /**
-     * Set this to the interwiki prefix for the OAuth central wiki.
+     * The interwiki prefix for the OAuth central wiki.
      */
     protected $mwOAuthIW = 'mw';
 
     /**
-     * Set this to the API endpoint
+     * The API endpoint
      */
     protected $apiUrl = 'https://commons.wikimedia.org/w/api.php';
 
@@ -48,28 +44,52 @@ class OAuthConsumer {
     private $gTokenSecret = '';
     private $signatureMethod = 'HMAC-SHA1'; // TODO: 'RSA-SHA1'
 
-    private $username = ''; // username of the authorized user
+    /**
+     * Private key file used to sign OAuth requests using the RSA-SHA1 method.
+     */
+    protected $rsaPrivateKeyFile = '../mykey.pem';
 
+    /**
+     * public key file used with signed OAuth requests using the RSA-SHA1 method.
+     */
+    protected $rsaPublicKeyFile = '../mykey.public';
+
+    /**
+     * Username of the authorized user
+     */
+    private $username = '';
+
+    /**
+     * Object carrying out encryption and decryption
+     */
     private $cipher;
+
+    /**
+     * The hostname, most likely 'tools.wmflabs.org'
+     */
+    private $hostname;
 
     public function __construct()
     {
+
+        $this->hostname = isset($_SERVER['HTTP_X_FORWARDED_SERVER'])
+                ? $_SERVER['HTTP_X_FORWARDED_SERVER']
+                : $_SERVER['SERVER_NAME'];
 
         session_name('croptool');
         session_set_cookie_params(
             0,
             dirname( $_SERVER['SCRIPT_NAME'] ),
-            'tools.wmflabs.org'
+            $this->hostname
         );
 
         session_start();
 
         if (isset($_GET['title'])) {
+            // Store the title, so we can retrieve if after
+            // having having authenticated at the OAuth endpoint
             $_SESSION['title'] = $_GET['title'];
         }
-
-        // Setup the session cookie
-        //session_name( 'OAuthHelloWorld' );
 
         // Read the ini file
         $ini = parse_ini_file( $this->inifile );
@@ -97,9 +117,6 @@ class OAuthConsumer {
         // Load the user token (request or access) from the session
         $this->gTokenKey = '';
         $this->gTokenSecret = '';
-        //session_start();
-
-
 
         // Grab request token from SESSION
         if ( isset( $_SESSION['mwKey'] ) && isset( $_SESSION['mwSecret'] ) ) {
@@ -108,17 +125,11 @@ class OAuthConsumer {
             unset($_SESSION['mwKey']);
             unset($_SESSION['mwSecret']);
 
-        // Grab permanent token from COOKIE
+        // or grab permanent token from COOKIE
         } else if ( isset( $_COOKIE['mwKey'] ) && isset( $_COOKIE['mwSecret'] ) ) {
             $this->gTokenKey = $this->cipher->decrypt($_COOKIE['mwKey'], $this->cookieKey, true);
             $this->gTokenSecret = $this->cipher->decrypt($_COOKIE['mwSecret'], $this->cookieKey, true);
         }
-
-        /*if ( isset( $_SESSION['tokenKey'] ) ) {
-            $this->gTokenKey = $_SESSION['tokenKey'];
-            $this->gTokenSecret = $_SESSION['tokenSecret'];
-        }*/
-        //session_write_close();
 
         // Fetch the access token if this is the callback from requesting authorization
         if ( isset( $_GET['oauth_verifier'] ) && $_GET['oauth_verifier'] ) {
@@ -134,15 +145,10 @@ class OAuthConsumer {
                 $this->doAuthorizationRedirect();
                 return;
 
-            /*case 'edit':
-                $this->doEdit();
-                break;
-                */
         }
 
         $this->authorized = $this->checkAuthorization();
 
-        //session_write_close();
     }
 
     private function checkAuthorization()
@@ -156,21 +162,17 @@ class OAuthConsumer {
         ) );
 
         if ( isset( $res->error->code ) && $res->error->code === 'mwoauth-invalid-authorization' ) {
-
             $this->authError = $res->error;
-
             // We're not authorized!
             return false;
         }
 
         if ( !isset( $res->query->userinfo ) ) {
             $this->authError = 'Bad API response';
-            //echo 'Bad API response: <pre>' . htmlspecialchars( var_export( $res, 1 ) ) . '</pre>';
             return false;
         }
         if ( isset( $res->query->userinfo->anon ) ) {
             $this->authError = 'Not logged in';
-            //echo 'Not logged in. (How did that happen?)';
             return false;
         }
         $this->username = $res->query->userinfo->name;
@@ -230,7 +232,6 @@ class OAuthConsumer {
         }
 
         // Save the access token
-        //session_start();
 
         $twoYears = time() + 60 * 60 * 24 * 365 * 2;
 
@@ -239,7 +240,7 @@ class OAuthConsumer {
             $this->cipher->encrypt($this->gTokenKey, $this->cookieKey, true),
             $twoYears,
             dirname( $_SERVER['SCRIPT_NAME'] ),
-            'tools.wmflabs.org',
+            $this->hostname,
             true,  // only secure (https)
             true   // httponly
         )) {
@@ -253,7 +254,7 @@ class OAuthConsumer {
             $this->cipher->encrypt($this->gTokenSecret, $this->cookieKey, true), // ~ 150 bytes
             $twoYears,
             dirname( $_SERVER['SCRIPT_NAME'] ),
-            'tools.wmflabs.org',
+            $this->hostname,
             true,  // only secure (https)
             true   // httponly
         )) {
@@ -350,12 +351,13 @@ class OAuthConsumer {
 
     public function doLogout()
     {
-        //session_start();
-        session_destroy();
-        $_SESSION = array();
+        setcookie('mwKey', '', time() - 3600, dirname( $_SERVER['SCRIPT_NAME'] ), $this->hostname, true, true);
+        setcookie('mwSecret', '', time() - 3600, dirname( $_SERVER['SCRIPT_NAME'] ), $this->hostname, true, true);
         $this->authorized = false;
+        $this->gTokenKey = '';
+        $this->gTokenSecret = '';
         $this->username = '';
-        //session_write_close();
+        $this->authError = 'Not logged in';
     }
 
     /**
@@ -499,67 +501,4 @@ class OAuthConsumer {
         return $this->username;
     }
 
-    /**
-     * Perform a generic edit
-     * @return void Does not return
-     */
-    function doEdit() {
-
-        $ch = null;
-
-        // First fetch the username
-        $res = $this->doApiQuery( array(
-            'format' => 'json',
-            'action' => 'query',
-            'meta' => 'userinfo',
-        ) );
-
-        if ( isset( $res->error->code ) && $res->error->code === 'mwoauth-invalid-authorization' ) {
-            // We're not authorized!
-            echo 'You haven\'t authorized this application yet! Go <a href="' . htmlspecialchars( $_SERVER['SCRIPT_NAME'] ) . '?action=authorize">here</a> to do that.';
-            echo '<hr>';
-            return;
-        }
-
-        if ( !isset( $res->query->userinfo ) ) {
-            header( "HTTP/1.1 500 Internal Server Error" );
-            echo 'Bad API response: <pre>' . htmlspecialchars( var_export( $res, 1 ) ) . '</pre>';
-            exit(0);
-        }
-        if ( isset( $res->query->userinfo->anon ) ) {
-            header( "HTTP/1.1 500 Internal Server Error" );
-            echo 'Not logged in. (How did that happen?)';
-            exit(0);
-        }
-        $page = 'User talk:' . $res->query->userinfo->name;
-
-        // Next fetch the edit token
-        $res = $this->doApiQuery( array(
-            'format' => 'json',
-            'action' => 'tokens',
-            'type' => 'edit',
-        ) );
-        if ( !isset( $res->tokens->edittoken ) ) {
-            header( "HTTP/1.1 500 Internal Server Error" );
-            echo 'Bad API response: <pre>' . htmlspecialchars( var_export( $res, 1 ) ) . '</pre>';
-            exit(0);
-        }
-        $token = $res->tokens->edittoken;
-
-        // Now perform the edit
-        $res = $this->doApiQuery( array(
-            'format' => 'json',
-            'action' => 'edit',
-            'title' => $page,
-            'section' => 'new',
-            'sectiontitle' => 'Hello, world',
-            'text' => 'This message was posted using the OAuth Hello World application, and should be seen as coming from yourself. To revoke this application\'s access to your account, visit [[:' . $this->mwOAuthIW . ':Special:OAuthManageMyGrants]]. ~~~~',
-            'summary' => '/* Hello, world */ Hello from OAuth!',
-            'watchlist' => 'nochange',
-            'token' => $token,
-        ) );
-
-        echo 'API edit result: <pre>' . htmlspecialchars( var_export( $res, 1 ) ) . '</pre>';
-        echo '<hr>';
-    }
 }

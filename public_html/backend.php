@@ -76,7 +76,6 @@ class CropTool {
 
     public function logout()
     {
-        $this->oauth = new OAuthConsumer;
         $this->oauth->doLogout();
         return array(
             'oauth' => $this->checkOauthLogin(),
