@@ -196,6 +196,8 @@ class CropTool {
             die('unknown crop method');
         }
 
+        $_SESSION['cropmethod'] = $cm;
+
         chmod($dest_path, 0664);
 
         if ($cmd_res != "" || $return_var != 0) {
@@ -334,7 +336,8 @@ class CropTool {
 
             $args['filename'] = $title;
             $args['ignorewarnings'] = 1;
-            $args['comment'] = 'Cropped ' . ($cropPercentX ?: ' < 1') . ' % horizontally and ' . ($cropPercentY ?: '< 1') . ' % vertically using [[Commons:CropTool|CropTool]].';
+            $mode = ($_SESSION['cropmethod'] == 'lossless') ? 'lossless mode' : 'precise mode';
+            $args['comment'] = 'Cropped ' . ($cropPercentX ?: ' < 1') . ' % horizontally and ' . ($cropPercentY ?: '< 1') . ' % vertically using [[Commons:CropTool|CropTool]] with ' . $mode . '.';
             
         } else {
 
