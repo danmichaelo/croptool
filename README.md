@@ -1,3 +1,4 @@
+[![Stories in Ready](https://badge.waffle.io/danmichaelo/croptool.png?label=ready)](https://waffle.io/danmichaelo/croptool)  
 CropTool
 ===========================
 
