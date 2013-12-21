@@ -76,7 +76,8 @@ controller('LoginCtrl', ['$scope', '$http', 'LoginService', function($scope, $ht
 controller('AppCtrl', ['$scope', '$http', '$timeout', '$q', 'LoginService', function($scope, $http, $timeout, $q, LoginService) {
 
     var jcrop_api,
-        everPushedSomething = false;
+        everPushedSomething = false,
+        pixelratio = [1,1];
     function getParameterByName(name) {
         name = name.replace(/[\[]/, "\\\[").replace(/[\]]/, "\\\]");
         var regex = new RegExp("[\\?&]" + name + "=([^&#]*)"),
@@ -85,12 +86,14 @@ controller('AppCtrl', ['$scope', '$http', '$timeout', '$q', 'LoginService', func
     }
 
     function updateCoords(c) {
-        var ratio = [1,1];
-        if ($scope.metadata.thumb) {
-            ratio = [$scope.metadata.original.width/$scope.metadata.thumb.width, $scope.metadata.original.height/$scope.metadata.thumb.height];
-        }
-        var new_size = [Math.round(c.w * ratio[0]), Math.round(c.h * ratio[1])];
-        var new_offset = [Math.round(c.x * ratio[0]), Math.round(c.y * ratio[1])];
+        var new_size = [
+            Math.round(c.w * pixelratio[0]),
+            Math.round(c.h * pixelratio[1])
+        ];
+        var new_offset = [
+            Math.round(c.x * pixelratio[0]),
+            Math.round(c.y * pixelratio[1])
+        ];
 
         console.log(c);
 
@@ -98,7 +101,9 @@ controller('AppCtrl', ['$scope', '$http', '$timeout', '$q', 'LoginService', func
             x: new_offset[0],
             y: new_offset[1],
             w: new_size[0],
-            h: new_size[1]
+            h: new_size[1],
+            right: $scope.metadata.original.width - new_offset[0] - new_size[0],
+            bottom: $scope.metadata.original.height - new_offset[1] - new_size[1],
         };
 
         //$('#cropped_size').html(new_size[0] + 'x' + new_size[1] + ' px, x offset: ' + new_offset[0] + ' px, y offset: ' + new_offset[1] + ' px');
@@ -130,6 +135,10 @@ controller('AppCtrl', ['$scope', '$http', '$timeout', '$q', 'LoginService', func
 
             $scope.metadata = response;
 
+            if ($scope.metadata.thumb) {
+                pixelratio = [$scope.metadata.original.width/$scope.metadata.thumb.width, $scope.metadata.original.height/$scope.metadata.thumb.height];
+            }
+
             if (!response.error) {
 
                 $scope.title = title;
@@ -155,6 +164,31 @@ controller('AppCtrl', ['$scope', '$http', '$timeout', '$q', 'LoginService', func
 
         });
     }
+
+    $scope.locateBorder = function() {
+        if ($scope.borderLocatorBusy) return;
+
+        $scope.borderLocatorBusy = true;
+        $http.get('backend.php?locateBorder=1&title=' + encodeURIComponent($scope.title))
+            .success(function(response) {
+                $scope.borderLocatorBusy = false;
+                console.log(response);
+                var area = [
+                    response['area'][0]/pixelratio[0],
+                    response['area'][1]/pixelratio[1],
+                    response['area'][2]/pixelratio[0],
+                    response['area'][3]/pixelratio[1]
+                ];
+                console.log(area);
+                setTimeout(function() {
+                    jcrop_api.setSelect(area);
+                }, 0); // update outside the digest cycle (TODO: Rewrite JCrop to be fully compatible with AngularJS)
+            })
+            .error(function() {
+                alert("An error occured while trying to locate the border");
+                $scope.borderLocatorBusy = false;
+            });
+    };
 
     $scope.setTitle = function(filename, updateHistory) {
 
@@ -324,6 +358,11 @@ controller('AppCtrl', ['$scope', '$http', '$timeout', '$q', 'LoginService', func
     $scope.$watch('filename', function() {
 
         if ($scope.filename !== undefined && $scope.exists[$scope.filename] === undefined) {
+            $scope.filename = $scope.filename.replace(new RegExp('^(https://|http://)'), '');
+            $scope.filename = $scope.filename.replace(new RegExp('^commons.wikimedia.org/wiki/'), '');
+            $scope.filename = $scope.filename.replace(new RegExp('^File:'), '');
+            $scope.filename = decodeURI($scope.filename);
+            $scope.filename = $scope.filename.replace('_', ' ', 'g');
             pageExists($scope.filename);
         }
 

@@ -217,13 +217,19 @@ $I18N = new TsIntuition(array(
                     <input type="hidden" name="title" ng-model="title" />
 
                     <p ng-show="!crop_dim">
-                        Select a crop region by click-and-drag.
+                        Select a crop region by click-and-drag, or try the
+                        <a href ng-click="locateBorder();">magic border locator</a>.
+                        <img src="res/spinner1.gif" ng-show="borderLocatorBusy">
                     </p>
+
 
                     <p ng-show="crop_dim">
                         Crop region:
                         <span id="cropped_size">
-                            {{crop_dim.w}} x {{crop_dim.h}} px, left offset: {{crop_dim.x}} px, top offset {{crop_dim.y}} px.
+                            Left offset: {{crop_dim.x}} px,
+                            top offset {{crop_dim.y}} px,
+                            right offset {{crop_dim.right}} px,
+                            bottom offset {{crop_dim.bottom}} px.
                         </span>
                     </p>
 

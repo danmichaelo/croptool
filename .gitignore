@@ -3,3 +3,4 @@ composer.lock
 data/*
 public_html/files/*
 vendor
+oauth.ini

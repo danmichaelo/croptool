@@ -3,6 +3,7 @@
     "description": "CropTool for Wikimedia Commons",
     "require": {
         "shuber/curl": "master-dev",
+        "danmichaelo/coma": "master-dev",
         "lib-curl": "*"
 
     },

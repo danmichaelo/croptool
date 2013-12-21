@@ -5,6 +5,7 @@ ini_set('display_errors', '1');
 
 require('../vendor/autoload.php');
 require('../oauth.php');
+require('../BorderLocator.php');
 
 class CropTool {
 
@@ -555,7 +556,19 @@ if (isset($_GET['checkLogin'])) {
     $title = $_GET['title'];
 
     if (isset($_GET['lookup'])) {
+        header('Content-type: application/json');
         echo json_encode($ct->fetchImage($title));
+        exit;
+
+    } else if (isset($_GET['locateBorder'])) {
+        $info = $ct->fetchImage($title);
+        $bl = new BorderLocator($info['original']['name']);
+        $area = $bl->selection;
+
+        header('Content-type: application/json');
+        echo json_encode(array(
+            'area' => $area
+        ));
         exit;
     }
 }
