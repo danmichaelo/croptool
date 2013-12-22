@@ -354,7 +354,9 @@ $I18N = new TsIntuition(array(
 
             <div class="panel-footer">
 
-                <button type="button" class="btn btn-large" ng-click="cropresults=undefined">Back</button>
+                <button type="button" class="btn btn-large" ng-click="cropresults=undefined">
+                    <?php echo $I18N->msg( 'previewform-back-btn'); ?>
+                </button>
                 <button type="submit" class="btn btn-large btn-primary">
                     <?php echo $I18N->msg( 'previewform-upload-btn'); ?>
                 </button>
@@ -369,7 +371,7 @@ $I18N = new TsIntuition(array(
 
             <div class="panel-heading">
                 <i class="icon-info-sign"></i>
-                File: <a href="{{metadata.description}}">{{title}}</a>.
+                <a href="{{metadata.description}}">{{title}}</a>.
             </div>
 
             <div class="panel-body">
@@ -379,15 +381,19 @@ $I18N = new TsIntuition(array(
                 </div>
 
                 <p ng-show="uploadresults.result == 'Success'">
-                    Cropped image uploaded successfully!<br /><br />
-
-                    Please inspect the result by going to <a href="{{uploadresults.imageinfo.descriptionurl}}">{{uploadresults.filename}}</a>,
-                    and refresh the page if needed.
-                    Report any anomalies, so that they can be fixed.
+                    <?php echo $I18N->msg( 'results-success'); ?>
+                </p>
+                <p ng-show="uploadresults.result == 'Success'">
+                    <?php echo $I18N->msg( 'results-success-details', array('variables' => array(
+                        '{{uploadresults.imageinfo.descriptionurl}}',
+                        '{{uploadresults.filename}}'
+                    ))); ?>
                 </p>
 
                 <p ng-show="uploadresults.error">
-                    Cropped image upload failed: {{uploadresults.error.info}}
+                    <?php echo $I18N->msg( 'results-failure', array('variables' => array(
+                        '{{uploadresults.error.info}}'
+                    ))); ?>
                 </p>
 
             </div>

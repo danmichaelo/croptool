@@ -57,7 +57,12 @@ $messages['en'] = array(
     'previewform-create-new' => 'Upload as new file:',
 	'previewform-new-filename' => 'New filename',
 	'previewform-new-filename-exists' => 'File «$1» already exists.',
+	'previewform-back-btn' => 'Back',
 	'previewform-upload-btn' => 'Upload to Commons',
+
+	'results-success' => 'Cropped image uploaded successfully!',
+	'results-success-details' => 'Please inspect the result by going to <a href="$1">$2</a>, and refresh the page if needed.',
+	'results-failure' => 'Cropped image upload failed: $1',
 
 );
 
@@ -75,6 +80,10 @@ The title of the tool.',
 	'cropform-thumb-dimensions' => 'Parameters:
 * $1 - the width of the thumbnail in pixels.
 * $2 - the height of the thumbnail in pixels.',
+
+	'results-success' => 'Message shown if the upload succeeeds.',
+	'results-failure' => 'Message shown if the upload fails.
+* $1 - some error message.',
 
 );
 
