@@ -167,7 +167,7 @@ $I18N = new TsIntuition(array(
                 <p>
                     <?php echo $I18N->msg( 'fetching-progress-body' ); ?>
                 </p>
-                <img src="spinner.gif" alt="Spinner" style="width:220px; height:20px;">
+                <img src="res/spinner.gif" alt="Spinner" style="width:220px; height:20px;">
 
             </div>
 
