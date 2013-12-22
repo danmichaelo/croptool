@@ -249,12 +249,12 @@ $I18N = new TsIntuition(array(
 
                 <div class="form-group">
                     <label class="radio-inline">
-                        <input type="radio" name="cropmethod" value="lossless" ng-model="cropmethod">
-                        <?php echo $I18N->msg( 'cropform-method-lossless' ); ?>
+                        <input type="radio" name="cropmethod" value="precise" ng-model="cropmethod">
+                        <?php echo $I18N->msg( 'cropform-method-precise' ); ?>
                     </label>
                     <label class="radio-inline">
-                        <input type="radio" name="cropmethod" value="exact" ng-model="cropmethod">
-                        <?php echo $I18N->msg( 'cropform-method-precise' ); ?>
+                        <input type="radio" name="cropmethod" value="lossless" ng-model="cropmethod">
+                        <?php echo $I18N->msg( 'cropform-method-lossless' ); ?>
                     </label>
                 </div>
 
@@ -268,10 +268,10 @@ $I18N = new TsIntuition(array(
 
                 <ul>
                     <li>
-                        <?php echo $I18N->msg( 'cropform-method-lossless-help' ); ?>
+                        <?php echo $I18N->msg( 'cropform-method-precise-help' ); ?>
                     </li>
                     <li>
-                        <?php echo $I18N->msg( 'cropform-method-precise-help' ); ?>
+                        <?php echo $I18N->msg( 'cropform-method-lossless-help' ); ?>
                     </li>
                 </ul>
 

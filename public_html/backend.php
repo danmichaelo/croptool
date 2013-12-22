@@ -173,7 +173,7 @@ class CropTool {
             $cmd_res = exec($cmd, $output, $return_var);
             $res['lossless'] = true;
 
-        } else if ($cm === 'exact') {
+        } else if ($cm === 'precise') {
             #$cmd = 'convert ' . escapeshellarg($src_path) . ' -crop ' . escapeshellarg($dim) . ' ' . escapeshellarg($dest_path);
             #$cmd_res = exec($cmd, $output, $return_var);
 

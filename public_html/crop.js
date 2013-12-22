@@ -306,7 +306,7 @@ controller('AppCtrl', ['$scope', '$http', '$timeout', '$q', 'LoginService', func
 
     $scope.status = 'Checking login';
 
-    $scope.cropmethod = "lossless";
+    $scope.cropmethod = "precise";
     $scope.overwrite = "overwrite";
 
 
