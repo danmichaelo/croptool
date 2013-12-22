@@ -190,8 +190,14 @@ $I18N = new TsIntuition(array(
             <div class="panel-heading">
                 <i class="icon-camera-retro"></i>
                 <a href="{{metadata.description}}">{{title}}</a>.
-                Original: {{metadata.original.width}} x {{metadata.original.height}} px.
-                <span ng-show="metadata.thumb">Thumbnail size: {{metadata.thumb.width}} x {{metadata.thumb.height}} px</span>
+                <?php echo $I18N->msg( 'original-dimensions', array('variables' => array(
+                    '{{metadata.original.width}}', '{{metadata.original.height}}'
+                ))); ?>
+                <span ng-show="metadata.thumb">
+                    <?php echo $I18N->msg( 'thumb-dimensions', array('variables' => array(
+                    '{{metadata.thumb.width}}', '{{metadata.thumb.height}}'
+                    ))); ?>
+                </span>
             </div>
 
             <div class="panel-body">
@@ -217,19 +223,21 @@ $I18N = new TsIntuition(array(
                     <input type="hidden" name="title" ng-model="title" />
 
                     <p ng-show="!crop_dim">
-                        Select a crop region by click-and-drag, or try the
-                        <a href ng-click="locateBorder();">magic border locator</a>.
+                        <?php echo $I18N->msg( 'cropform-select-region', array('variables' => array(
+                            'locateBorder();'
+                        ))); ?>
                         <img src="res/spinner1.gif" ng-show="borderLocatorBusy">
                     </p>
 
 
                     <p ng-show="crop_dim">
-                        Crop region:
                         <span id="cropped_size">
-                            Left offset: {{crop_dim.x}} px,
-                            top offset {{crop_dim.y}} px,
-                            right offset {{crop_dim.right}} px,
-                            bottom offset {{crop_dim.bottom}} px.
+                            <?php echo $I18N->msg( 'cropform-region', array('variables' => array(
+                                '{{crop_dim.x}}',
+                                '{{crop_dim.y}}',
+                                '{{crop_dim.right}}',
+                                '{{crop_dim.bottom}}',
+                            ))); ?>
                         </span>
                     </p>
 
@@ -237,31 +245,35 @@ $I18N = new TsIntuition(array(
             </div>
             <div class="panel-footer">
 
+                <?php echo $I18N->msg( 'cropform-method' ); ?>
+
                 <div class="form-group">
                     <label class="radio-inline">
                         <input type="radio" name="cropmethod" value="lossless" ng-model="cropmethod">
-                        Lossless cropping
+                        <?php echo $I18N->msg( 'cropform-method-lossless' ); ?>
                     </label>
                     <label class="radio-inline">
                         <input type="radio" name="cropmethod" value="exact" ng-model="cropmethod">
-                        Exact cropping
+                        <?php echo $I18N->msg( 'cropform-method-precise' ); ?>
                     </label>
                 </div>
 
-                <button type="submit" class="btn btn-large btn-primary" ng-disabled="!crop_dim">Preview</button>
+                <button type="submit" class="btn btn-large btn-primary" ng-disabled="!crop_dim">
+                    <?php echo $I18N->msg( 'cropform-preview-btn' ); ?>
+                </button>
 
-                <p style="padding:.8em 0;">
-                    <i class="icon-question-sign"></i>
-                    With <strong>lossless cropping</strong>, the image is treated in
-                    terms of blocks (8x8 or 16x16 px depending on sampling).
-                    If the upper left part of the crop region does not fall on a block boundary,
-                    the crop region will have to be increased so that it does.
-                    The resulting image will therefore in general be a few pixels larger than requested,
-                    but never smaller than requested, and never more than 16 px larger.<br>
-                    With <strong>exact cropping</strong> the image
-                    has to be resampled, a process that always result in a small quality loss.
+                <p>
+                    <i class="icon-question-sign"></i> <?php echo $I18N->msg( 'cropform-help' ); ?>:
                 </p>
 
+                <ul>
+                    <li>
+                        <?php echo $I18N->msg( 'cropform-method-lossless-help' ); ?>
+                    </li>
+                    <li>
+                        <?php echo $I18N->msg( 'cropform-method-precise-help' ); ?>
+                    </li>
+                </ul>
 
             </div>
         </form>
@@ -274,58 +286,66 @@ $I18N = new TsIntuition(array(
 
             <div class="panel-heading">
                 <i class="icon-info-sign"></i>
-                File: <a href="{{metadata.description}}">{{title}}</a>.
-
-                Original size: {{metadata.original.width}} x {{metadata.original.height}} px.
-                Cropped size: {{cropresults.width}} x {{cropresults.height}} px.
+                <a href="{{metadata.description}}">{{title}}</a>.
+                <?php echo $I18N->msg( 'original-dimensions', array('variables' => array(
+                    '{{metadata.original.width}}', '{{metadata.original.height}}'
+                ))); ?>
+                <span ng-show="metadata.thumb">
+                    <?php echo $I18N->msg( 'cropped-dimensions', array('variables' => array(
+                    '{{cropresults.width}}', '{{cropresults.height}}'
+                    ))); ?>
+                </span>
             </div>
 
             <div class="panel-body">
 
                 <p ng-show="cropresults.lossless">
-                    A lossless crop was performed.
+                    <?php echo $I18N->msg( 'previewform-lossless'); ?>
                     <span ng-show="cropresults.width!=crop_dim.w || cropresults.height!=crop_dim.h">
-                        The resulting image is {{cropresults.width - crop_dim.w}} px wider
-                        and {{cropresults.height - crop_dim.h}} px higher than the region you selected.
-                        <a href="//en.wikipedia.org/wiki/JPEG#Lossless_editing">Why?</a>
-                        Note that the extra pixels included are in the left and/or top part of the image.
+                        <?php echo $I18N->msg( 'previewform-lossless-explanation', array('variables' => array(
+                            '{{cropresults.width - crop_dim.w}}',
+                            '{{cropresults.height - crop_dim.h}}',
+                            '//en.wikipedia.org/wiki/JPEG#Lossless_editing'
+                        ))); ?>
                     </span>
                 </p>
 
                 <p ng-show="!cropresults.lossless">
-                    An exact crop was performed.
+                    <?php echo $I18N->msg( 'previewform-precise'); ?>
                 </p>
 
                 <img ng-src="{{cropresults.name}}" style="max-width:800px;" />
 
                 <div style="padding: 1em 0;">
 
-
                 <p>
-                    <i class="icon-warning-sign"></i> Please make sure you are familiar with
-                    <a href="https://commons.wikimedia.org/wiki/Commons:Overwriting existing files">Commons:Overwriting existing files</a>.
+                    <i class="icon-warning-sign"></i>
+                    <?php echo $I18N->msg( 'previewform-overwrite-policy', array('variables' => array(
+                        'https://commons.wikimedia.org/wiki/Commons:Overwriting existing files'
+                    ))); ?>
                 </p>
                 <p ng-non-bindable>
-                    <i class="icon-info-sign"></i> Note that the templates <tt>{{crop}}</tt> and <tt>{{remove border}}</tt> will be removed if found.
+                    <i class="icon-info-sign"></i>
+                    <?php echo $I18N->msg( 'previewform-template-removal-notice'); ?>
                 </p>
                     <div class="form-group">
                         <label class="radio-inline">
                             <input type="radio" name="overwrite" ng-model="overwrite" value="overwrite">
-                            Overwrite original
+                            <?php echo $I18N->msg( 'previewform-overwrite'); ?>
                         </label>
                         <label class="radio-inline">
                             <input type="radio" name="overwrite" ng-model="overwrite" value="rename">
-                            Upload as new file:
+                            <?php echo $I18N->msg( 'previewform-create-new'); ?>
                         </label>
                     </div>
 
                     <div class="form-group" ng-show="overwrite=='rename'" ng-class="{ 'has-error': exists[newFilename] === true, 'has-success': exists[newFilename] === false }">
                         <label class="sr-only" for="newFilename">
-                            <?php echo $I18N->msg( 'cropform-new-filename' ); ?>
+                            <?php echo $I18N->msg( 'previewform-new-filename' ); ?>
                         </label>
                         <input id="newFilename" type="text" class="form-control" style="width: 400px;" ng-model="newFilename">
                         <span class="help-block" ng-show="exists[newFilename] === true">
-                            <?php echo $I18N->msg( 'cropform-new-filename-exists', array('variables' => array('{{newFilename}}')) ); ?>
+                            <?php echo $I18N->msg( 'previewform-new-filename-exists', array('variables' => array('{{newFilename}}')) ); ?>
                         </span>
                     </div>
 
@@ -335,7 +355,9 @@ $I18N = new TsIntuition(array(
             <div class="panel-footer">
 
                 <button type="button" class="btn btn-large" ng-click="cropresults=undefined">Back</button>
-                <button type="submit" class="btn btn-large btn-primary">Upload to Commons</button>
+                <button type="submit" class="btn btn-large btn-primary">
+                    <?php echo $I18N->msg( 'previewform-upload-btn'); ?>
+                </button>
             </div>
         </form>
 
