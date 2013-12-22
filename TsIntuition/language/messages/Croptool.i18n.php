@@ -31,8 +31,7 @@ $messages['en'] = array(
 	'titleform-footer' => 'Tip: You can open CropTool directly from a media file at Wikimedia Commons. <a href="$1">Learn more</a>.',
 	'titleform-filename-not-found' => 'File «$1» not found.',
 
-	'fetching-progress-title' => 'Fetching image',
-	'fetching-progress-body' => 'Please wait while fetching image data and metadata... This might take some time depending on the filesize of the image...',
+	'fetching-progress' => 'Please wait while fetching image data and metadata... This might take some time depending on the filesize of the image...',
 
 	'original-dimensions' => 'Original: $1 x $2 px.',
 	'thumb-dimensions' => 'Thumbnail: $1 x $2 px.',
@@ -48,6 +47,8 @@ $messages['en'] = array(
 	'cropform-preview-btn' => 'Preview',
 	'cropform-help' => 'Help',
 
+	'cropping-progress' => 'Please wait while cropping the image...',
+
     'previewform-lossless' => 'A lossless crop was performed.',
     'previewform-lossless-explanation' => 'The resulting image is $1 px wider and $2 px higher than the region you selected. <a href="$3">Why?</a> Note that the extra pixels included are in the left and/or top part of the image.',
     'previewform-precise' => 'A precise crop was performed.',
@@ -59,6 +60,8 @@ $messages['en'] = array(
 	'previewform-new-filename-exists' => 'File «$1» already exists.',
 	'previewform-back-btn' => 'Back',
 	'previewform-upload-btn' => 'Upload to Commons',
+
+	'upload-progress' => 'Please wait while uploading...',
 
 	'results-success' => 'Cropped image uploaded successfully!',
 	'results-success-details' => 'Please inspect the result by going to <a href="$1">$2</a>, and refresh the page if needed.',

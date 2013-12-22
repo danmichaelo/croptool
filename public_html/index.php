@@ -157,15 +157,16 @@ $I18N = new TsIntuition(array(
 
     <div ng-show="user && !title && busy">
 
-        <div class="panel panel-primary">
+        <div class="panel panel-default">
 
             <div class="panel-heading">
-                <?php echo $I18N->msg( 'fetching-progress-title' ); ?>
+                <i class="icon-camera-retro"></i>
+                {{filename}}
             </div>
             <div class="panel-body">
 
                 <p>
-                    <?php echo $I18N->msg( 'fetching-progress-body' ); ?>
+                    <?php echo $I18N->msg( 'fetching-progress' ); ?>
                 </p>
                 <img src="res/spinner.gif" alt="Spinner" style="width:220px; height:20px;">
 
@@ -185,7 +186,7 @@ $I18N = new TsIntuition(array(
              Crop form
              **************************************************************************************************** -->
 
-        <form ng-submit="preview()" ng-show="!cropresults" class="panel panel-default form-inline" role="form">
+        <form ng-submit="preview()" ng-show="!cropresults && !busy" class="panel panel-default form-inline" role="form">
 
             <div class="panel-heading">
                 <i class="icon-camera-retro"></i>
@@ -202,15 +203,15 @@ $I18N = new TsIntuition(array(
 
             <div class="panel-body">
 
-                <div ng-show="status">
-                    {{status}}
+                <div style="color:red;padding:10px;" ng-show="error">
+                    {{error}}
                 </div>
 
                 <div style="color:red;padding:10px;" ng-show="metadata.error">
                     {{metadata.error}}
                 </div>
 
-                <div ng-show="!status && metadata && !metadata.error && !cropresults">
+                <div ng-show="metadata && !metadata.error && !cropresults">
 
                     <!-- This is the image we're attaching Jcrop to -->
                     <img id="cropbox" ng-src="{{metadata.thumb ? metadata.thumb.name : metadata.original.name}}">
@@ -279,25 +280,47 @@ $I18N = new TsIntuition(array(
         </form>
 
         <!-- ********************************************************************************************************
+        Busy cropping
+        **************************************************************************************************** -->
+
+        <div ng-show="!cropresults && busy">
+
+            <div class="panel panel-default">
+
+                <div class="panel-heading">
+                    <i class="icon-camera-retro"></i>
+                    <a href="{{metadata.description}}">{{title}}</a>
+                </div>
+                <div class="panel-body">
+
+                    <p>
+                        <?php echo $I18N->msg( 'cropping-progress' ); ?>
+                    </p>
+                    <img src="res/spinner.gif" alt="Spinner" style="width:220px; height:20px;">
+
+                </div>
+
+            </div>
+
+        </div>
+
+        <!-- ********************************************************************************************************
              Preview form
              **************************************************************************************************** -->
 
-        <form ng-submit="upload()" ng-show="!status && cropresults && !uploadresults" class="panel panel-default form-inline" role="form">
+        <form ng-submit="upload()" ng-show="cropresults && !uploadresults && !busy" class="panel panel-default form-inline" role="form">
 
             <div class="panel-heading">
-                <i class="icon-info-sign"></i>
-                <a href="{{metadata.description}}">{{title}}</a>.
-                <?php echo $I18N->msg( 'original-dimensions', array('variables' => array(
-                    '{{metadata.original.width}}', '{{metadata.original.height}}'
-                ))); ?>
-                <span ng-show="metadata.thumb">
-                    <?php echo $I18N->msg( 'cropped-dimensions', array('variables' => array(
-                    '{{cropresults.width}}', '{{cropresults.height}}'
-                    ))); ?>
-                </span>
+                <i class="icon-camera-retro"></i>
+                <a href="{{metadata.description}}">{{title}}</a>
+
             </div>
 
             <div class="panel-body">
+
+                <div style="color:red;padding:10px;" ng-show="error">
+                    {{error}}
+                </div>
 
                 <p ng-show="cropresults.lossless">
                     <?php echo $I18N->msg( 'previewform-lossless'); ?>
@@ -354,7 +377,7 @@ $I18N = new TsIntuition(array(
 
             <div class="panel-footer">
 
-                <button type="button" class="btn btn-large" ng-click="cropresults=undefined">
+                <button type="button" class="btn btn-large" ng-click="back()">
                     <?php echo $I18N->msg( 'previewform-back-btn'); ?>
                 </button>
                 <button type="submit" class="btn btn-large btn-primary">
@@ -364,13 +387,38 @@ $I18N = new TsIntuition(array(
         </form>
 
         <!-- ********************************************************************************************************
+        Busy uploading
+        **************************************************************************************************** -->
+
+        <div ng-show="cropresults && !uploadresults && busy">
+
+            <div class="panel panel-default">
+
+                <div class="panel-heading">
+                    <i class="icon-camera-retro"></i>
+                    <a href="{{metadata.description}}">{{title}}</a>
+                </div>
+                <div class="panel-body">
+
+                    <p>
+                        <?php echo $I18N->msg( 'upload-progress' ); ?>
+                    </p>
+                    <img src="res/spinner.gif" alt="Spinner" style="width:220px; height:20px;">
+
+                </div>
+
+            </div>
+
+        </div>
+
+        <!-- ********************************************************************************************************
              Result
              **************************************************************************************************** -->
 
         <div class="panel panel-default" ng-show="uploadresults">
 
             <div class="panel-heading">
-                <i class="icon-info-sign"></i>
+                <i class="icon-camera-retro"></i>
                 <a href="{{metadata.description}}">{{title}}</a>.
             </div>
 

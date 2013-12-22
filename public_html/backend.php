@@ -361,6 +361,10 @@ class CropTool {
         //$this->curl['Content-Disposition'] = $title;
         $response = $this->apiRequest($args, true);
 
+        if (!isset($response->upload)) {
+            return $response;
+        }
+
         if ($response->upload->result == 'Success' && $input->overwrite == 'overwrite') {
             $wikitext2 = preg_replace('/{{crop}}\s*/i', '', $wikitext);
             $wikitext2 = preg_replace('/{{remove border}}\s*/i', '', $wikitext2);

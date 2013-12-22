@@ -78,6 +78,7 @@ controller('AppCtrl', ['$scope', '$http', '$timeout', '$q', 'LoginService', func
     var jcrop_api,
         everPushedSomething = false,
         pixelratio = [1,1];
+
     function getParameterByName(name) {
         name = name.replace(/[\[]/, "\\\[").replace(/[\]]/, "\\\]");
         var regex = new RegExp("[\\?&]" + name + "=([^&#]*)"),
@@ -108,6 +109,11 @@ controller('AppCtrl', ['$scope', '$http', '$timeout', '$q', 'LoginService', func
 
         //$('#cropped_size').html(new_size[0] + 'x' + new_size[1] + ' px, x offset: ' + new_offset[0] + ' px, y offset: ' + new_offset[1] + ' px');
     }
+
+    $scope.back = function() {
+        $scope.cropresults = undefined;
+        $scope.error = '';
+    };
 
     $scope.$on('loginStatusChanged', function(response) {
 
@@ -223,7 +229,9 @@ controller('AppCtrl', ['$scope', '$http', '$timeout', '$q', 'LoginService', func
             return false;
         }
 
-        $scope.status = 'Please wait while cropping...';
+        $scope.error = '';
+        $scope.busy = true;
+        //$scope.status = 'Please wait while cropping...';
 
         $http.post('backend.php', {
             title: $scope.title,
@@ -235,8 +243,7 @@ controller('AppCtrl', ['$scope', '$http', '$timeout', '$q', 'LoginService', func
         }).
         success(function(response) {
 
-            $scope.status = '';
-
+            $scope.busy = false;
             console.log(response);
 
             if (response.error) {
@@ -246,8 +253,8 @@ controller('AppCtrl', ['$scope', '$http', '$timeout', '$q', 'LoginService', func
             }
         }).
         error(function(response, status, headers) {
-            $scope.status = 'An error occured: ' + status + ' ' + response;
-
+            $scope.error = 'An error occured: ' + status + ' ' + response;
+            $scope.busy = false;
         });
 
 
@@ -255,8 +262,9 @@ controller('AppCtrl', ['$scope', '$http', '$timeout', '$q', 'LoginService', func
 
     $scope.upload = function() {
 
-        $scope.status = 'Please wait while saving...';
-        $scope.uploadresults = { status: 'Working' };
+        $scope.busy = true;
+        $scope.error = '';
+        //$scope.uploadresults = { status: 'Working' };
 
         $http.post('backend.php', {
             title: $scope.title,
@@ -268,21 +276,21 @@ controller('AppCtrl', ['$scope', '$http', '$timeout', '$q', 'LoginService', func
 
             console.log(response);
 
+            $scope.busy = false;
             if (response.result === 'Success') {
-                $scope.status = '';
                 $scope.uploadresults = response; //.imageinfo.descriptionurl;
 
             } else {
-                $scope.status = 'Upload failed!';
+                $scope.error = 'Upload failed! ';
                 if (response.error) {
-                    $scope.status += ' ' + response.error.info;
+                    $scope.error += response.error.info;
                 }
             }
 
         }).
         error(function(response, status, headers) {
-            $scope.status = 'An error occured: ' + status + ' ' + response;
-
+            $scope.busy = false;
+            $scope.error = 'An error occured: ' + status + ' ' + response;
         });
 
     };
