@@ -121,7 +121,7 @@ class OAuthConsumer {
         // Fetch the access token if this is the callback from requesting authorization
         if ( isset( $_GET['oauth_verifier'] ) && $_GET['oauth_verifier'] ) {
             $this->fetchAccessToken();
-            header('Location: ./?title=' . urlencode($_SESSION['title']));
+            header('Location: ./?title=' . urlencode(str_replace(' ', '_', $_SESSION['title'])));
             exit;
         }
 

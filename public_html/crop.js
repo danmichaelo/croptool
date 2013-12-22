@@ -199,7 +199,7 @@ controller('AppCtrl', ['$scope', '$http', '$timeout', '$q', 'LoginService', func
     $scope.setTitle = function(filename, updateHistory) {
 
         if (updateHistory !== false) {
-            var newUrl = location.href.split('?', 1)[0] + (filename ? '?title=' + encodeURIComponent(filename) : '');
+            var newUrl = location.href.split('?', 1)[0] + (filename ? '?title=' + encodeURIComponent(filename.replace(/ /g, '_')) : '');
             window.history.pushState(null, null, newUrl);
             everPushedSomething = true;
         }
