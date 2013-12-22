@@ -366,11 +366,16 @@ controller('AppCtrl', ['$scope', '$http', '$timeout', '$q', 'LoginService', func
     $scope.$watch('filename', function() {
 
         if ($scope.filename !== undefined && $scope.exists[$scope.filename] === undefined) {
-            $scope.filename = $scope.filename.replace(new RegExp('^(https://|http://)'), '');
-            $scope.filename = $scope.filename.replace(new RegExp('^commons.wikimedia.org/wiki/'), '');
-            $scope.filename = $scope.filename.replace(new RegExp('^File:'), '');
-            $scope.filename = decodeURI($scope.filename);
-            $scope.filename = $scope.filename.replace('_', ' ', 'g');
+            var fname = $scope.filename
+                .replace(new RegExp('^(https://|http://)'), '')
+                .replace(new RegExp('^commons.wikimedia.org/wiki/'), '');
+            if (fname !== $scope.filename) {
+                // The pasted filename was a url, so we should decode it
+                fname = decodeURIComponent(fname);
+            }
+            fname = fname.replace(/^File:/, '')
+                .replace('_', ' ', 'g');
+            $scope.filename = fname;
             pageExists($scope.filename);
         }
 
