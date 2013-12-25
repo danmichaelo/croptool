@@ -1,7 +1,7 @@
 'use strict';
 
 // Declare app level module which depends on filters, and services
-angular.module('croptool', []).
+angular.module('croptool', ['LocalStorageModule']).
 
 service('LoginService', ['$http', '$rootScope', function($http, $rootScope) {
 
@@ -73,7 +73,7 @@ controller('LoginCtrl', ['$scope', '$http', 'LoginService', function($scope, $ht
 
 }]).
 
-controller('AppCtrl', ['$scope', '$http', '$timeout', '$q', 'LoginService', function($scope, $http, $timeout, $q, LoginService) {
+controller('AppCtrl', ['$scope', '$http', '$timeout', '$q', 'LoginService', 'localStorageService', function($scope, $http, $timeout, $q, LoginService, LocalStorageService) {
 
     var jcrop_api,
         everPushedSomething = false,
@@ -108,6 +108,14 @@ controller('AppCtrl', ['$scope', '$http', '$timeout', '$q', 'LoginService', func
         };
 
         //$('#cropped_size').html(new_size[0] + 'x' + new_size[1] + ' px, x offset: ' + new_offset[0] + ' px, y offset: ' + new_offset[1] + ' px');
+    }
+
+    //LocalStorageService.setPrefix('croptool');
+    $scope.showNotice = !LocalStorageService.get('croptool-notice-1');
+
+    $scope.dismissNotice = function() {
+        LocalStorageService.add('croptool-notice-1','hide');
+        $scope.showNotice = false;
     }
 
     $scope.back = function() {

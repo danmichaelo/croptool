@@ -37,12 +37,27 @@ $I18N = new TsIntuition(array(
   <script src="//netdna.bootstrapcdn.com/bootstrap/3.0.0/js/bootstrap.min.js"></script>
   <script src="js/jquery.Jcrop.js"></script>
   <script src="//ajax.googleapis.com/ajax/libs/angularjs/1.2.2/angular.min.js"></script>
+  <script src="js/angular-local-storage.min.js"></script>
   <script src="crop.js"></script>
 
 </head>
 <body ng-controller="AppCtrl">
 
 <div class="container">
+
+    <!-- ********************************************************************************************************
+        Notice
+        **************************************************************************************************** -->
+
+    <div ng-show="showNotice" style="padding: .3em; background: #eeee88; text-align:center; border-bottom-right-radius: 5px; border-bottom-left-radius: 5px;">
+        <span style="float:right;">
+            <a href ng-click="dismissNotice();">[hide]</a>
+        </span>
+        Note: If you've added CropTool to your
+        <a href="https://commons.wikimedia.org/wiki/Special:MyPage/common.js">common.js</a> before Dec 22th,
+        you should update the code to
+        <a href="//commons.wikimedia.org/wiki/Commons_talk:CropTool#Change_in_userscript">the new version</a>.
+    </div>
 
     <!-- ********************************************************************************************************
         Header
