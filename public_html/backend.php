@@ -9,6 +9,11 @@ require('../BorderLocator.php');
 
 class CropTool {
 
+    /**
+     * Are we in a testing environment?
+     */
+    public $testingEnv = false;
+
     public function __construct()
     {
         $this->api_url ='https://commons.wikimedia.org/w/api.php';
@@ -19,6 +24,10 @@ class CropTool {
         $this->hostname = isset($_SERVER['HTTP_X_FORWARDED_SERVER'])
                 ? $_SERVER['HTTP_X_FORWARDED_SERVER']
                 : $_SERVER['SERVER_NAME'];
+
+        if ($this->hostname !== 'tools.wmflabs.org') {
+            $this->testingEnv = true;
+        }
 
         session_name('croptool');
         session_set_cookie_params(
@@ -40,7 +49,7 @@ class CropTool {
         $this->curl->user_agent = 'CropTool (+tools.wmflabs.org/croptool)';
         $this->curl->follow_redirects = false;
 
-        $this->oauth = new OAuthConsumer;
+        $this->oauth = new OAuthConsumer($this->hostname, $this->testingEnv);
     }
 
     public function checkOauthLogin()

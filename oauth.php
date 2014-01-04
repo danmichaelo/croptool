@@ -57,20 +57,28 @@ class OAuthConsumer {
     /**
      * Username of the authorized user
      */
-    private $username = '';
+    protected $username = '';
 
     /**
      * Object carrying out encryption and decryption
      */
-    private $cipher;
+    protected $cipher;
 
     /**
      * The hostname, most likely 'tools.wmflabs.org'
      */
-    private $hostname;
+    protected $hostname;
 
-    public function __construct()
+    /**
+     * Are we on a test/development server?
+     */
+    protected $testingEnv = false;
+
+    public function __construct($hostname, $testingEnv)
     {
+
+        $this->hostname = $hostname;
+        $this->testingEnv = $testingEnv;
 
         if (isset($_GET['title'])) {
             // Store the title, so we can retrieve if after
@@ -228,7 +236,7 @@ class OAuthConsumer {
             $twoYears,
             dirname( $_SERVER['SCRIPT_NAME'] ),
             $this->hostname,
-            true,  // only secure (https)
+            !$this->testingEnv,  // only secure (https)
             true   // httponly
         )) {
             header( "HTTP/1.1 500 Internal Server Error" );
@@ -242,7 +250,7 @@ class OAuthConsumer {
             $twoYears,
             dirname( $_SERVER['SCRIPT_NAME'] ),
             $this->hostname,
-            true,  // only secure (https)
+            !$this->testingEnv,  // only secure (https) unless we are on a testing server
             true   // httponly
         )) {
             header( "HTTP/1.1 500 Internal Server Error" );
@@ -338,8 +346,8 @@ class OAuthConsumer {
 
     public function doLogout()
     {
-        setcookie('mwKey', '', time() - 3600, dirname( $_SERVER['SCRIPT_NAME'] ), $this->hostname, true, true);
-        setcookie('mwSecret', '', time() - 3600, dirname( $_SERVER['SCRIPT_NAME'] ), $this->hostname, true, true);
+        setcookie('mwKey', '', time() - 3600, dirname( $_SERVER['SCRIPT_NAME'] ), $this->hostname, !$this->testingEnv, true);
+        setcookie('mwSecret', '', time() - 3600, dirname( $_SERVER['SCRIPT_NAME'] ), $this->hostname, !$this->testingEnv, true);
         $this->authorized = false;
         $this->gTokenKey = '';
         $this->gTokenSecret = '';
