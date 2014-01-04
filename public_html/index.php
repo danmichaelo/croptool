@@ -455,7 +455,7 @@ $I18N = new TsIntuition(array(
                     ))); ?>
                 </p>
 
-                <p ng-show="uploadresults.error">
+                <p ng-show="uploadresults.error" style="background: url(res/x_mark-24px.png) left no-repeat; padding: 5px 5px 5px 28px;">
                     <?php echo $I18N->msg( 'results-failure', array('variables' => array(
                         '{{uploadresults.error.info}}'
                     ))); ?>
