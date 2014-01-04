@@ -443,7 +443,7 @@ $I18N = new TsIntuition(array(
                     {{status}}
                 </div>
 
-                <p ng-show="uploadresults.result == 'Success'">
+                <p ng-show="uploadresults.result == 'Success'" style="background: url(res/yes_check-24px.png) left no-repeat; padding: 5px 5px 5px 28px;">
                     <?php echo $I18N->msg( 'results-success'); ?>
                 </p>
                 <p ng-show="uploadresults.result == 'Success'">
