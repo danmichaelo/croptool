@@ -7,6 +7,9 @@ require('../vendor/autoload.php');
 require('../oauth.php');
 require('../BorderLocator.php');
 
+use PHPExiftool\Exiftool,
+    Monolog\Logger;
+
 class CropTool {
 
     /**
@@ -178,7 +181,12 @@ class CropTool {
         );
 
         if ($cm === 'lossless') {
-            $cmd = $this->pathToJpegTran . ' -copy all -crop ' . escapeshellarg($dim) . ' ' . escapeshellarg($src_path) .' > ' . escapeshellarg($dest_path);
+            $cmd = sprintf('%s -copy all -crop %s %s > %s',
+                $this->pathToJpegTran,
+                escapeshellarg($dim),
+                escapeshellarg($src_path),
+                escapeshellarg($dest_path)
+            );
             $cmd_res = exec($cmd, $output, $return_var);
             $res['lossless'] = true;
 
@@ -205,6 +213,17 @@ class CropTool {
         } else {
             die('unknown crop method');
         }
+
+        # Copy metadata using exiftool
+        $logger = new Logger('exiftool');
+        $exiftool = new Exiftool($logger);
+
+        // Reference: http://owl.phy.queensu.ca/~phil/exiftool/exiftool_pod.html
+        $exiftool->executeCommand(sprintf('-overwrite_original -quiet -TagsFromFile %s -all:all %s',
+          escapeshellarg($src_path),
+          escapeshellarg($dest_path)
+        ));
+        // TODO: Catch exception
 
         $_SESSION['cropmethod'] = $cm;
 

@@ -5,6 +5,7 @@
         "shuber/curl": "master-dev",
         "danmichaelo/coma": "master-dev",
         "phpstats/phpstats": "master-dev",
+        "phpexiftool/phpexiftool": "master-dev",
         "lib-curl": "*"
 
     },
