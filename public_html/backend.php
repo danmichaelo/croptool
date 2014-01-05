@@ -2,6 +2,7 @@
 
 error_reporting(E_ALL);
 ini_set('display_errors', '1');
+ini_set('memory_limit', '512M');
 
 require('../vendor/autoload.php');
 require('../oauth.php');
