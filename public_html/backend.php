@@ -317,6 +317,13 @@ class CropTool {
         }
     }
 
+    public function removeBorderTemplateAndCat($text)
+    {
+        $text = preg_replace('/{{crop}}\s*/i', '', $text);
+        $text = preg_replace('/{{remove border}}\s*/i', '', $text);
+        $text = preg_replace('/\[\[category:images(?: |_)with(?: |_)borders\]\]\s*/i', '', $text);
+    }
+
     public function upload($input) {
 
         if (!$this->isAuthorized()) {
@@ -395,8 +402,8 @@ class CropTool {
         }
 
         if ($response->upload->result == 'Success' && $input->overwrite == 'overwrite') {
-            $wikitext2 = preg_replace('/{{crop}}\s*/i', '', $wikitext);
-            $wikitext2 = preg_replace('/{{remove border}}\s*/i', '', $wikitext2);
+
+            $wikitext2 = $this->removeBorderTemplateAndCat($wikitext);
 
             if ($wikitext != $wikitext2) {
 
