@@ -245,7 +245,7 @@ class CropTool {
             }
         } else {
             $s = getimagesize($dest_path);
-            $res['name'] = $dest_name;
+            $res['name'] = $dest_name . '?ts=' . time();
             $res['width'] = $s[0];
             $res['height'] = $s[1];
         }
