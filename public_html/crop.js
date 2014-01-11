@@ -11,10 +11,8 @@ service('LoginService', ['$http', '$rootScope', function($http, $rootScope) {
 
     this.checkLogin = function(response) {
         console.log(response);
-        if (response.oauth.user) {
-            that.user = { name: response.oauth.user, method: 'OAuth' };
-        } else if (response.tusc.user) {
-            that.user = { name: response.tusc.user, method: 'TUSC' };
+        if (response.user) {
+            that.user = { name: response.user };
         } else {
             that.user = undefined;
         }
@@ -63,8 +61,8 @@ controller('LoginCtrl', ['$scope', '$http', 'LoginService', function($scope, $ht
         console.log('Login status changed: ' + (LoginService.user ? 'logged in' : 'not logged in'));
         $scope.user = LoginService.user;
         $scope.ready = true;
-        if (LoginService.loginResponse.oauth.error) {
-            $scope.oautherror = LoginService.loginResponse.oauth.error.code + ' : ' + LoginService.loginResponse.oauth.error.info;
+        if (LoginService.loginResponse.error) {
+            $scope.oautherror = LoginService.loginResponse.error.code + ' : ' + LoginService.loginResponse.error.info;
         }
 
     });
@@ -221,6 +219,8 @@ controller('AppCtrl', ['$scope', '$http', '$timeout', '$q', 'LoginService', 'loc
             $scope.title = '';
             //$scope.filename = '';
             $scope.newFilename = '';
+            $scope.cropresults = null;
+            $scope.uploadresults = null;
             $scope.metadata = null;
             return;
         }

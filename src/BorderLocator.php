@@ -1,8 +1,6 @@
 <?php
 
-require('vendor/autoload.php');
-
-require('vendor/phpstats/phpstats/lib/Stats.php');
+require('../vendor/phpstats/phpstats/lib/Stats.php');
 
 use PHPStats\Stats;
 use Danmichaelo\Coma\ColorDistance,

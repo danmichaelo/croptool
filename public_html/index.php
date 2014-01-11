@@ -45,7 +45,7 @@ $I18N = new TsIntuition(array(
 
 <div class="container">
 
-    <?php echo $ct->testingEnv ? '<p style="position:absolute; right:0; top: 0; font-size: 80%; background: yellow;"><strong>NOTE:</strong> We are in a testing environment</p>' : ''; ?>
+    <?php echo $testingEnv ? '<p style="position:absolute; right:0; top: 0; font-size: 80%; background: yellow;"><strong>NOTE:</strong> We are in a testing environment</p>' : ''; ?>
 
     <!-- ********************************************************************************************************
         Notice

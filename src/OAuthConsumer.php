@@ -1,19 +1,8 @@
 <?php
 
-require_once('Cryptastic.php');
-
 // See also: http://oauth.googlecode.com/svn/code/php/OAuth.php
 
 class OAuthConsumer {
-
-    /**
-     * A file containing the following keys:
-     * - agent: The HTTP User-Agent to use
-     * - consumerKey: The "consumer token" given to you when registering your app
-     * - consumerSecret: The "secret token" given to you when registering your app
-     * - localPassphrase: The (base64 encoded) key used for encrypting cookie content
-     */
-    protected $inifile = '../oauth.ini';
 
     /**
      * The Special:OAuth URL.
@@ -37,7 +26,7 @@ class OAuthConsumer {
      */
     protected $mytalkUrl = 'https://commons.wikimedia.org/wiki/Special:MyTalk#Hello.2C_world';
 
-    private $gUserAgent = '';
+    private $gUserAgent = 'CropTool/1.1 (+tools.wmflabs.org/croptool)';
     private $gConsumerKey = '';
     private $gConsumerSecret = '';
     private $gTokenKey = '';
@@ -74,40 +63,16 @@ class OAuthConsumer {
      */
     protected $testingEnv = false;
 
-    public function __construct($hostname, $testingEnv)
+    public function __construct($hostname = 'localhost', $testingEnv = false, $consumerKey = '', $consumerSecret = '', $localPassphrase = '')
     {
 
         $this->hostname = $hostname;
         $this->testingEnv = $testingEnv;
+        $this->gConsumerKey = $consumerKey;
+        $this->gConsumerSecret = $consumerSecret;
+        $this->cookieKey = base64_decode($localPassphrase);
 
-        if (isset($_GET['title'])) {
-            // Store the title, so we can retrieve if after
-            // having having authenticated at the OAuth endpoint
-            $_SESSION['title'] = $_GET['title'];
-        }
-
-        // Read the ini file
-        $ini = parse_ini_file( $this->inifile );
-
-        if ( $ini === false ) {
-            header( "HTTP/1.1 500 Internal Server Error" );
-            echo 'The ini file could not be read';
-            exit(0);
-        }
-        if ( !isset( $ini['agent'] ) ||
-            !isset( $ini['consumerKey'] ) ||
-            !isset( $ini['consumerSecret'] )
-        ) {
-            header( "HTTP/1.1 500 Internal Server Error" );
-            echo 'Required configuration directives not found in ini file';
-            exit(0);
-        }
-        $this->gUserAgent = $ini['agent'];
-        $this->gConsumerKey = $ini['consumerKey'];
-        $this->gConsumerSecret = $ini['consumerSecret'];
-        $this->cookieKey = base64_decode($ini['localPassphrase']);
-
-        $this->cipher = new Cryptastic();
+        $this->cipher = new Cryptastic;
 
         // Load the user token (request or access) from the session
         $this->gTokenKey = '';
@@ -146,8 +111,19 @@ class OAuthConsumer {
 
         }
 
-        $this->authorized = $this->checkAuthorization();
+    }
 
+    public function authorized()
+    {
+        if (!isset($this->_authorized)) {
+            $this->_authorized = $this->checkAuthorization();
+        }
+        return $this->_authorized;
+    }
+
+    public function getUserAgent()
+    {
+        return $this->gUserAgent;
     }
 
     private function checkAuthorization()
@@ -488,11 +464,6 @@ class OAuthConsumer {
         //print_r($data);
         //die;
         return json_decode( $data );
-    }
-
-    public function isAuthorized()
-    {
-        return $this->authorized;
     }
 
     public function getUsername()
