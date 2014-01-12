@@ -52,10 +52,11 @@ if (!isset( $config['consumerKey'] ) || !isset( $config['consumerSecret'] )) {
     exit(0);
 }
 
-$cropper = new Cropper($config['jpegtranPath']);
+Image::$pathToJpegTran = $config['jpegtranPath'];
+
 $oauth = new OAuthConsumer($hostname, $basepath, $testingEnv, $config['consumerKey'], $config['consumerSecret'], $config['localPassphrase']);
 $apiClient = new MwApiClient($oauth);
-$ct = new CropTool($apiClient, $cropper);
+$ct = new CropTool($apiClient);
 
 
 if ($_SERVER['REQUEST_METHOD'] == 'POST')

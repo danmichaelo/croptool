@@ -8,12 +8,11 @@ class CropTool {
 
     protected $publicPath;
 
-    public function __construct(MwApiClient $apiClient = null, Cropper $cropper = null, Curl $curl = null)
+    public function __construct(MwApiClient $apiClient = null, Curl $curl = null)
     {
         $this->publicPath = dirname(dirname(__FILE__)) . '/public_html/';
 
         $this->api = $apiClient ?: new MwApiClient;
-        $this->cropper = $cropper ?: new Cropper;
         $this->curl = $curl ?: new Curl;
         $this->curl->cookie_file = $this->api->cookie_file;
         $this->curl->user_agent = $this->api->user_agent;
@@ -54,8 +53,8 @@ class CropTool {
 
         $sha1 = $response->imageinfo[0]->sha1;
         $ext = $this->getFileExt($response->imageinfo[0]->mime);
-        $src_path = $this->publicPath . '/files/' . $sha1 . $ext;
-        $dest_path = $this->publicPath . '/files/' . $sha1 . '_cropped' . $ext;
+        $srcPath = $this->publicPath . '/files/' . $sha1 . $ext;
+        $destPath = $this->publicPath . '/files/' . $sha1 . '_cropped' . $ext;
 
         $new_width = intval($input->w);
         $new_height = intval($input->h);
@@ -64,7 +63,20 @@ class CropTool {
 
         $cm = $input->cropmethod;
 
-        $res = $this->cropper->crop($src_path, $dest_path, $cm, $new_x, $new_y, $new_width, $new_height);
+        $image = new Image;
+        $image->load($srcPath);
+        if ($cm == 'precise') {
+            $res = $image->preciseCrop($destPath, $new_x, $new_y, $new_width, $new_height);
+        } else if ($cm == 'lossless') {
+            $res = $image->losslessCrop($destPath, $new_x, $new_y, $new_width, $new_height);
+        } else {
+            die('Unknown crop method');
+        }
+        chmod($destPath, 0664);
+        if (!isset($res['error'])) {
+            // TODO: MAKE THUMB
+        }
+
         $_SESSION['cropmethod'] = $cm;
         return $res;
     }
@@ -227,7 +239,7 @@ class CropTool {
         $orig_name = 'files/' . $sha1 . $ext;
         $abs_path = $this->publicPath . '/' . $orig_name;
 
-        $r = array(
+        $res = array(
             'original' => array(
                 'cached' => true,
                 'name' => $orig_name,
@@ -239,45 +251,35 @@ class CropTool {
         );
 
         if (!file_exists($abs_path)) {
-            $r['original']['cached'] = false;
+            $res['original']['cached'] = false;
             $data = $this->curl->get($image_url);
             file_put_contents($abs_path, $data);
             chmod($abs_path, 0664);
         }
 
-        // 3. Get thumb
+        // 3. Make thumb
 
-        if ($image_size[0] > 800) {
+        $thumbName = 'files/' . $sha1 . '_thumb' . $ext;
+        $thumbPath = $this->publicPath . '/' . $thumbName;
 
-            $args = array(
-              'f' => $title,
-              'w' => 800
-            );
-            $thumb_url = 'https://commons.wikimedia.org/w/thumb.php?' . http_build_query($args);
-
-            $thumb_name = 'files/' . $sha1 . '_thumb' . $ext;
-            $abs_path = $this->publicPath . '/' . $thumb_name;
-
-            $r['thumb'] = array(
-                'cached' => true,
-                'name' => $thumb_name,
-                'url' => $thumb_url
-            );
-
-            if (!file_exists($abs_path)) {
-                $r['thumb']['cached'] = false;
-                $data = $this->curl->get($thumb_url);
-                file_put_contents($abs_path, $data);
-                chmod($abs_path, 0664);
-
-            }
-
-            $s = getimagesize($abs_path);
-            $r['thumb']['width'] = $s[0];
-            $r['thumb']['height'] = $s[1];
+        $image = new Image();
+        if (!$image->load($abs_path)) {
+            $res['error'] = $image->error;
+            return $res;
         }
+        $thumbDim = $image->thumb($thumbPath, 800, 800);
+        chmod($thumbPath, 0664);
 
-        return $r;
+        $res['orientation'] = $image->orientation;
+
+        $res['thumb'] = array(
+            'cached' => true,
+            'name' => $thumbName,
+            'width' => $thumbDim[0],
+            'height' => $thumbDim[1]
+        );
+
+        return $res;
     }
 
 }
