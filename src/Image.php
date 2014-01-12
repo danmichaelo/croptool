@@ -30,8 +30,24 @@ class Image
 
         $xy = getimagesize($path);
 
-        $this->width = $xy[0];
-        $this->height = $xy[1];
+        switch($this->orientation)
+        {
+            case 1:     // No rotation
+            case 3:     // 180 deg
+                $this->width = $xy[0];
+                $this->height = $xy[1];
+                break;
+
+            case 6:     // 90 deg CW
+            case 8:     // 90 deg CCW
+                $this->width = $xy[1];
+                $this->height = $xy[0];
+                break;
+
+            default:
+                $this->error = 'Unsupported EXIF orientation';
+                return false;
+        }
 
         $this->aspectRatio = $this->width / $this->height;
 
@@ -41,14 +57,57 @@ class Image
     public function getCropCoordinates($x, $y, $width, $height)
     {
 
-        // TODO: check for orientation
-        return array(
-            'x' => $x,
-            'y' => $y,
-            'width' => $width,
-            'height' => $height
-        );
+        // Remember:
+        // - Origin is in the upper left corner
+        // - Positive x is rightwards
+        // - Positive y is downwards
 
+        switch($this->orientation)
+        {
+            case 1:
+                // No rotation
+                $rect = array(
+                    'x' => $x,
+                    'y' => $y,
+                    'width' => $width,
+                    'height' => $height
+                );
+                break;
+
+            case 3:
+                // Image rotated 180 deg
+                $rect = array(
+                    'x' => $this->width - $x - $width,
+                    'y' => $this->height - $y - $height,
+                    'width' => $width,
+                    'height' => $height
+                );
+                break;
+
+            case 6:
+                // Image rotated 90 deg CCW
+                $rect = array(
+                    'x' => $y,
+                    'y' => $this->width - $x - $width,
+                    'width' => $height,
+                    'height' => $width
+                );
+                break;
+
+            case 8:
+                // Image rotated 90 deg CW
+                $rect = array(
+                    'x' => $this->height - $y - $height,
+                    'y' => $x,
+                    'width' => $height,
+                    'height' => $width
+                );
+                break;
+
+            default:
+                die('Unsupported EXIF orientation');
+        }
+        return $rect;
     }
 
     public function preciseCrop($destPath, $x, $y, $width, $height)
@@ -150,6 +209,28 @@ class Image
     {
         // Currently we only support jpeg, so no checking needed
         $srcImg = imagecreatefromjpeg($this->srcPath);
+
+        switch($this->orientation)
+        {
+            case 1: // No rotation
+                break;
+
+            case 3: // 180 rotate left
+                $srcImg = imagerotate($srcImg, 180, 0);
+                break;
+
+            case 6: // 90 rotate right
+                $srcImg = imagerotate($srcImg, -90, 0);
+                break;
+
+            case 8:    // 90 rotate left
+                $srcImg = imagerotate($srcImg, 90, 0);
+                break;
+
+            default:
+                // we should never get here, this is checked in load() as well
+                die('Unsupported EXIF orientation');
+        }
 
         // Assume width is the limiting factor
         $w = ($this->width > $maxWidth) ? $maxWidth : $this->width;

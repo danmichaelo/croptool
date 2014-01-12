@@ -339,7 +339,7 @@ $I18N = new TsIntuition(array(
                     {{error}}
                 </div>
 
-                <p ng-show="cropresults.lossless">
+                <p ng-show="cropresults.method=='lossless'">
                     <?php echo $I18N->msg( 'previewform-lossless'); ?>
                     <span ng-show="cropresults.width!=crop_dim.w || cropresults.height!=crop_dim.h">
                         <?php echo $I18N->msg( 'previewform-lossless-explanation', array('variables' => array(
@@ -350,11 +350,11 @@ $I18N = new TsIntuition(array(
                     </span>
                 </p>
 
-                <p ng-show="!cropresults.lossless">
+                <p ng-show="cropresults.method=='precise'">
                     <?php echo $I18N->msg( 'previewform-precise'); ?>
                 </p>
 
-                <img ng-src="{{cropresults.name}}" style="max-width:800px;" />
+                <img ng-src="{{cropresults.thumb.name}}" style="max-width:800px;" />
 
                 <div style="padding: 1em 0;">
 

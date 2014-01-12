@@ -73,9 +73,24 @@ class CropTool {
             die('Unknown crop method');
         }
         chmod($destPath, 0664);
-        if (!isset($res['error'])) {
-            // TODO: MAKE THUMB
+        if (isset($res['error'])) {
+            return $res;
         }
+
+        // Make thumb
+        $thumbName = 'files/' . $sha1 . '_cropped_thumb' . $ext;
+        $thumbPath = $this->publicPath . '/' . $thumbName;
+        $image = new Image;
+        $image->load($destPath);
+        $thumbDim = $image->thumb($thumbPath, 800, 800);
+        chmod($thumbPath, 0664);
+
+        $res['thumb'] = array(
+            'cached' => true,
+            'name' => $thumbName . '?ts=' . time(),
+            'width' => $thumbDim[0],
+            'height' => $thumbDim[1]
+        );
 
         $_SESSION['cropmethod'] = $cm;
         return $res;
