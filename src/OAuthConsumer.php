@@ -334,7 +334,15 @@ class OAuthConsumer {
     {
         setcookie('mwKey', '', time() - 3600, $this->basepath, $this->hostname, !$this->testingEnv, true);
         setcookie('mwSecret', '', time() - 3600, $this->basepath, $this->hostname, !$this->testingEnv, true);
-        $this->authorized = false;
+
+        // The domain is sometimes prepended by a dot (http://stackoverflow.com/q/2285010):
+        // To make sure the cookies are deleted:
+        setcookie('mwKey', '', time() - 3600, $this->basepath, '.' . $this->hostname, !$this->testingEnv, true);
+        setcookie('mwSecret', '', time() - 3600, $this->basepath, '.' . $this->hostname, !$this->testingEnv, true);
+        setcookie('mwKey', '', time() - 3600, $this->basepath, '', !$this->testingEnv, true);
+        setcookie('mwSecret', '', time() - 3600, $this->basepath, '', !$this->testingEnv, true);
+
+        $this->_authorized = false;
         $this->gTokenKey = '';
         $this->gTokenSecret = '';
         $this->username = '';
