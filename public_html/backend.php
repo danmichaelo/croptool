@@ -53,7 +53,7 @@ if (!isset( $config['consumerKey'] ) || !isset( $config['consumerSecret'] )) {
 }
 
 $cropper = new Cropper($config['jpegtranPath']);
-$oauth = new OAuthConsumer($hostname, $testingEnv, $config['consumerKey'], $config['consumerSecret'], $config['localPassphrase']);
+$oauth = new OAuthConsumer($hostname, $basepath, $testingEnv, $config['consumerKey'], $config['consumerSecret'], $config['localPassphrase']);
 $apiClient = new MwApiClient($oauth);
 $ct = new CropTool($apiClient, $cropper);
 

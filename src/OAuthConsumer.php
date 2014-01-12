@@ -59,14 +59,20 @@ class OAuthConsumer {
     protected $hostname;
 
     /**
+     * The base path
+     */
+    protected $basepath;
+
+    /**
      * Are we on a test/development server?
      */
     protected $testingEnv = false;
 
-    public function __construct($hostname = 'localhost', $testingEnv = false, $consumerKey = '', $consumerSecret = '', $localPassphrase = '')
+    public function __construct($hostname = 'localhost', $basepath = '/', $testingEnv = false, $consumerKey = '', $consumerSecret = '', $localPassphrase = '')
     {
 
         $this->hostname = $hostname;
+        $this->basepath = $basepath;
         $this->testingEnv = $testingEnv;
         $this->gConsumerKey = $consumerKey;
         $this->gConsumerSecret = $consumerSecret;
@@ -214,7 +220,7 @@ class OAuthConsumer {
         if (!setcookie('mwKey',
             $this->cipher->encrypt($this->gTokenKey, $this->cookieKey, true),
             $twoYears,
-            dirname( $_SERVER['SCRIPT_NAME'] ),
+            $this->basepath,
             $this->hostname,
             !$this->testingEnv,  // only secure (https)
             true   // httponly
@@ -228,7 +234,7 @@ class OAuthConsumer {
         if (!setcookie('mwSecret',
             $this->cipher->encrypt($this->gTokenSecret, $this->cookieKey, true), // ~ 150 bytes
             $twoYears,
-            dirname( $_SERVER['SCRIPT_NAME'] ),
+            $this->basepath,
             $this->hostname,
             !$this->testingEnv,  // only secure (https) unless we are on a testing server
             true   // httponly
@@ -326,8 +332,8 @@ class OAuthConsumer {
 
     public function doLogout()
     {
-        setcookie('mwKey', '', time() - 3600, dirname( $_SERVER['SCRIPT_NAME'] ), $this->hostname, !$this->testingEnv, true);
-        setcookie('mwSecret', '', time() - 3600, dirname( $_SERVER['SCRIPT_NAME'] ), $this->hostname, !$this->testingEnv, true);
+        setcookie('mwKey', '', time() - 3600, $this->basepath, $this->hostname, !$this->testingEnv, true);
+        setcookie('mwSecret', '', time() - 3600, $this->basepath, $this->hostname, !$this->testingEnv, true);
         $this->authorized = false;
         $this->gTokenKey = '';
         $this->gTokenSecret = '';
