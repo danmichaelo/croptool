@@ -7,10 +7,10 @@ Tool for cropping images at Wikimedia Commons. The current official installation
 
 CropTool uses [Jcrop](//github.com/tapmodo/Jcrop), [AngularJS](//angularjs.org/) and Sean Huber's [Curl wrapper for php](//github.com/shuber/curl).
 
-Setup:
+Checklist:
 
 	1. `composer install`
-	2. `chown www-data:www-data data`
-	2. `chown www-data:www-data public_html/files`
-	3. `cp config.dist.yml config.yml` and edit
+	2. `cp config.dist.ini config.ini` and edit
+    3. Check that the server can write to `data` and `public_html/files`.
+    4. `vendor/bin/phpunit`
 

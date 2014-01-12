@@ -37,7 +37,7 @@ if (isset($_GET['title'])) {
  * - localPassphrase: The (base64 encoded) key used for encrypting cookie content
  * - jpegtranPath: Path to jpegtran
  */
-$configFile = '../oauth.ini';
+$configFile = '../config.ini';
 $config = parse_ini_file($configFile);
 
 if ( $config === false ) {
