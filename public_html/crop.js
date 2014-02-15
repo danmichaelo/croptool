@@ -138,6 +138,7 @@ controller('AppCtrl', ['$scope', '$http', '$timeout', '$q', 'LoginService', 'loc
         }
 
         $scope.busy = true;
+        $scope.crop_dim = undefined;
 
         $http.get('backend.php?lookup=1&title=' + encodeURIComponent(title)).
         success(function(response) {
