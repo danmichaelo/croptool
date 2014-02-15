@@ -174,22 +174,12 @@ $I18N = new TsIntuition(array(
 
     <div ng-show="user && !title && busy">
 
-        <div class="panel panel-default">
+        <h2>File:{{filename}}</h2> 
 
-            <div class="panel-heading">
-                <i class="icon-camera-retro"></i>
-                {{filename}}
-            </div>
-            <div class="panel-body">
-
-                <p>
-                    <?php echo $I18N->msg( 'fetching-progress' ); ?>
-                </p>
-                <img src="res/spinner.gif" alt="Spinner" style="width:220px; height:20px;">
-
-            </div>
-
-        </div>
+        <p>
+            <?php echo $I18N->msg( 'fetching-progress' ); ?>
+        </p>
+        <img src="res/spinner.gif" alt="Spinner" style="width:220px; height:20px;">
 
     </div>
 
@@ -200,25 +190,52 @@ $I18N = new TsIntuition(array(
     <div ng-show="user && title">
 
         <!-- ********************************************************************************************************
-             Crop form
+             Header
              **************************************************************************************************** -->
-
-        <form ng-submit="preview()" ng-show="!cropresults && !busy" class="panel panel-default form-inline" role="form">
-
-            <div class="panel-heading">
-                <i class="icon-camera-retro"></i>
-                <a href="{{metadata.description}}">{{title}}</a>.
+        <div>
+            <h2>File:{{title}}</h2> 
+            <p>
                 <?php echo $I18N->msg( 'original-dimensions', array('variables' => array(
                     '{{metadata.original.width}}', '{{metadata.original.height}}'
                 ))); ?>
+
                 <span ng-show="metadata.thumb">
                     <?php echo $I18N->msg( 'thumb-dimensions', array('variables' => array(
                     '{{metadata.thumb.width}}', '{{metadata.thumb.height}}'
                     ))); ?>
                 </span>
-            </div>
+                <a href="{{metadata.description}}">
+                    View at Commons
+                </a>
+            </p>
+        </div>
 
-            <div class="panel-body">
+
+        <!-- ********************************************************************************************************
+             Crop form
+             **************************************************************************************************** -->
+        <div class="row" ng-show="metadata && !metadata.error && !cropresults" style="padding-bottom:1.5em;">
+
+
+            <!-- ********************************************************************************************************
+                 Left column
+                 **************************************************************************************************** -->
+            <div class="col-lg-9">
+
+                <div class="well">
+
+                    <!-- This is the image we're attaching Jcrop to -->
+                    <img id="cropbox" ng-src="{{metadata.thumb ? metadata.thumb.name : metadata.original.name}}">
+
+                </div>
+
+              </div>
+
+
+            <!-- ********************************************************************************************************
+                 Right column
+                 **************************************************************************************************** -->
+            <div class="col-lg-3">
 
                 <div style="color:red;padding:10px;" ng-show="error">
                     {{error}}
@@ -228,15 +245,12 @@ $I18N = new TsIntuition(array(
                     {{metadata.error}}
                 </div>
 
-                <div ng-show="metadata && !metadata.error && !cropresults">
+                <form ng-submit="preview()" role="form">
 
-                    <!-- This is the image we're attaching Jcrop to -->
-                    <img id="cropbox" ng-src="{{metadata.thumb ? metadata.thumb.name : metadata.original.name}}">
-
-        			<input type="hidden" id="x" name="x" />
-        			<input type="hidden" id="y" name="y" />
-        			<input type="hidden" id="w" name="w" />
-        			<input type="hidden" id="h" name="h" />
+                    <input type="hidden" id="x" name="x" />
+                    <input type="hidden" id="y" name="y" />
+                    <input type="hidden" id="w" name="w" />
+                    <input type="hidden" id="h" name="h" />
 
                     <input type="hidden" name="title" ng-model="title" />
 
@@ -259,56 +273,25 @@ $I18N = new TsIntuition(array(
                         </span>
                     </p>
 
-                </div>
-            </div>
-            <div class="panel-footer">
+                    <?php echo $I18N->msg( 'cropform-method' ); ?>
 
-                <?php echo $I18N->msg( 'cropform-method' ); ?>
+                    <div class="form-group">
+                        <label class="radio-inline">
+                            <input type="radio" name="cropmethod" value="precise" ng-model="cropmethod">
+                            <?php echo $I18N->msg( 'cropform-method-precise' ); ?>
+                        </label>
+                        <label class="radio-inline">
+                            <input type="radio" name="cropmethod" value="lossless" ng-model="cropmethod">
+                            <?php echo $I18N->msg( 'cropform-method-lossless' ); ?>
+                        </label>
+                    </div>
 
-                <div class="form-group">
-                    <label class="radio-inline">
-                        <input type="radio" name="cropmethod" value="precise" ng-model="cropmethod">
-                        <?php echo $I18N->msg( 'cropform-method-precise' ); ?>
-                    </label>
-                    <label class="radio-inline">
-                        <input type="radio" name="cropmethod" value="lossless" ng-model="cropmethod">
-                        <?php echo $I18N->msg( 'cropform-method-lossless' ); ?>
-                    </label>
-                </div>
+                    <button type="submit" class="btn btn-large btn-primary" ng-disabled="!crop_dim || busy">
+                        <?php echo $I18N->msg( 'cropform-preview-btn' ); ?>
+                    </button>
+                </form>
 
-                <button type="submit" class="btn btn-large btn-primary" ng-disabled="!crop_dim">
-                    <?php echo $I18N->msg( 'cropform-preview-btn' ); ?>
-                </button>
-
-                <p>
-                    <i class="icon-question-sign"></i> <?php echo $I18N->msg( 'cropform-help' ); ?>:
-                </p>
-
-                <ul>
-                    <li>
-                        <?php echo $I18N->msg( 'cropform-method-precise-help' ); ?>
-                    </li>
-                    <li>
-                        <?php echo $I18N->msg( 'cropform-method-lossless-help' ); ?>
-                    </li>
-                </ul>
-
-            </div>
-        </form>
-
-        <!-- ********************************************************************************************************
-        Busy cropping
-        **************************************************************************************************** -->
-
-        <div ng-show="!cropresults && busy">
-
-            <div class="panel panel-default">
-
-                <div class="panel-heading">
-                    <i class="icon-camera-retro"></i>
-                    <a href="{{metadata.description}}">{{title}}</a>
-                </div>
-                <div class="panel-body">
+                <div ng-show="busy">
 
                     <p>
                         <?php echo $I18N->msg( 'cropping-progress' ); ?>
@@ -317,27 +300,50 @@ $I18N = new TsIntuition(array(
 
                 </div>
 
-            </div>
+                <div ng-show="!busy">
 
+                    <p>
+                        <i class="icon-question-sign"></i> <?php echo $I18N->msg( 'cropform-help' ); ?>:
+                    </p>
+
+                    <ul>
+                        <li>
+                            <?php echo $I18N->msg( 'cropform-method-precise-help' ); ?>
+                        </li>
+                        <li>
+                            <?php echo $I18N->msg( 'cropform-method-lossless-help' ); ?>
+                        </li>
+                    </ul>
+                </div>
+
+            </div>
         </div>
+
 
         <!-- ********************************************************************************************************
              Preview form
              **************************************************************************************************** -->
+        <div class="row" ng-show="cropresults && !uploadresults" style="padding-bottom:1.5em;">
 
-        <form ng-submit="upload()" ng-show="cropresults && !uploadresults && !busy" class="panel panel-default form-inline" role="form">
 
-            <div class="panel-heading">
-                <i class="icon-camera-retro"></i>
-                <a href="{{metadata.description}}">{{title}}</a>
+            <!-- ********************************************************************************************************
+                 Left column
+                 **************************************************************************************************** -->
+            <div class="col-md-9">
+
+                <div class="well">
+
+                    <img ng-src="{{cropresults.thumb.name}}" class="img-responsive" />
+
+                </div>
 
             </div>
 
-            <div class="panel-body">
 
-                <div style="color:red;padding:10px;" ng-show="error">
-                    {{error}}
-                </div>
+            <!-- ********************************************************************************************************
+                 Right column
+                 **************************************************************************************************** -->
+            <div class="col-md-3">
 
                 <p ng-show="cropresults.method=='lossless'">
                     <?php echo $I18N->msg( 'previewform-lossless'); ?>
@@ -354,27 +360,31 @@ $I18N = new TsIntuition(array(
                     <?php echo $I18N->msg( 'previewform-precise'); ?>
                 </p>
 
-                <img ng-src="{{cropresults.thumb.name}}" style="max-width:800px;" />
+                <div style="color:red;padding:10px;" ng-show="error">
+                    {{error}}
+                </div>
 
-                <div style="padding: 1em 0;">
+                <form ng-submit="upload()" role="form">
 
-                <p>
-                    <i class="icon-warning-sign"></i>
-                    <?php echo $I18N->msg( 'previewform-overwrite-policy', array('variables' => array(
-                        'https://commons.wikimedia.org/wiki/Commons:Overwriting existing files'
-                    ))); ?>
-                </p>
-                <p ng-non-bindable>
-                    <i class="icon-info-sign"></i>
-                    <?php echo $I18N->msg( 'previewform-template-removal-notice'); ?>
-                </p>
-                    <div class="form-group">
-                        <label class="radio-inline">
-                            <input type="radio" name="overwrite" ng-model="overwrite" value="overwrite">
+                    <p>
+                        <i class="icon-warning-sign"></i>
+                        <?php echo $I18N->msg( 'previewform-overwrite-policy', array('variables' => array(
+                            'https://commons.wikimedia.org/wiki/Commons:Overwriting existing files'
+                        ))); ?>
+                    </p>
+                    <p ng-non-bindable>
+                        <i class="icon-info-sign"></i>
+                        <?php echo $I18N->msg( 'previewform-template-removal-notice'); ?>
+                    </p>
+                    <div class="radio">
+                        <label>
+                            <input type="radio" name="overwrite" ng-model="overwrite" value="overwrite" ng-disabled="busy">
                             <?php echo $I18N->msg( 'previewform-overwrite'); ?>
                         </label>
-                        <label class="radio-inline">
-                            <input type="radio" name="overwrite" ng-model="overwrite" value="rename">
+                    </div>
+                    <div class="radio">
+                        <label>
+                            <input type="radio" name="overwrite" ng-model="overwrite" value="rename" ng-disabled="busy">
                             <?php echo $I18N->msg( 'previewform-create-new'); ?>
                         </label>
                     </div>
@@ -383,69 +393,63 @@ $I18N = new TsIntuition(array(
                         <label class="sr-only" for="newFilename">
                             <?php echo $I18N->msg( 'previewform-new-filename' ); ?>
                         </label>
-                        <input id="newFilename" type="text" class="form-control" style="width: 400px;" ng-model="newFilename">
+                        <input id="newFilename" type="text" class="form-control" ng-model="newFilename" ng-disabled="busy">
                         <span class="help-block" ng-show="exists[newFilename] === true">
                             <?php echo $I18N->msg( 'previewform-new-filename-exists', array('variables' => array('{{newFilename}}')) ); ?>
                         </span>
                     </div>
 
-                </div>
-            </div>
+                     <button type="button" class="btn btn-large" ng-click="back()" ng-disabled="busy">
+                        <?php echo $I18N->msg( 'previewform-back-btn'); ?>
+                    </button>
+                    <button type="submit" class="btn btn-large btn-primary" ng-disabled="busy">
+                        <?php echo $I18N->msg( 'previewform-upload-btn'); ?>
+                    </button>
 
-            <div class="panel-footer">
+                </form>
 
-                <button type="button" class="btn btn-large" ng-click="back()">
-                    <?php echo $I18N->msg( 'previewform-back-btn'); ?>
-                </button>
-                <button type="submit" class="btn btn-large btn-primary">
-                    <?php echo $I18N->msg( 'previewform-upload-btn'); ?>
-                </button>
-            </div>
-        </form>
-
-        <!-- ********************************************************************************************************
-        Busy uploading
-        **************************************************************************************************** -->
-
-        <div ng-show="cropresults && !uploadresults && busy">
-
-            <div class="panel panel-default">
-
-                <div class="panel-heading">
-                    <i class="icon-camera-retro"></i>
-                    <a href="{{metadata.description}}">{{title}}</a>
-                </div>
-                <div class="panel-body">
-
+                <!-- Spinner -->
+                <div ng-show="busy">
                     <p>
                         <?php echo $I18N->msg( 'upload-progress' ); ?>
                     </p>
                     <img src="res/spinner.gif" alt="Spinner" style="width:220px; height:20px;">
-
                 </div>
 
             </div>
 
         </div>
 
+
         <!-- ********************************************************************************************************
              Result
              **************************************************************************************************** -->
+        <div class="row" ng-show="uploadresults" style="padding-bottom:1.5em;">
 
-        <div class="panel panel-default" ng-show="uploadresults">
+            <!-- ********************************************************************************************************
+                 Left column
+                 **************************************************************************************************** -->
+            <div class="col-md-9">
 
-            <div class="panel-heading">
-                <i class="icon-camera-retro"></i>
-                <a href="{{metadata.description}}">{{title}}</a>.
+                <div class="well">
+
+                    <img ng-src="{{cropresults.thumb.name}}" class="img-responsive" />
+
+                </div>
+
             </div>
 
-            <div class="panel-body">
+
+            <!-- ********************************************************************************************************
+                 Right column
+                 **************************************************************************************************** -->
+            <div class="col-md-3">
 
                 <div ng-show="status">
                     {{status}}
                 </div>
 
-                <p ng-show="uploadresults.result == 'Success'" style="background: url(res/yes_check-24px.png) left no-repeat; padding: 5px 5px 5px 28px;">
+                <p ng-show="uploadresults.result == 'Success'" style="background: url(res/yes_check-24px.png) left no-repeat; padding: 5px 5px 5px 30px;">
                     <?php echo $I18N->msg( 'results-success'); ?>
                 </p>
                 <p ng-show="uploadresults.result == 'Success'">
@@ -455,7 +459,7 @@ $I18N = new TsIntuition(array(
                     ))); ?>
                 </p>
 
-                <p ng-show="uploadresults.error" style="background: url(res/x_mark-24px.png) left no-repeat; padding: 5px 5px 5px 28px;">
+                <p ng-show="uploadresults.error" style="background: url(res/x_mark-24px.png) left no-repeat; padding: 5px 5px 5px 30px;">
                     <?php echo $I18N->msg( 'results-failure', array('variables' => array(
                         '{{uploadresults.error.info}}'
                     ))); ?>
@@ -463,22 +467,21 @@ $I18N = new TsIntuition(array(
 
             </div>
         </div>
+
     </div>
 
 
     <div class="push"></div>
 </div>
 
-<footer>    
-        Tool by <a href="//commons.wikimedia.org/wiki/User:Danmichaelo">Danmichaelo</a>, 
-        made using <a href="//github.com/tapmodo/Jcrop">Jcrop</a> and <a href="http://www.angularjs.org/">AngularJS</a>,
-        inspired by <a href="//commons.wikimedia.org/wiki/User:Cropbot">Cropbot</a>.
-        MIT license. 
-        Please report bugs <a href="//github.com/danmichaelo/croptool">on GitHub</a>.
+<footer>
+    <a href="https://commons.wikimedia.org/wiki/CropTool">Tutorial</a>
+    •
+    <a href="//github.com/danmichaelo/croptool">Source code and issue tracker</a>
+    
+    <!--•<?php echo $I18N->getFooterLine( 'croptool' ); ?>-->
 
-        <!--<?php echo $I18N->getFooterLine( 'croptool' ); ?>-->
-
-    </footer>
+</footer>
 
 </body>
 

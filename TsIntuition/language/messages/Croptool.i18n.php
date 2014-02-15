@@ -39,7 +39,7 @@ $messages['en'] = array(
 
 	'cropform-select-region' => 'Select a crop region by click-and-drag, or try the <a href ng-click="$1">magic border locator</a>.',
 	'cropform-region' => 'Left: $1 px, top: $2 px, right: $3 px, bottom: $4 px.',
-	'cropform-method' => 'Method:',
+	'cropform-method' => 'Crop method:',
 	'cropform-method-precise' => 'Precise',
 	'cropform-method-lossless' => 'Lossless',
 	'cropform-method-precise-help' => 'The <strong>precise</strong> method respects your selection, but as is usual with precise cropping, the process involves a small quality loss.',
@@ -55,7 +55,7 @@ $messages['en'] = array(
     'previewform-overwrite-policy' => 'Please make sure you are familiar with <a href="$1">Commons:Overwriting existing files</a>.',
     'previewform-template-removal-notice' => 'Note that the templates <tt>{{crop}}</tt> and <tt>{{remove border}}</tt> will be removed if found.',
     'previewform-overwrite' => 'Overwrite original',
-    'previewform-create-new' => 'Upload as new file:',
+    'previewform-create-new' => 'Upload as new file',
 	'previewform-new-filename' => 'New filename',
 	'previewform-new-filename-exists' => 'File «$1» already exists.',
 	'previewform-back-btn' => 'Back',
@@ -64,7 +64,7 @@ $messages['en'] = array(
 	'upload-progress' => 'Please wait while uploading...',
 
 	'results-success' => 'Cropped image uploaded successfully!',
-	'results-success-details' => 'Please inspect the result by going to <a href="$1">$2</a>, and refresh the page if needed.',
+	'results-success-details' => '<a href="$1">View the result at Commons</a>. Refreshing the page might be necessary.',
 	'results-failure' => 'Cropped image upload failed: $1',
 
 );

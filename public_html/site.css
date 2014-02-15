@@ -8,10 +8,10 @@ html, body {
     min-height: 100%;
     height: auto !important;
     height: 100%;
-    margin: 0 auto -40px; /* the bottom margin is the negative value of the footer's height */
+    margin: 0 auto -35px; /* the bottom margin is the negative value of the footer's height */
 }
 footer, .push {
-    height: 40px; /* .push must be the same height as .footer */
+    height: 35px; /* .push must be the same height as .footer */
 }
 footer {
     text-align: center;
@@ -19,7 +19,11 @@ footer {
     color: white;
     font-size: 85%;
     padding: 4px;
+    line-height: 110%;
 }
 footer a:link, footer a:visited {
     color: #83B4DE;
+}
+footer p {
+    margin: 0;
 }
