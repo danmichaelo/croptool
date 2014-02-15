@@ -25,6 +25,18 @@ service('LoginService', ['$http', '$rootScope', function($http, $rootScope) {
 
 }]).
 
+
+service('WindowService', ['$rootScope', '$window', function($rootScope, $window) {
+
+    var windowWidth = $window.outerWidth;
+    angular.element($window).bind('resize',function() {
+        $rootScope.$broadcast('windowWidthChanged', { oldValue: windowWidth, value: $window.outerWidth });
+        windowWidth = $window.outerWidth;
+        $rootScope.$apply();
+     });
+
+}]).
+
 controller('LoginCtrl', ['$scope', '$http', 'LoginService', function($scope, $http, LoginService) {
 
     $scope.user = LoginService.user;
@@ -71,7 +83,7 @@ controller('LoginCtrl', ['$scope', '$http', 'LoginService', function($scope, $ht
 
 }]).
 
-controller('AppCtrl', ['$scope', '$http', '$timeout', '$q', 'LoginService', 'localStorageService', function($scope, $http, $timeout, $q, LoginService, LocalStorageService) {
+controller('AppCtrl', ['$scope', '$http', '$timeout', '$q', '$window', 'LoginService', 'localStorageService', 'WindowService', function($scope, $http, $timeout, $q, $window, LoginService, LocalStorageService, WindowService) {
 
     var jcrop_api,
         everPushedSomething = false,
@@ -306,7 +318,8 @@ controller('AppCtrl', ['$scope', '$http', '$timeout', '$q', 'LoginService', 'loc
 
     $scope.filename = getParameterByName('title');
 
-    window.addEventListener('popstate', function(e) {
+    angular.element($window).bind('popstate', function(e) {
+    //window.addEventListener('popstate', function(e) {
 
         if (!everPushedSomething) {
             // Chrome and Safari always emit a popstate event on page load, but Firefox doesn't.
@@ -398,5 +411,9 @@ controller('AppCtrl', ['$scope', '$http', '$timeout', '$q', 'LoginService', 'loc
 
     });
 
+    $scope.$on('windowWidthChanged', function(evt, val) {
+        //console.log('Width changed');
+        //console.log(val);
+    });
 
 }]);
