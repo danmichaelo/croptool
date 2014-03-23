@@ -17,7 +17,7 @@ $hostname = isset($_SERVER['HTTP_X_FORWARDED_SERVER'])
                 ? $_SERVER['HTTP_X_FORWARDED_SERVER']
                 : $_SERVER['SERVER_NAME'];
 
-if ($hostname == 'tools.wmflabs.org, tools-eqiad.wmflabs.org') {
+if ($hostname == 'tools.wmflabs.org, tools-eqiad.wmflabs.org' || $hostname == 'tools-eqiad.wmflabs.org') {
     $hostname = 'tools.wmflabs.org';
 }
 
