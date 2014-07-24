@@ -21,7 +21,7 @@ class Image
         $this->exiftool = new Exiftool($logger);
 
         $this->orientation = 1;
-        $exif = exif_read_data($path);
+        $exif = @exif_read_data($path);
         if (isset($exif['IFD0']) && isset($exif['IFD0']['Orientation'])) {
             $this->orientation = intval($exif['IFD0']['Orientation']);
         } else if (isset($exif['Orientation'])) {

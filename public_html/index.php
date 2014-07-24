@@ -3,11 +3,11 @@
 error_reporting(E_ALL);
 ini_set('display_errors', '1');
 
-if (isset($_SERVER['HTTP_X_FORWARDED_PROTO']) && $_SERVER['HTTP_X_FORWARDED_PROTO'] == 'http') {
-    $redirect = "https://" . $_SERVER['HTTP_X_FORWARDED_SERVER'] . $_SERVER['REQUEST_URI'];
-    header("Location: $redirect");
-    exit;
-}
+//if (isset($_SERVER['HTTP_X_FORWARDED_PROTO']) && $_SERVER['HTTP_X_FORWARDED_PROTO'] == 'http') {
+//    $redirect = "https://" . $_SERVER['HTTP_X_FORWARDED_SERVER'] . $_SERVER['REQUEST_URI'];
+//    header("Location: $redirect");
+//    exit;
+//}
 
 require('../TsIntuition/ToolStart.php'); // for testing
 //require('/home/project/intuition/src/Intuition/ToolStart.php');
@@ -27,6 +27,13 @@ $I18N = new TsIntuition(array(
 <head>
   <title><?php echo $I18N->msg( 'title' ); ?></title>
   <meta http-equiv="Content-type" content="text/html;charset=UTF-8">
+
+<script>
+
+if (window.location.protocol != "https:")
+    window.location.href = "https:" + window.location.href.substring(window.location.protocol.length);
+
+</script>
 
   <link rel="stylesheet" type="text/css" href="//netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap.min.css">
   <link rel="stylesheet" href="css/jquery.Jcrop.css" type="text/css">

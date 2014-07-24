@@ -17,6 +17,10 @@ $hostname = isset($_SERVER['HTTP_X_FORWARDED_SERVER'])
                 ? $_SERVER['HTTP_X_FORWARDED_SERVER']
                 : $_SERVER['SERVER_NAME'];
 
+if ($hostname == 'tools.wmflabs.org, tools-eqiad.wmflabs.org' || $hostname == 'tools-eqiad.wmflabs.org') {
+    $hostname = 'tools.wmflabs.org';
+}
+
 $basepath = dirname( $_SERVER['SCRIPT_NAME'] );
 $testingEnv = ($hostname !== 'tools.wmflabs.org');
 
