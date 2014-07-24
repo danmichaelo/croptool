@@ -27,6 +27,9 @@ class Image
         } else if (isset($exif['Orientation'])) {
             $this->orientation = intval($exif['Orientation']);
         }
+        if ($this->orientation == 0) {  // Unknown, assume 1
+            $this->orientation = 1;
+        }
 
         $xy = getimagesize($path);
 
@@ -45,7 +48,7 @@ class Image
                 break;
 
             default:
-                $this->error = 'Unsupported EXIF orientation';
+                $this->error = 'Unsupported EXIF orientation "' . $this->orientation . '"';
                 return false;
         }
 
