@@ -30,20 +30,20 @@ $I18N = new TsIntuition(array(
 
 <script>
 
-if (window.location.protocol != "https:")
-    window.location.href = "https:" + window.location.href.substring(window.location.protocol.length);
+// if (window.location.protocol != "https:")
+//     window.location.href = "https:" + window.location.href.substring(window.location.protocol.length);
 
 </script>
 
   <link rel="stylesheet" type="text/css" href="//netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap.min.css">
   <link rel="stylesheet" href="css/jquery.Jcrop.css" type="text/css">
-  <link rel="stylesheet" type="text/css" href="//netdna.bootstrapcdn.com/font-awesome/3.2.1/css/font-awesome.min.css">
+  <link rel="stylesheet" type="text/css" href="//maxcdn.bootstrapcdn.com/font-awesome/4.1.0/css/font-awesome.min.css">
   <link rel="stylesheet" href="site.css" type="text/css">
 
-  <script src="//code.jquery.com/jquery-1.10.1.min.js"></script>
-  <script src="//netdna.bootstrapcdn.com/bootstrap/3.0.0/js/bootstrap.min.js"></script>
+  <script src="//code.jquery.com/jquery-1.11.0.min.js"></script>
+  <script src="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js"></script>
   <script src="js/jquery.Jcrop.js"></script>
-  <script src="//ajax.googleapis.com/ajax/libs/angularjs/1.2.2/angular.min.js"></script>
+  <script src="//ajax.googleapis.com/ajax/libs/angularjs/1.2.20/angular.min.js"></script>
   <script src="js/angular-local-storage.min.js"></script>
   <script src="crop.js"></script>
 
