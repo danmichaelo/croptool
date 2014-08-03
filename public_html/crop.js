@@ -374,7 +374,8 @@ controller('AppCtrl', ['$scope', '$http', '$timeout', '$q', '$window', 'LoginSer
     });
 
 
-    $scope.imageUrl = getParameterByName('imageUrl');
+    $scope.currentUrl = getParameterByName('imageUrl');
+    $scope.imageUrl = $scope.currentUrl;
     if (!$scope.imageUrl) {
         $scope.imageUrl = getParameterByName('title');  // deprecated        
     }
@@ -469,7 +470,11 @@ controller('AppCtrl', ['$scope', '$http', '$timeout', '$q', '$window', 'LoginSer
 
             // console.log('Image url changed. Site: ' + $scope.site, ' title: ' + $scope.title);
 
-            fileExists( $scope.site, $scope.title );
+            if ($scope.imageUrl !== $scope.currentUrl) {
+                $scope.error = '';
+                $scope.currentUrl = $scope.imageUrl;
+                fileExists( $scope.site, $scope.title );
+            }
         }
 
     });
