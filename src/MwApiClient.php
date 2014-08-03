@@ -113,12 +113,14 @@ class MwApiClient
     public function pageExists($title)
     {
 
-        $response = $this->request(array(
+        $query = array(
             'action' => 'query',
             'prop' => 'pageprops',
             'format' => 'json',
             'titles' => 'File:' . $title
-        ));
+        );
+
+        $response = $this->request($query);
 
         foreach ($response->query->pages as $pageid => $page) {
             if ($pageid == '-1') {

@@ -8,6 +8,8 @@ class CropTool {
 
     protected $publicPath;
 
+    public $api;
+
     public function __construct(MwApiClient $apiClient = null, Curl $curl = null)
     {
         $this->publicPath = dirname(dirname(__FILE__)) . '/public_html/';
@@ -28,9 +30,9 @@ class CropTool {
         }
     }
 
-    public function pageExists($title)
+    public function pageExists( $title )
     {
-        return $this->api->pageExists($title);
+        return $this->api->pageExists( $title );
     }
 
     public function logout()
