@@ -2,31 +2,6 @@
 
 require 'common.php';
 
-/**
- * A file containing the following keys:
- * - consumerKey: The "consumer token" given to you when registering your app
- * - consumerSecret: The "secret token" given to you when registering your app
- * - localPassphrase: The (base64 encoded) key used for encrypting cookie content
- * - jpegtranPath: Path to jpegtran
- */
-$configFile = '../config.ini';
-$config = parse_ini_file($configFile);
-
-if ( $config === false ) {
-    header( "HTTP/1.1 500 Internal Server Error" );
-    echo 'The ini file could not be read';
-    exit(0);
-}
-
-if (!isset( $config['consumerKey'] ) || !isset( $config['consumerSecret'] )) {
-    header( "HTTP/1.1 500 Internal Server Error" );
-    echo 'Required configuration directives not found in ini file';
-    exit(0);
-}
-
-Image::$pathToJpegTran = $config['jpegtranPath'];
-
-$oauth = new OAuthConsumer($hostname, $basepath, $testingEnv, $config['consumerKey'], $config['consumerSecret'], $config['localPassphrase']);
 $apiClient = new MwApiClient($oauth);
 $ct = new CropTool($apiClient);
 
