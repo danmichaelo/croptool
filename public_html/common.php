@@ -7,7 +7,19 @@ ini_set('memory_limit', '512M');
 require('../vendor/autoload.php');
 #require('../oauth.php');
 #require('../BorderLocator.php');
+ini_set('display_errors', false);
 
+
+function shutdown() {
+    $error = error_get_last();
+    if ($error['type'] === E_ERROR) {
+        // fatal error has occured
+        header( "HTTP/1.1 500 Internal Server Error" );
+        print $error['message'];
+    }
+}
+
+register_shutdown_function('shutdown');
 
 /*************************************************
  * Routing
