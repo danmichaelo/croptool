@@ -48,7 +48,7 @@ $messages['en'] = array(
 	'cropform-preview-btn' => 'Preview',
 	'cropform-help' => 'Help',
 
-	'cropping-progress' => 'Please wait while cropping the image...',
+	'cropping-progress' => 'Please wait while cropping...',
 
     'previewform-lossless' => 'A lossless crop was performed.',
     'previewform-lossless-explanation' => 'The resulting image is $1 px wider and $2 px higher than the region you selected. <a href="$3">Why?</a> Note that the extra pixels included are in the left and/or top part of the image.',
@@ -59,6 +59,7 @@ $messages['en'] = array(
     'previewform-create-new' => 'Upload as new file',
 	'previewform-new-title' => 'New filename',
 	'previewform-new-title-exists' => 'File «$1» already exists.',
+	'previewform-upload-comment' => 'Upload comment',
 	'previewform-back-btn' => 'Back',
 	'previewform-upload-btn' => 'Upload',
 

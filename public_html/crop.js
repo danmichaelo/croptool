@@ -331,6 +331,7 @@ controller('AppCtrl', ['$scope', '$http', '$timeout', '$q', '$window', 'LoginSer
             title: $scope.title,
             site: $scope.site,
             overwrite: $scope.overwrite,
+            comment: $scope.cropresults.uploadComments[$scope.overwrite],
             filename: $scope.newTitle,
             store: true
         }).

@@ -91,10 +91,18 @@ class CropTool {
             'cached' => true,
             'name' => $thumbName . '?ts=' . time(),
             'width' => $thumbDim[0],
-            'height' => $thumbDim[1]
+            'height' => $thumbDim[1],
         );
 
-        $_SESSION['cropmethod'] = $cm;
+        $s1 = getimagesize($srcPath);
+        $s2 = getimagesize($destPath);
+        $cropPercentX = round(($s1[0]-$s2[0]) / $s1[0] * 100);
+        $cropPercentY = round(($s1[1]-$s2[1]) / $s1[1] * 100);
+        $res['uploadComments'] = array(
+            'overwrite' => 'Cropped ' . ($cropPercentX ?: ' < 1') . ' % horizontally and ' . ($cropPercentY ?: '< 1') . ' % vertically using [[Commons:CropTool|CropTool]] with ' . ($cm == 'lossless' ? 'lossless mode' : 'precise mode') . '.',
+            'rename' => 'Cropped version of [[File:' . $title . ']] using [[Commons:CropTool|CropTool]].',
+        );
+
         return $res;
     }
 
@@ -121,13 +129,7 @@ class CropTool {
 
         $sha1 = $response->imageinfo[0]->sha1;
         $ext = $this->getFileExt($response->imageinfo[0]->mime);
-        $orig_path = $this->publicPath . '/files/' . $sha1 . $ext;
         $path = $this->publicPath . '/files/' . $sha1 . '_cropped' . $ext;
-
-        $s1 = getimagesize($orig_path);
-        $s2 = getimagesize($path);
-        $cropPercentX = round(($s1[0]-$s2[0]) / $s1[0] * 100);
-        $cropPercentY = round(($s1[1]-$s2[1]) / $s1[1] * 100);
 
         $response = $this->api->request(array(
             'action' => 'parse',
@@ -144,6 +146,7 @@ class CropTool {
             'action' => 'upload',
             'format' => 'json',
             'token' => $token,
+            'comment' => $input->comment,
             //'file' => $imData,
             'file' => (version_compare(PHP_VERSION, '5.5.0') >= 0)
                 ? new CURLFile($path)
@@ -154,13 +157,10 @@ class CropTool {
 
             $args['filename'] = $title;
             $args['ignorewarnings'] = 1;
-            $mode = ($_SESSION['cropmethod'] == 'lossless') ? 'lossless mode' : 'precise mode';
-            $args['comment'] = 'Cropped ' . ($cropPercentX ?: ' < 1') . ' % horizontally and ' . ($cropPercentY ?: '< 1') . ' % vertically using [[Commons:CropTool|CropTool]] with ' . $mode . '.';
 
         } else {
 
             $args['filename'] = $input->filename;
-            $args['comment'] = 'Cropped version of [[File:' . $title . ']] using [[Commons:CropTool|CropTool]].';
 
             $tpl = '{{Extracted from|' . $title . '}}';
             $x = mb_stripos($wikitext, "[[category:");

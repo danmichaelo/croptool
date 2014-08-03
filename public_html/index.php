@@ -373,16 +373,25 @@ $I18N = new TsIntuition(array(
 
                 <form ng-submit="upload()" role="form">
 
+                    <p ng-non-bindable>
+                        <i class="fa fa-info-circle"></i>
+                        <?php echo $I18N->msg( 'previewform-template-removal-notice'); ?>
+                    </p>
+
+                    <div class="form-group">
+                        <label for="uploadComment">
+                            <?php echo $I18N->msg( 'previewform-upload-comment' ); ?>:
+                        </label>
+                        <input id="uploadComment" type="text" class="form-control" ng-model="cropresults.uploadComments[overwrite]" ng-disabled="busy">
+                    </div>
+
                     <p ng-show="site == 'commons.wikimedia.org'">
                         <i class="fa fa-warning"></i>
                         <?php echo $I18N->msg( 'previewform-overwrite-policy', array('variables' => array(
                             'https://commons.wikimedia.org/wiki/Commons:Overwriting existing files'
                         ))); ?>
                     </p>
-                    <p ng-non-bindable>
-                        <i class="fa fa-info-circle"></i>
-                        <?php echo $I18N->msg( 'previewform-template-removal-notice'); ?>
-                    </p>
+
                     <div class="radio">
                         <label>
                             <input type="radio" name="overwrite" ng-model="overwrite" value="overwrite" ng-disabled="busy">
@@ -395,7 +404,6 @@ $I18N = new TsIntuition(array(
                             <?php echo $I18N->msg( 'previewform-create-new'); ?>
                         </label>
                     </div>
-
                     <div class="form-group" ng-show="overwrite=='rename'" ng-class="{ 'has-error': exists[site + ':' + newTitle] === true, 'has-success': exists[site + ':' + newTitle] === false }">
                         <label class="sr-only" for="newTitle">
                             <?php echo $I18N->msg( 'previewform-new-title' ); ?>
@@ -406,7 +414,7 @@ $I18N = new TsIntuition(array(
                         </span>
                     </div>
 
-                     <button type="button" class="btn btn-large" ng-click="back()" ng-disabled="busy">
+                    <button type="button" class="btn btn-large" ng-click="back()" ng-disabled="busy">
                         <?php echo $I18N->msg( 'previewform-back-btn'); ?>
                     </button>
                     <button type="submit" class="btn btn-large btn-primary" ng-disabled="busy">
@@ -461,7 +469,7 @@ $I18N = new TsIntuition(array(
                 </p>
                 <p ng-show="uploadresults.result == 'Success'">
                     <?php echo $I18N->msg( 'results-success-details', array('variables' => array(
-                        '{{uploadresults.imageinfo.descriptionurl}}',
+                        '{{uploadresults.imageinfo.descriptionurl}}?action=purge',
                         '{{uploadresults.filename}}'
                     ))); ?>
                 </p>
