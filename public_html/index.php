@@ -35,6 +35,7 @@ $I18N = new TsIntuition(array(
   <script src="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js"></script>
   <script src="js/jquery.Jcrop.js"></script>
   <script src="//ajax.googleapis.com/ajax/libs/angularjs/1.2.20/angular.min.js"></script>
+  <script src="//ajax.googleapis.com/ajax/libs/angularjs/1.2.20/angular-sanitize.min.js"></script>
   <script src="js/angular-local-storage.min.js"></script>
   <script src="crop.js"></script>
 
@@ -84,6 +85,12 @@ $I18N = new TsIntuition(array(
         **************************************************************************************************** -->
 
     <div ng-controller="LoginCtrl" ng-show="ready && !user">
+
+        <div ng-show="oauthError" class="alert alert-danger" role="alert">
+            <span class="fa fa-frown-o"></span>
+            <span ng-bind-html="oauthError"></span>
+        </div>
+
 
         <form class="form-inline panel panel-primary" role="form">
 

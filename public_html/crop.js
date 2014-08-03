@@ -1,7 +1,7 @@
 'use strict';
 
 // Declare app level module which depends on filters, and services
-angular.module('croptool', ['LocalStorageModule']).
+angular.module('croptool', ['LocalStorageModule', 'ngSanitize']).
 
 service('LoginService', ['$http', '$rootScope', function($http, $rootScope) {
 
@@ -21,7 +21,12 @@ service('LoginService', ['$http', '$rootScope', function($http, $rootScope) {
         $rootScope.$broadcast('loginStatusChanged', response);
     };
 
-    $http.get('backend.php?checkLogin').success(this.checkLogin);
+    $http.get('backend.php?checkLogin')
+      .success(this.checkLogin)
+      .error(function(err, code) {
+        that.loginResponse = { error: { code: code, info: err }};
+        $rootScope.$broadcast('loginStatusChanged');
+      });
 
 }]).
 
@@ -68,13 +73,15 @@ controller('LoginCtrl', ['$scope', '$http', 'LoginService', function($scope, $ht
         });
     };
 
-    $scope.$on('loginStatusChanged', function(response) {
+    $scope.$on('loginStatusChanged', function() {
 
         console.log('Login status changed: ' + (LoginService.user ? 'logged in' : 'not logged in'));
         $scope.user = LoginService.user;
         $scope.ready = true;
         if (LoginService.loginResponse.error) {
-            $scope.oautherror = LoginService.loginResponse.error.code + ' : ' + LoginService.loginResponse.error.info;
+            var err = LoginService.loginResponse.error.code + ' : ' + LoginService.loginResponse.error.info;
+            console.log('SET ERR: ' + err);
+            $scope.oauthError = err;
         }
 
     });
@@ -133,7 +140,7 @@ controller('AppCtrl', ['$scope', '$http', '$timeout', '$q', '$window', 'LoginSer
         $scope.error = '';
     };
 
-    $scope.$on('loginStatusChanged', function(response) {
+    $scope.$on('loginStatusChanged', function() {
 
         console.log('[appctrl] Login status changed: ' + LoginService.user);
 
