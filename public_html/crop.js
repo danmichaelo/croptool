@@ -358,8 +358,6 @@ controller('AppCtrl', ['$scope', '$http', '$timeout', '$q', '$window', 'LoginSer
 
     };
 
-    $scope.imageUrl = getParameterByName('imageUrl');
-
     angular.element($window).bind('popstate', function(e) {
     //window.addEventListener('popstate', function(e) {
 
@@ -378,7 +376,7 @@ controller('AppCtrl', ['$scope', '$http', '$timeout', '$q', '$window', 'LoginSer
 
     $scope.imageUrl = getParameterByName('imageUrl');
     if (!$scope.imageUrl) {
-        $scope.imageUrl = getParameterByName('filename');  // deprecated        
+        $scope.imageUrl = getParameterByName('title');  // deprecated        
     }
     $scope.openFile(false);
 
