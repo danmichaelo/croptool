@@ -7,14 +7,45 @@ require '../vendor/autoload.php';
 require '../BorderLocator.php';
 
 use Danmichaelo\Coma\sRGB;
+use PHPExiftool\Exiftool;
 
 ini_set('memory_limit', '1024M');
 
 // Script start
 $rustart = getrusage();
 
-$basename = '/test/test5.jpg';
+$basename = '/test/test-orientation.jpg';
 $fname = dirname(__FILE__) . $basename;
+
+//$reader = PHPExiftool\Reader::create($logger);
+//$metadatas = $reader->files($fname)->first();
+//$Writer = Writer::create();
+//$Writer->write('image.jpg', $metadatas);
+
+/*
+$exif = read_exif_data($fname);
+
+if (isset($exif['IFD0']) && isset($exif['IFD0']['Orientation'])) {
+  $exif['IFD0']['Orientation'];
+  $ort = $exif['IFD0']['Orientation'];
+  switch($ort)
+  {
+
+      case 3: // 180 rotate left
+          $image->imagerotate($upload_path . $newfilename, 180, -1);
+          break;
+
+
+      case 6: // 90 rotate right
+          $image->imagerotate($upload_path . $newfilename, -90, -1);
+          break;
+
+      case 8:    // 90 rotate left
+          $image->imagerotate($upload_path . $newfilename, 90, -1);
+          break;
+  }
+}
+*/
 
 $bl = new BorderLocator($fname);
 $area = $bl->selection;
