@@ -82,9 +82,9 @@ class CropTool {
         // Make thumb
         $thumbName = 'files/' . $sha1 . '_cropped_thumb' . $ext;
         $thumbPath = $this->publicPath . '/' . $thumbName;
-        $image = new Image;
-        $image->load($destPath);
-        $thumbDim = $image->thumb($thumbPath, 800, 800);
+        $thumb = new Image;
+        $thumb->load($destPath);
+        $thumbDim = $thumb->thumb($thumbPath, 800, 800);
         chmod($thumbPath, 0664);
 
         $res['thumb'] = array(
