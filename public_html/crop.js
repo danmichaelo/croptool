@@ -167,6 +167,10 @@ controller('AppCtrl', ['$scope', '$http', '$timeout', '$q', '$window', 'LoginSer
         $scope.crop_dim = undefined;
 
         $http.get('backend.php?action=metadata&title=' + encodeURIComponent($scope.title) + '&site=' + encodeURIComponent($scope.site)).
+        error(function(response, status, headers) {
+            $scope.error = 'An error occured: ' + status + ' ' + response;
+            $scope.busy = false;
+        }).
         success(function(response) {
 
             $scope.busy = false;
