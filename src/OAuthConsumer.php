@@ -64,12 +64,20 @@ class OAuthConsumer {
     protected $basepath;
 
     /**
+     * The remote site name
+     */
+    protected $site;
+
+    /**
      * Are we on a test/development server?
      */
     protected $testingEnv = false;
 
-    public function __construct($hostname = 'localhost', $basepath = '/', $testingEnv = false, $consumerKey = '', $consumerSecret = '', $localPassphrase = '')
+    public function __construct($site, $hostname = 'localhost', $basepath = '/', $testingEnv = false, $consumerKey = '', $consumerSecret = '', $localPassphrase = '')
     {
+
+        $this->site = $site;
+        $this->apiUrl = 'https://' . $site . '/w/api.php';
 
         $this->hostname = $hostname;
         $this->basepath = $basepath;
@@ -117,6 +125,11 @@ class OAuthConsumer {
 
         }
 
+    }
+
+    public function getApiUrl()
+    {
+        return $this->apiUrl;
     }
 
     public function authorized()

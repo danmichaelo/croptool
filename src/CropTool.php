@@ -24,7 +24,7 @@ class CropTool {
     public function checkLogin() {
         $user = $this->api->getUser();
         if (is_null($user)) {
-            return array('error' => 'not_logged_in');
+            return array();
         } else {
             return array('user' => $user);
         }

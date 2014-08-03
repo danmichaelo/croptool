@@ -20,16 +20,17 @@ $messages['en'] = array(
 	'logout' => 'Logout',
 
 	'loginform-header' => 'Authorization required',
-	'loginform-blurb' => 'CropTool is a tool for cropping images (currently only jpeg files) at Wikimedia Commons. <a href="$1">Learn more</a>.',
-	'loginform-help' => 'To use CropTool you need to connect it to your Wikimedia Commons account. This process is secure and your password will not be given to CropTool.',
+	'loginform-blurb' => 'CropTool is a tool for cropping images (currently only jpeg files) at Wikimedia sites. <a href="$1">Learn more</a>.',
+	'loginform-help' => 'To use CropTool you need to connect it to your Wikimedia account. This process is secure and your password will not be given to CropTool.',
 	'loginform-submit-button' => 'Connect',
 
 	'titleform-header' => 'What to crop?',
-	'titleform-help' => 'Enter the filename for a Wikimedia Commons image you would like to crop.',
-	'titleform-filename-label' => 'Filename',
+	'titleform-help' => 'Enter the URL or filename for an image you would like to crop.',
+	'titleform-file-label' => 'URL or filename',
 	'titleform-submit-button' => 'Open',
-	'titleform-footer' => 'Tip: You can open CropTool directly from a media file at Wikimedia Commons. <a href="$1">Learn more</a>.',
-	'titleform-filename-not-found' => 'File «$1» not found.',
+	'titleform-footer' => 'Tip: You can open CropTool directly from a media file. <a href="$1">Learn more at Commons</a>.',
+	'titleform-file-found' => 'File «$1» found on «$2».',
+	'titleform-file-not-found' => 'File «$1» not found on «$2».',
 
 	'fetching-progress' => 'Please wait while fetching image data and metadata... This might take some time depending on the filesize of the image...',
 
@@ -53,18 +54,18 @@ $messages['en'] = array(
     'previewform-lossless-explanation' => 'The resulting image is $1 px wider and $2 px higher than the region you selected. <a href="$3">Why?</a> Note that the extra pixels included are in the left and/or top part of the image.',
     'previewform-precise' => 'A precise crop was performed.',
     'previewform-overwrite-policy' => 'Please make sure you are familiar with <a href="$1">Commons:Overwriting existing files</a>.',
-    'previewform-template-removal-notice' => 'Note that the templates <tt>{{crop}}</tt> and <tt>{{remove border}}</tt> will be removed if found.',
+    'previewform-template-removal-notice' => 'The templates <tt>{{crop}}</tt> and <tt>{{remove border}}</tt> will be removed if found.',
     'previewform-overwrite' => 'Overwrite original',
     'previewform-create-new' => 'Upload as new file',
-	'previewform-new-filename' => 'New filename',
-	'previewform-new-filename-exists' => 'File «$1» already exists.',
+	'previewform-new-title' => 'New filename',
+	'previewform-new-title-exists' => 'File «$1» already exists.',
 	'previewform-back-btn' => 'Back',
-	'previewform-upload-btn' => 'Upload to Commons',
+	'previewform-upload-btn' => 'Upload',
 
 	'upload-progress' => 'Please wait while uploading...',
 
 	'results-success' => 'Cropped image uploaded successfully!',
-	'results-success-details' => '<a href="$1">View the result at Commons</a>. Refreshing the page might be necessary.',
+	'results-success-details' => '<a href="$1">View the result</a>. Refreshing the page might be necessary.',
 	'results-failure' => 'Cropped image upload failed: $1',
 
 );

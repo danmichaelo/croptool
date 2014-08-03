@@ -50,17 +50,13 @@ $I18N = new TsIntuition(array(
         Notice
         **************************************************************************************************** -->
 
-    <!--
     <div ng-show="showNotice" style="padding: .3em; background: #eeee88; text-align:center; border-bottom-right-radius: 5px; border-bottom-left-radius: 5px;">
         <span style="float:right;">
             <a href ng-click="dismissNotice();">[hide]</a>
         </span>
-        Note: If you've added CropTool to your
-        <a href="https://commons.wikimedia.org/wiki/Special:MyPage/common.js">common.js</a> before Dec 22th,
-        you should update the code to
-        <a href="//commons.wikimedia.org/wiki/Commons_talk:CropTool#Change_in_userscript">the new version</a>.
+        3. august: Added support for other Wikimedia sites than Commons, such as Wikipedia.
+        <a href="//github.com/danmichaelo/croptool/issues/31">Report any errors here</a>
     </div>
-    -->
 
     <!-- ********************************************************************************************************
         Header
@@ -74,7 +70,7 @@ $I18N = new TsIntuition(array(
     </div>
 
     <h1 style="padding:.4em 0; margin: 0 0 .3em 0;">
-        <a href ng-click="setTitle()">
+        <a href ng-click="imageUrl = ''; openFile()">
             <i class="fa fa-crop"></i>
             <?php echo $I18N->msg( 'title' ); ?>
         </a>
@@ -87,7 +83,7 @@ $I18N = new TsIntuition(array(
     <div ng-controller="LoginCtrl" ng-show="ready && !user">
 
         <div ng-show="oauthError" class="alert alert-danger" role="alert">
-            <span class="fa fa-frown-o"></span>
+            <span class="fa fa-warning"></span>
             <span ng-bind-html="oauthError"></span>
         </div>
 
@@ -124,7 +120,7 @@ $I18N = new TsIntuition(array(
         If authorized, but no title given, show "enter title form"
         **************************************************************************************************** -->
 
-    <div ng-show="user && !title && !busy">
+    <div ng-show="user && !metadata && !busy">
 
         <div class="panel panel-primary">
 
@@ -137,17 +133,20 @@ $I18N = new TsIntuition(array(
                     <?php echo $I18N->msg( 'titleform-help' ); ?>
                 </p>
 
-                <form role="form" ng-submit="setTitle(filename)">
+                <form role="form" ng-submit="openFile()">
 
                     <div class="row">
 
-                        <div class="form-group col-sm-8" ng-class="{ 'has-error': exists[filename] === false, 'has-success': exists[filename] === true }">
-                            <label class="sr-only" for="filename">
-                                <?php echo $I18N->msg( 'titleform-filename-label' ); ?>
+                        <div class="form-group col-sm-8" ng-class="{ 'has-error': exists[site+':'+title] === false, 'has-success': exists[site+':'+title] === true }">
+                            <label class="sr-only" for="imageUrl">
+                                <?php echo $I18N->msg( 'titleform-file-label' ); ?>
                             </label>
-                            <input type="text" ng-model="filename" class="form-control" placeholder="<?php echo $I18N->msg( 'titleform-filename-label' ); ?>">
-                            <span class="help-block" ng-show="exists[filename] === false">
-                                <?php echo $I18N->msg( 'titleform-filename-not-found', array('variables' => array('{{filename}}')) ); ?>
+                            <input type="text" ng-model="imageUrl" class="form-control" placeholder="<?php echo $I18N->msg( 'titleform-file-label' ); ?>">
+                            <span class="help-block" ng-show="exists[site+':'+title] === false">
+                                <?php echo $I18N->msg( 'titleform-file-not-found', array('variables' => array('{{title}}', '{{site}}')) ); ?>
+                            </span>
+                            <span class="help-block" ng-show="exists[site+':'+title] === true">
+                                <?php echo $I18N->msg( 'titleform-file-found', array('variables' => array('{{title}}', '{{site}}')) ); ?>
                             </span>
                         </div>
 
@@ -159,8 +158,9 @@ $I18N = new TsIntuition(array(
 
                     </div>
 
-                    <div style="color:red;" ng-show="metadata.error">
-                        {{metadata.error}}
+                    <div ng-show="error" class="alert alert-danger" role="alert">
+                        <span class="fa fa-warning"></span>
+                        <span ng-bind-html="error"></span>
                     </div>
 
                 </form>
@@ -179,9 +179,9 @@ $I18N = new TsIntuition(array(
         Fetching image data and metadata
         **************************************************************************************************** -->
 
-    <div ng-show="user && !title && busy">
+    <div ng-show="user && !metadata && busy">
 
-        <h2>File:{{filename}}</h2> 
+        <h2>File:{{title}}</h2> 
 
         <p>
             <?php echo $I18N->msg( 'fetching-progress' ); ?>
@@ -194,7 +194,7 @@ $I18N = new TsIntuition(array(
         If authorized and given a title
         **************************************************************************************************** -->
 
-    <div ng-show="user && title">
+    <div ng-show="user && metadata">
 
         <!-- ********************************************************************************************************
              Header
@@ -212,7 +212,7 @@ $I18N = new TsIntuition(array(
                     ))); ?>
                 </span>
                 <a href="{{metadata.description}}">
-                    View at Commons
+                    View at {{site}}
                 </a>
             </p>
         </div>
@@ -310,7 +310,7 @@ $I18N = new TsIntuition(array(
                 <div ng-show="!busy">
 
                     <p>
-                        <i class="fa fa-question-sign"></i> <?php echo $I18N->msg( 'cropform-help' ); ?>:
+                        <i class="fa fa-question-circle"></i> <?php echo $I18N->msg( 'cropform-help' ); ?>:
                     </p>
 
                     <ul>
@@ -373,14 +373,14 @@ $I18N = new TsIntuition(array(
 
                 <form ng-submit="upload()" role="form">
 
-                    <p>
-                        <i class="fa fa-warning-sign"></i>
+                    <p ng-show="site == 'commons.wikimedia.org'">
+                        <i class="fa fa-warning"></i>
                         <?php echo $I18N->msg( 'previewform-overwrite-policy', array('variables' => array(
                             'https://commons.wikimedia.org/wiki/Commons:Overwriting existing files'
                         ))); ?>
                     </p>
                     <p ng-non-bindable>
-                        <i class="fa fa-info-sign"></i>
+                        <i class="fa fa-info-circle"></i>
                         <?php echo $I18N->msg( 'previewform-template-removal-notice'); ?>
                     </p>
                     <div class="radio">
@@ -396,13 +396,13 @@ $I18N = new TsIntuition(array(
                         </label>
                     </div>
 
-                    <div class="form-group" ng-show="overwrite=='rename'" ng-class="{ 'has-error': exists[newFilename] === true, 'has-success': exists[newFilename] === false }">
-                        <label class="sr-only" for="newFilename">
-                            <?php echo $I18N->msg( 'previewform-new-filename' ); ?>
+                    <div class="form-group" ng-show="overwrite=='rename'" ng-class="{ 'has-error': exists[site + ':' + newTitle] === true, 'has-success': exists[site + ':' + newTitle] === false }">
+                        <label class="sr-only" for="newTitle">
+                            <?php echo $I18N->msg( 'previewform-new-title' ); ?>
                         </label>
-                        <input id="newFilename" type="text" class="form-control" ng-model="newFilename" ng-disabled="busy">
-                        <span class="help-block" ng-show="exists[newFilename] === true">
-                            <?php echo $I18N->msg( 'previewform-new-filename-exists', array('variables' => array('{{newFilename}}')) ); ?>
+                        <input id="newTitle" type="text" class="form-control" ng-model="newTitle" ng-disabled="busy">
+                        <span class="help-block" ng-show="exists[site + ':' + newTitle] === true">
+                            <?php echo $I18N->msg( 'previewform-new-title-exists', array('variables' => array('{{newTitle}}')) ); ?>
                         </span>
                     </div>
 

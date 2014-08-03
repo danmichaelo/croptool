@@ -79,7 +79,7 @@ controller('LoginCtrl', ['$scope', '$http', 'LoginService', function($scope, $ht
         $scope.user = LoginService.user;
         $scope.ready = true;
         if (LoginService.loginResponse.error) {
-            var err = LoginService.loginResponse.error.code + ' : ' + LoginService.loginResponse.error.info;
+            var err = LoginService.loginResponse.error ? LoginService.loginResponse.error.code + ' : ' + LoginService.loginResponse.error.info : null;
             console.log('SET ERR: ' + err);
             $scope.oauthError = err;
         }
@@ -95,6 +95,10 @@ controller('AppCtrl', ['$scope', '$http', '$timeout', '$q', '$window', 'LoginSer
     var jcrop_api,
         everPushedSomething = false,
         pixelratio = [1,1];
+
+    
+    $scope.site = '';     // Site-part of the URL
+    $scope.title = '';    // Title-part of the URL
 
     function getParameterByName(name) {
         name = name.replace(/[\[]/, "\\\[").replace(/[\]]/, "\\\]");
@@ -128,10 +132,10 @@ controller('AppCtrl', ['$scope', '$http', '$timeout', '$q', '$window', 'LoginSer
     }
 
     //LocalStorageService.setPrefix('croptool');
-    $scope.showNotice = !LocalStorageService.get('croptool-notice-1');
+    $scope.showNotice = !LocalStorageService.get('croptool-notice-2');
 
     $scope.dismissNotice = function() {
-        LocalStorageService.add('croptool-notice-1','hide');
+        LocalStorageService.add('croptool-notice-2','hide');
         $scope.showNotice = false;
     }
 
@@ -149,21 +153,30 @@ controller('AppCtrl', ['$scope', '$http', '$timeout', '$q', '$window', 'LoginSer
 
     });
 
-    function fetchImage (title) {
+    function fetchImage() {
 
-        if (!title) {
-            console.log('No title given, nothing to fetch');
+        console.log('[fetchImage] Site: ' + $scope.site + ', title: ' + $scope.title);
+
+        if (!$scope.title) {
+            console.log('[fetchImage] No title given, nothing to fetch');
             return;
         }
 
+        $scope.error = '';
         $scope.busy = true;
         $scope.crop_dim = undefined;
 
-        $http.get('backend.php?lookup=1&title=' + encodeURIComponent(title)).
+        $http.get('backend.php?action=metadata&title=' + encodeURIComponent($scope.title) + '&site=' + encodeURIComponent($scope.site)).
         success(function(response) {
 
             $scope.busy = false;
             console.log(response);
+
+            if (response.error) {
+                $scope.error = response.error;
+                $scope.metadata = null;
+                return;
+            }
 
             $scope.metadata = response;
 
@@ -173,9 +186,8 @@ controller('AppCtrl', ['$scope', '$http', '$timeout', '$q', '$window', 'LoginSer
 
             if (!response.error) {
 
-                $scope.title = title;
-                var p = title.lastIndexOf('.');
-                $scope.newFilename = title.substr(0, p) + ' (cropped)' + title.substr(p);
+                var p = $scope.title.lastIndexOf('.');
+                $scope.newTitle = $scope.title.substr(0, p) + ' (cropped)' + $scope.title.substr(p);
 
                 $timeout(function() {
                     console.log('Enabling Jcrop');
@@ -201,7 +213,7 @@ controller('AppCtrl', ['$scope', '$http', '$timeout', '$q', '$window', 'LoginSer
         if ($scope.borderLocatorBusy) return;
 
         $scope.borderLocatorBusy = true;
-        $http.get('backend.php?locateBorder=1&title=' + encodeURIComponent($scope.title))
+        $http.get('backend.php?action=locateBorder&title=' + encodeURIComponent($scope.title) + '&site=' + encodeURIComponent($scope.site))
             .success(function(response) {
                 $scope.borderLocatorBusy = false;
                 console.log(response);
@@ -222,34 +234,54 @@ controller('AppCtrl', ['$scope', '$http', '$timeout', '$q', '$window', 'LoginSer
             });
     };
 
-    $scope.setTitle = function(filename, updateHistory) {
+    function parseImageUrl( imageUrl ) {
+
+        var matches = imageUrl.match(/\/\/([a-z]+)\.(wikimedia.org|wikipedia.org)\/wiki\/(.*)$/),
+            site = 'commons.wikimedia.org',
+            title = '';
+
+        if (matches) {
+            site = matches[1] + '.' + matches[2];
+            title = matches[3];
+        } else {
+            title = imageUrl;
+        }
+
+        title = title
+            .replace(/_/g, ' ')
+            .replace(/^[^:]+:/, '');  // Strip off File:, Fil:, etc.
+
+        return { site: site, title: title };
+    }
+
+
+    $scope.openFile = function(updateHistory) {
 
         if (updateHistory !== false) {
-            var newUrl = location.href.split('?', 1)[0] + (filename ? '?title=' + encodeURIComponent(filename.replace(/ /g, '_')) : '');
+            var newUrl = location.href.split('?', 1)[0] + ($scope.imageUrl ? '?imageUrl=' + encodeURIComponent($scope.imageUrl.replace(/ /g, '_')) : '');
             window.history.pushState(null, null, newUrl);
             everPushedSomething = true;
         }
 
-        if (!filename) {
-            console.log('show title form');
+        if (!$scope.imageUrl) {
             if (jcrop_api) {
                 jcrop_api.destroy();
                 $('#cropbox').removeAttr('style');
             }
-            $scope.title = '';
-            //$scope.filename = '';
-            $scope.newFilename = '';
+            $scope.site = ''; // Site part of URL
+            $scope.title = ''; // Title part of URL
+            $scope.newTitle = ''; // Title part of URL
             $scope.cropresults = null;
             $scope.uploadresults = null;
             $scope.metadata = null;
             return;
         }
-        var title = filename
-            .replace(/_/g, ' ')
-            .replace(/^File:/, '');
 
-        fetchImage(title);
-    }
+        var o = parseImageUrl($scope.imageUrl);
+        $scope.site = o.site;
+        $scope.title = o.title;
+        fetchImage();
+    };
 
     $scope.preview = function() {
         if ($scope.crop_dim === undefined) {
@@ -263,6 +295,7 @@ controller('AppCtrl', ['$scope', '$http', '$timeout', '$q', '$window', 'LoginSer
 
         $http.post('backend.php', {
             title: $scope.title,
+            site: $scope.site,
             cropmethod: $scope.cropmethod,
             x: $scope.crop_dim.x,
             y: $scope.crop_dim.y,
@@ -296,8 +329,9 @@ controller('AppCtrl', ['$scope', '$http', '$timeout', '$q', '$window', 'LoginSer
 
         $http.post('backend.php', {
             title: $scope.title,
+            site: $scope.site,
             overwrite: $scope.overwrite,
-            filename: $scope.newFilename,
+            filename: $scope.newTitle,
             store: true
         }).
         success(function(response) {
@@ -323,7 +357,7 @@ controller('AppCtrl', ['$scope', '$http', '$timeout', '$q', '$window', 'LoginSer
 
     };
 
-    $scope.filename = getParameterByName('title');
+    $scope.imageUrl = getParameterByName('imageUrl');
 
     angular.element($window).bind('popstate', function(e) {
     //window.addEventListener('popstate', function(e) {
@@ -334,12 +368,18 @@ controller('AppCtrl', ['$scope', '$http', '$timeout', '$q', '$window', 'LoginSer
             return;
         }
         $scope.$apply(function() {
-            console.log('LOCATION CHANGED: ' + getParameterByName('title'));
-            $scope.setTitle(getParameterByName('title'), false);
+            console.log('LOCATION CHANGED: ' + getParameterByName('imageUrl'));
+            $scope.imageUrl = getParameterByName('imageUrl');
+            $scope.openFile(false);
         });
     });
 
-    $scope.setTitle(getParameterByName('title'), false);
+
+    $scope.imageUrl = getParameterByName('imageUrl');
+    if (!$scope.imageUrl) {
+        $scope.imageUrl = getParameterByName('filename');  // deprecated        
+    }
+    $scope.openFile(false);
 
     $scope.status = 'Checking login';
 
@@ -355,21 +395,17 @@ controller('AppCtrl', ['$scope', '$http', '$timeout', '$q', '$window', 'LoginSer
 
     $scope.exists = [];
 
-    function pageExists(filename) {
-
-        var title = filename
-            .replace(/_/g, ' ')
-            .replace(/^File:/, '');
+    function fileExists( site, title ) {
 
         if (!canceler) {
-            console.log('nothing to abort');
+            //console.log('nothing to abort');
         } else if (canceler && canceler.resolve) {
             // Aborts the $http request if it isn't finished.
-            console.log('abort http');
+            //console.log('abort http');
             canceler.resolve();
         } else {
             // Abort the timer
-            console.log('abort timer');
+            // console.log('abort timer');
             $timeout.cancel(canceler);
         }
 
@@ -382,38 +418,69 @@ controller('AppCtrl', ['$scope', '$http', '$timeout', '$q', '$window', 'LoginSer
 
             canceler = $q.defer();
 
-            $http.get('backend.php?pageExists=' + encodeURIComponent(title), {
+            console.log('Check existence of site:' + site + ', title:' + title);
+
+            $http.get('backend.php?action=exists&site=' + encodeURIComponent(site) + '&title=' + encodeURIComponent(title), {
                 timeout: canceler.promise,
             }).success(function(response) {
-                $scope.exists[filename] = response.exists;
+                var key = site + ':' + title;
+                
+                $scope.error = response.error;
+
+                if (response.error) {
+                    $scope.error = response.error;
+                } else {
+                    $scope.exists[key] = response.exists;
+                    // console.log($scope.exists);                    
+                }
                 canceler = null;
             });
 
         }, 300);
     }
 
-    $scope.$watch('filename', function() {
+    $scope.$watch('imageUrl', function() {
 
-        if ($scope.filename !== undefined && $scope.exists[$scope.filename] === undefined) {
-            var fname = $scope.filename
-                .replace(new RegExp('^(https://|http://)'), '')
-                .replace(new RegExp('^commons.wikimedia.org/wiki/'), '');
-            if (fname !== $scope.filename) {
-                // The pasted filename was a url, so we should decode it
-                fname = decodeURIComponent(fname);
-            }
-            fname = fname.replace(/^File:/, '')
-                .replace('_', ' ', 'g');
-            $scope.filename = fname;
-            pageExists($scope.filename);
+        var o = parseImageUrl( $scope.imageUrl ),
+            key = o.site + ':' + o.title;
+
+        $scope.site = o.site;
+        $scope.title = o.title;
+
+        if ($scope.imageUrl !== undefined && $scope.exists[key] === undefined) {
+
+            var imageUrl = decodeURIComponent($scope.imageUrl)
+                .replace(' ', '_', 'g');
+
+            // TODO: We should strip off the query string, but we must be a bit careful since
+            // we have decoded the URI, and so might have '?' in the actual URI:
+            // https://commons.wikimedia.org/wiki/File:Svg_convex_hull?_country.png?uselang=nb
+
+            $scope.imageUrl = imageUrl;
+
+            // var imageUrl = $scope.imageUrl
+            //     .replace(new RegExp('^(https://|http://)'), '');
+                // .replace(new RegExp('^commons.wikimedia.org/wiki/'), '');
+            //if (fname !== $scope.filename) {
+            // Decode URL
+            // imageUrl = decodeURIComponent(imageUrl);
+            // //}
+            // imageUrl = imageUrl.replace(/^File:/, '')
+            //     .replace('_', ' ', 'g');
+
+            // console.log('Image url changed. Site: ' + $scope.site, ' title: ' + $scope.title);
+
+            fileExists( $scope.site, $scope.title );
         }
 
     });
 
-    $scope.$watch('newFilename', function() {
+    $scope.$watch('newTitle', function() {
 
-        if ($scope.newFilename !== undefined && $scope.exists[$scope.newFilename] === undefined) {
-            pageExists($scope.newFilename);
+        // TODO: !!! pageExists -> imageUrlExists
+
+        if ($scope.newTitle && $scope.exists[$scope.site + ':' + $scope.newTitle] === undefined) {
+            fileExists($scope.site, $scope.newTitle);
         }
 
     });

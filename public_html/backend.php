@@ -34,31 +34,51 @@ if (isset($_GET['checkLogin'])) {
     echo json_encode($ct->checkLogin());
     exit;
 
-} else if (isset($_GET['pageExists'])) {
-    header('Content-type: application/json');
-    echo json_encode(array(
-        'exists' => $ct->pageExists($_GET['pageExists']),
-        'filename' => $_GET['pageExists']
-    ));
-    exit;
+}
 
-} else if (isset($_GET['title'])) {
-    $title = $_GET['title'];
+if (!isset($_GET['action']) || !isset($_GET['title'])) {
+    die('Invalid request');
+}
 
-    if (isset($_GET['lookup'])) {
-        header('Content-type: application/json');
+$action = $_GET['action'];
+$title = $_GET['title'];
+
+header('Content-type: application/json');
+
+switch ($action) {
+
+    case 'exists':
+
+        try {
+            $exists = $ct->pageExists($title);
+        } catch (Exception $e) {
+            echo json_encode(array(
+                'error' => $e->getMessage(),
+                'title' => $title,
+            ));
+            exit;
+        }
+
+        echo json_encode(array(
+            'exists' => $exists,
+            'title' => $title,
+        ));
+        exit;
+
+    case 'metadata':
+
         echo json_encode($ct->fetchImage($title));
         exit;
 
-    } else if (isset($_GET['locateBorder'])) {
+    case 'locateBorder':
+
         $info = $ct->fetchImage($title);
         $bl = new BorderLocator($info['original']['name']);
         $area = $bl->selection;
 
-        header('Content-type: application/json');
         echo json_encode(array(
             'area' => $area
         ));
         exit;
-    }
+
 }

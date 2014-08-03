@@ -58,6 +58,16 @@ if (!isset( $config['consumerKey'] ) || !isset( $config['consumerSecret'] )) {
 
 Image::$pathToJpegTran = $config['jpegtranPath'];
 
-$site = isset($_GET['site']) ? $_GET['site'] : 'no.wikipedia.org';
+if ($_SERVER['REQUEST_METHOD'] == 'POST')
+{
+    $input = json_decode(file_get_contents("php://input"));
+    $site = isset($input->site)
+        ? $input->site 
+        : 'en.wikipedia.org'; // use enwp as default to force re-authorization for 1.1 users
+} else {
+    $site = isset($_REQUEST['site'])
+        ? $_REQUEST['site'] 
+        : 'en.wikipedia.org'; // use enwp as default to force re-authorization for 1.1 users
+}
 
 $oauth = new OAuthConsumer($site, $hostname, $basepath, $testingEnv, $config['consumerKey'], $config['consumerSecret'], $config['localPassphrase']);

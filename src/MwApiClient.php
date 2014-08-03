@@ -5,14 +5,17 @@
 */
 class MwApiClient
 {
-    public $api_url = 'https://commons.wikimedia.org/w/api.php';
+    public $api_url;  // = 'https://commons.wikimedia.org/w/api.php';
     public $cookie_file = '../data/cookiejar.txt';
     public $user_agent;
 
     function __construct(OAuthConsumer $oauth = null, Curl $curl = null)
     {
+
         $this->oauth = $oauth ?: new OAuthConsumer;
         $this->user_agent = $this->oauth->getUserAgent();
+
+        $this->api_url = $oauth->getApiUrl();
 
         $this->curl = $curl ?: new Curl;
         $this->curl->cookie_file = $this->cookie_file;
@@ -50,11 +53,11 @@ class MwApiClient
     public function request($args, $multipart = false)
     {
         $args['format'] = 'json';
-        if ($this->authorized()) {
-            return $this->oauth->doApiQuery($args, $multipart);
-        } else {
-            return json_decode($this->curl->post($this->api_url, $args, $multipart));
-        }
+        //if ($this->authorized()) {
+        return $this->oauth->doApiQuery($args, $multipart);
+        //} else {
+        //    return json_decode($this->curl->post($this->api_url, $args, $multipart));
+        //}
     }
 
     public function getImageInfo($title)
@@ -121,6 +124,10 @@ class MwApiClient
         );
 
         $response = $this->request($query);
+
+        if (isset($response->error)) {
+            throw new Exception('Error: ' . $response->error->info . ' (' . $response->error->code . ')');
+        }
 
         foreach ($response->query->pages as $pageid => $page) {
             if ($pageid == '-1') {
