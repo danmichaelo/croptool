@@ -49,6 +49,7 @@ $I18N = new TsIntuition(array(
         Notice
         **************************************************************************************************** -->
 
+    <!--
     <div ng-show="showNotice" style="padding: .3em; background: #eeee88; text-align:center; border-bottom-right-radius: 5px; border-bottom-left-radius: 5px;">
         <span style="float:right;">
             <a href ng-click="dismissNotice();">[hide]</a>
@@ -58,6 +59,7 @@ $I18N = new TsIntuition(array(
         you should update the code to
         <a href="//commons.wikimedia.org/wiki/Commons_talk:CropTool#Change_in_userscript">the new version</a>.
     </div>
+    -->
 
     <!-- ********************************************************************************************************
         Header
