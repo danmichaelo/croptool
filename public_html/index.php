@@ -74,7 +74,7 @@ $I18N = new TsIntuition(array(
 
     <h1 style="padding:.4em 0; margin: 0 0 .3em 0;">
         <a href ng-click="setTitle()">
-            <i class="icon-crop"></i>
+            <i class="fa fa-crop"></i>
             <?php echo $I18N->msg( 'title' ); ?>
         </a>
     </h1>
@@ -104,7 +104,7 @@ $I18N = new TsIntuition(array(
                 </p>
 
                 <button type="submit" class="btn btn-primary" ng-click="oauthLogin()">
-                    <i class="icon-lock"></i>
+                    <i class="fa fa-lock"></i>
                     <?php echo $I18N->msg( 'loginform-submit-button' ); ?>
                 </button>
 
@@ -303,7 +303,7 @@ $I18N = new TsIntuition(array(
                 <div ng-show="!busy">
 
                     <p>
-                        <i class="icon-question-sign"></i> <?php echo $I18N->msg( 'cropform-help' ); ?>:
+                        <i class="fa fa-question-sign"></i> <?php echo $I18N->msg( 'cropform-help' ); ?>:
                     </p>
 
                     <ul>
@@ -367,13 +367,13 @@ $I18N = new TsIntuition(array(
                 <form ng-submit="upload()" role="form">
 
                     <p>
-                        <i class="icon-warning-sign"></i>
+                        <i class="fa fa-warning-sign"></i>
                         <?php echo $I18N->msg( 'previewform-overwrite-policy', array('variables' => array(
                             'https://commons.wikimedia.org/wiki/Commons:Overwriting existing files'
                         ))); ?>
                     </p>
                     <p ng-non-bindable>
-                        <i class="icon-info-sign"></i>
+                        <i class="fa fa-info-sign"></i>
                         <?php echo $I18N->msg( 'previewform-template-removal-notice'); ?>
                     </p>
                     <div class="radio">
