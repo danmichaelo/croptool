@@ -381,6 +381,7 @@ controller('AppCtrl', ['$scope', '$http', '$timeout', '$q', '$window', 'LoginSer
     $scope.currentUrl = getParameterByName('imageUrl');
     $scope.imageUrl = $scope.currentUrl;
     if (!$scope.imageUrl) {
+        $scope.currentUrl = getParameterByName('title');
         $scope.imageUrl = getParameterByName('title');  // deprecated        
     }
     $scope.openFile(false);
