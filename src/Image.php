@@ -33,6 +33,7 @@ class Image
 
         $xy = getimagesize($path);
         if (!$xy[0] || !$xy[1]) {
+            unlink($path);
             $this->error = 'Invalid image file. Refreshing the page might help in some cases.';
             return false;
         }
