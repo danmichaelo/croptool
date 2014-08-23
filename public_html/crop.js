@@ -262,7 +262,7 @@ controller('AppCtrl', ['$scope', '$http', '$timeout', '$q', '$window', 'LoginSer
     $scope.openFile = function(updateHistory) {
 
         if (updateHistory !== false) {
-            var newUrl = location.href.split('?', 1)[0] + ($scope.imageUrl ? '?imageUrl=' + encodeURIComponent($scope.imageUrl.replace(/ /g, '_')) : '');
+            var newUrl = location.href.split('?', 1)[0] + ($scope.imageUrl ? '?title=' + encodeURIComponent($scope.imageUrl.replace(/ /g, '_')) : '');
             window.history.pushState(null, null, newUrl);
             everPushedSomething = true;
         }
@@ -378,11 +378,10 @@ controller('AppCtrl', ['$scope', '$http', '$timeout', '$q', '$window', 'LoginSer
     });
 
 
-    $scope.currentUrl = getParameterByName('imageUrl');
+    var tmp = getParameterByName('title');
+    if (!tmp) tmp = getParameterByName('imageUrl');  // deprecated
+    $scope.currentUrl = tmp;
     $scope.imageUrl = $scope.currentUrl;
-    if (!$scope.imageUrl) {
-        $scope.imageUrl = getParameterByName('title');  // deprecated        
-    }
     $scope.openFile(false);
 
     $scope.status = 'Checking login';
