@@ -288,6 +288,7 @@ class CropTool {
         chmod($thumbPath, 0664);
 
         $res['orientation'] = $image->orientation;
+        $res['samplingFactor'] = $image->samplingFactor;
 
         $res['thumb'] = array(
             'cached' => true,

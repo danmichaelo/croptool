@@ -14,47 +14,44 @@ class Image
 
     public $error;
 
+    public $orientation;
+    public $samplingFactor;
+
     public function load($path)
     {
         $this->srcPath = $path;
+
+        $image = new Imagick($path);
+        $this->samplingFactor = explode(',', $image->GetImageProperty('jpeg:sampling-factor'))[0];
+        $this->orientation = $image->getImageOrientation();
+
         $logger = new Logger('exiftool');
         $this->exiftool = new Exiftool($logger);
 
-        $this->orientation = 1;
-        $exif = @exif_read_data($path);
-        if (isset($exif['IFD0']) && isset($exif['IFD0']['Orientation'])) {
-            $this->orientation = intval($exif['IFD0']['Orientation']);
-        } else if (isset($exif['Orientation'])) {
-            $this->orientation = intval($exif['Orientation']);
-        }
-        if ($this->orientation == 0) {  // Unknown, assume 1
-            $this->orientation = 1;
-        }
-
-        $xy = getimagesize($path);
-        if (!$xy[0] || !$xy[1]) {
-            unlink($path);
-            $this->error = 'Invalid image file. Refreshing the page might help in some cases.';
-            return false;
-        }
-
         switch($this->orientation)
         {
-            case 1:     // No rotation
-            case 3:     // 180 deg
-                $this->width = $xy[0];
-                $this->height = $xy[1];
+            case imagick::ORIENTATION_UNDEFINED:    // 0
+            case imagick::ORIENTATION_TOPLEFT:      // 1 : no rotation
+            case imagick::ORIENTATION_BOTTOMRIGHT:  // 3 : 180 deg
+                $this->width = $image->getImageWidth();
+                $this->height = $image->getImageHeight();
                 break;
 
-            case 6:     // 90 deg CW
-            case 8:     // 90 deg CCW
-                $this->width = $xy[1];
-                $this->height = $xy[0];
+            case imagick::ORIENTATION_RIGHTTOP:     // 6 : 90 deg CW
+            case imagick::ORIENTATION_LEFTBOTTOM:   // 8 : 90 deg CCW
+                $this->width = $image->getImageHeight();
+                $this->height = $image->getImageWidth();
                 break;
 
             default:
                 $this->error = 'Unsupported EXIF orientation "' . $this->orientation . '"';
                 return false;
+        }
+
+        if (!$this->width || !$this->height) {
+            unlink($path);
+            $this->error = 'Invalid image file. Refreshing the page might help in some cases.';
+            return false;
         }
 
         $this->aspectRatio = $this->width / $this->height;
@@ -72,7 +69,8 @@ class Image
 
         switch($this->orientation)
         {
-            case 1:
+            case imagick::ORIENTATION_UNDEFINED:    // 0
+            case imagick::ORIENTATION_TOPLEFT:      // 1 : no rotation
                 // No rotation
                 $rect = array(
                     'x' => $x,
@@ -82,7 +80,7 @@ class Image
                 );
                 break;
 
-            case 3:
+            case imagick::ORIENTATION_BOTTOMRIGHT:  // 3 : 180 deg
                 // Image rotated 180 deg
                 $rect = array(
                     'x' => $this->width - $x - $width,
@@ -92,7 +90,7 @@ class Image
                 );
                 break;
 
-            case 6:
+            case imagick::ORIENTATION_RIGHTTOP:     // 6 : 90 deg CW
                 // Image rotated 90 deg CCW
                 $rect = array(
                     'x' => $y,
@@ -102,7 +100,7 @@ class Image
                 );
                 break;
 
-            case 8:
+            case imagick::ORIENTATION_LEFTBOTTOM:   // 8 : 90 deg CCW
                 // Image rotated 90 deg CW
                 $rect = array(
                     'x' => $this->height - $y - $height,
@@ -220,18 +218,19 @@ class Image
 
         switch($this->orientation)
         {
-            case 1: // No rotation
+            case imagick::ORIENTATION_UNDEFINED:    // 0
+            case imagick::ORIENTATION_TOPLEFT:      // 1 : no rotation
                 break;
 
-            case 3: // 180 rotate left
+            case imagick::ORIENTATION_BOTTOMRIGHT:  // 3 : 180 deg
                 $srcImg = imagerotate($srcImg, 180, 0);
                 break;
 
-            case 6: // 90 rotate right
+            case imagick::ORIENTATION_RIGHTTOP:     // 6 : 90 deg CW
                 $srcImg = imagerotate($srcImg, -90, 0);
                 break;
 
-            case 8:    // 90 rotate left
+            case imagick::ORIENTATION_LEFTBOTTOM:   // 8 : 90 deg CCW
                 $srcImg = imagerotate($srcImg, 90, 0);
                 break;
 
