@@ -4,7 +4,8 @@
     "require": {
         "php": ">= 5.3.0",
         "ext-imagick": "*",
-        "lib-curl": "*",
+        "ext-curl": "*",
+        "ext-mcrypt": "*",
         "shuber/curl": "master-dev",
         "danmichaelo/coma": "master-dev",
         "phpstats/phpstats": "master-dev",
