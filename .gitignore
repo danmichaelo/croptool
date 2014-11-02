@@ -1,6 +1,8 @@
-config.json
+config.ini
 composer.lock
 data/*
 public_html/files/*
 vendor
 oauth.ini
+*.log
+composer.phar
