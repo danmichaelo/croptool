@@ -10,6 +10,33 @@ require('../vendor/autoload.php');
 ini_set('display_errors', false);
 
 
+/**
+ * A file containing the following keys:
+ * - consumerKey: The "consumer token" given to you when registering your app
+ * - consumerSecret: The "secret token" given to you when registering your app
+ * - localPassphrase: The (base64 encoded) key used for encrypting cookie content
+ * - jpegtranPath: Path to jpegtran
+ * - rollbarToken: Token for the Rollbar service
+ * - rollbarEnv: Rollbar environment
+ */
+$configFile = '../config.ini';
+$config = parse_ini_file($configFile);
+
+if ( $config === false ) {
+    header( "HTTP/1.1 500 Internal Server Error" );
+    echo 'The ini file could not be read';
+    exit(0);
+}
+
+if (isset($config['rollbarToken'])) {
+
+    Rollbar::init(array(
+        'access_token' => $config['rollbarToken'],
+        'environment' => $config['rollbarEnv']
+    ));
+
+}
+
 function shutdown() {
     $error = error_get_last();
     if ($error['type'] === E_ERROR) {
@@ -46,21 +73,6 @@ if (isset($_GET['title'])) {
     $_SESSION['title'] = $_GET['title'];
 }
 
-/**
- * A file containing the following keys:
- * - consumerKey: The "consumer token" given to you when registering your app
- * - consumerSecret: The "secret token" given to you when registering your app
- * - localPassphrase: The (base64 encoded) key used for encrypting cookie content
- * - jpegtranPath: Path to jpegtran
- */
-$configFile = '../config.ini';
-$config = parse_ini_file($configFile);
-
-if ( $config === false ) {
-    header( "HTTP/1.1 500 Internal Server Error" );
-    echo 'The ini file could not be read';
-    exit(0);
-}
 
 if (!isset( $config['consumerKey'] ) || !isset( $config['consumerSecret'] )) {
     header( "HTTP/1.1 500 Internal Server Error" );

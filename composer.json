@@ -6,7 +6,8 @@
         "danmichaelo/coma": "master-dev",
         "phpstats/phpstats": "master-dev",
         "phpexiftool/phpexiftool": "master-dev",
-        "lib-curl": "*"
+        "lib-curl": "*",
+        "rollbar/rollbar": "~0.9.8"
 
     },
     "require-dev": {
