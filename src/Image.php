@@ -22,7 +22,8 @@ class Image
         $this->srcPath = $path;
 
         $image = new Imagick($path);
-        $this->samplingFactor = explode(',', $image->GetImageProperty('jpeg:sampling-factor'))[0];
+        $sf = explode(',', $image->GetImageProperty('jpeg:sampling-factor'));
+        $this->samplingFactor = $sf[0];
         $this->orientation = $image->getImageOrientation();
 
         $logger = new Logger('exiftool');
