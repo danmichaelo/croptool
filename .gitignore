@@ -6,3 +6,4 @@ vendor
 oauth.ini
 *.log
 composer.phar
+.vagrant
