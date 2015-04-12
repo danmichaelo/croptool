@@ -13,8 +13,8 @@ apt-get install -y nginx > /dev/null
 
 echo "Installing PHP"
 apt-get install -y php5-fpm php5-cli php5-mcrypt php5-imagick php5-curl > /dev/null
-sudo ln -sf /etc/php5/mods-available/mcrypt.ini /etc/php5/fpm/conf.d/20-mcrypt.ini
-sudo ln -sf /etc/php5/mods-available/mcrypt.ini /etc/php5/cli/conf.d/20-mcrypt.ini
+ln -sf /etc/php5/mods-available/mcrypt.ini /etc/php5/fpm/conf.d/20-mcrypt.ini
+ln -sf /etc/php5/mods-available/mcrypt.ini /etc/php5/cli/conf.d/20-mcrypt.ini
 
 echo "Configuring Nginx"
 if [[ ! -e /etc/nginx/server.key ]]; then
