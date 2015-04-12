@@ -21,10 +21,12 @@ class Image
     {
         $this->srcPath = $path;
 
+        $exif = exif_read_data($this->srcPath, 'IFD0');
+        $this->orientation = isset($exif['Orientation']) ? intval($exif['Orientation']) : 0;
+
         $image = new Imagick($path);
         $sf = explode(',', $image->GetImageProperty('jpeg:sampling-factor'));
         $this->samplingFactor = $sf[0];
-        $this->orientation = $image->getImageOrientation();
 
         $logger = new Logger('exiftool');
         $this->exiftool = new Exiftool($logger);

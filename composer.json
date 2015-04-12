@@ -3,6 +3,7 @@
     "description": "CropTool for Wikimedia Commons",
     "require": {
         "php": ">= 5.3.0",
+        "ext-exif": "*",
         "ext-imagick": "*",
         "ext-curl": "*",
         "ext-mcrypt": "*",
