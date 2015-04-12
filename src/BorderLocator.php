@@ -1,7 +1,5 @@
 <?php
 
-require('../vendor/phpstats/phpstats/lib/Stats.php');
-
 use Danmichaelo\Coma\ColorDistance,
 	Danmichaelo\Coma\sRGB;
 
