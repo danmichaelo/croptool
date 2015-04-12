@@ -127,29 +127,21 @@ class Image
         $coords = $this->getCropCoordinates($x, $y, $width, $height);
 
         // Load img:
-        $srcImg = imagecreatefromjpeg($this->srcPath);
+        $im = new \Imagick($this->srcPath);
 
-        #$cmd = 'convert ' . escapeshellarg($this->srcPath) . ' -crop ' . escapeshellarg($dim) . ' ' . escapeshellarg($destPath);
-        #$cmd_res = exec($cmd, $output, $return_var);
+        $im->cropImage($coords['width'], $coords['height'], $coords['x'], $coords['y']);
+        
+        // Imagick will copy metadata to the destination file
+        $im->writeImage($destPath);
+        $im->destroy();
 
-        $jpegQuality = 90;
-
-        $dstImg = imagecreatetruecolor($coords['width'], $coords['height']);
-
-        imagecopyresampled($dstImg, $srcImg, 0, 0, $coords['x'], $coords['y'], $coords['width'], $coords['height'], $coords['width'], $coords['height']);
-        imagejpeg($dstImg, $destPath, $jpegQuality);
         chmod($destPath, 0664);
-
-        $this->copyMetadata($destPath);
-
-        $cropped = new Image();
-        $cropped->load($destPath);
 
         return array(
             'method' => 'precise',
             'name' => Image::$filesFolder . basename($destPath) . '?ts=' . time(),
-            'width' => $cropped->width,
-            'height' => $cropped->height
+            'width' => $width,
+            'height' => $height
         );
 
     }
@@ -214,49 +206,49 @@ class Image
 
     public function thumb($destPath, $maxWidth, $maxHeight)
     {
-        // Currently we only support jpeg, so no checking needed
-        $srcImg = imagecreatefromjpeg($this->srcPath);
-
-        switch($this->orientation)
+        try
         {
-            case imagick::ORIENTATION_UNDEFINED:    // 0
-            case imagick::ORIENTATION_TOPLEFT:      // 1 : no rotation
-                break;
+            $im = new \Imagick;
+            $im->readImage($this->srcPath);
 
-            case imagick::ORIENTATION_BOTTOMRIGHT:  // 3 : 180 deg
-                $srcImg = imagerotate($srcImg, 180, 0);
-                break;
+            switch($this->orientation)
+            {
+                case \imagick::ORIENTATION_UNDEFINED:    // 0
+                case \imagick::ORIENTATION_TOPLEFT:      // 1 : no rotation
+                    break;
 
-            case imagick::ORIENTATION_RIGHTTOP:     // 6 : 90 deg CW
-                $srcImg = imagerotate($srcImg, -90, 0);
-                break;
+                case \imagick::ORIENTATION_BOTTOMRIGHT:  // 3 : 180 deg
+                    $im->rotateimage(new \ImagickPixel(), 180);
+                    break;
 
-            case imagick::ORIENTATION_LEFTBOTTOM:   // 8 : 90 deg CCW
-                $srcImg = imagerotate($srcImg, 90, 0);
-                break;
+                case \imagick::ORIENTATION_RIGHTTOP:     // 6 : 90 deg CW
+                    $im->rotateimage(new \ImagickPixel(), 90);
+                    break;
 
-            default:
-                // we should never get here, this is checked in load() as well
-                die('Unsupported EXIF orientation');
+                case \imagick::ORIENTATION_LEFTBOTTOM:   // 8 : 90 deg CCW
+                    $im->rotateimage(new \ImagickPixel(), -90);
+                    break;
+
+                default:
+                    // we should never get here, this is checked in load() as well
+                    die('Unsupported EXIF orientation');
+            }
+
+            // Now that it's auto-rotated, make sure the EXIF data is correct, so
+            // thumbnailImage doesn't try to autorotate the image
+            $im->setImageOrientation(\imagick::ORIENTATION_TOPLEFT);
+
+            $im->thumbnailImage($maxWidth, $maxHeight, true);
+            $w = $im->getImageWidth();
+            $h = $im->getImageHeight();
+            $im->writeImage($destPath);
+            $im->destroy();
+        }
+        catch(Exception $e)
+        {
+            return $e->getMessage();  # TODO: MAke sure this is handled!
         }
 
-        // Assume width is the limiting factor
-        $w = ($this->width > $maxWidth) ? $maxWidth : $this->width;
-        $h = $w / $this->aspectRatio;
-
-        // If height is actually the limiting factor
-        if ($h > $maxHeight) {
-            $h = ($this->height > $maxHeight) ? $maxHeight : $this->height;
-            $w = $h * $this->aspectRatio;
-        }
-
-        $destImg = imagecreatetruecolor($w, $h);
-        imagecopyresampled($destImg, $srcImg, 0, 0, 0, 0, $w, $h, $this->width, $this->height);
-
-        $w = imagesx($destImg);
-        $h = imagesy($destImg);
-
-        imagejpeg($destImg, $destPath);
         return array($w, $h);
     }
 
