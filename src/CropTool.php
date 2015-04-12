@@ -270,8 +270,12 @@ class CropTool {
         if (!file_exists($abs_path)) {
             $res['original']['cached'] = false;
             $data = $this->curl->get($image_url);
-            file_put_contents($abs_path, $data);
-            chmod($abs_path, 0664);
+            if (file_put_contents($abs_path, $data) === false) {
+                return array('error' => 'Failed to write image data to disk. Permission problem?');
+            }
+            if (chmod($abs_path, 0664) === false) {
+                return array('error' => 'Failed to change permissions for file.');                
+            }
         }
 
         // 3. Make thumb
