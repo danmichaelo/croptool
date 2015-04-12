@@ -35,6 +35,11 @@ cp /vagrant/provision/nginx_vhost /etc/nginx/sites-available/nginx_vhost
 ln -sf /etc/nginx/sites-available/nginx_vhost /etc/nginx/sites-enabled/
 rm -f /etc/nginx/sites-available/default
 
+# Since we cannot chmod in a synced folder, we change the Nginx user 
+# from 'www-data' to 'vagrant' instead.
+sed -i 's/user = www-data/user = vagrant/g' /etc/php5/fpm/pool.d/www.conf
+sed -i 's/group = www-data/group = vagrant/g' /etc/php5/fpm/pool.d/www.conf
+
 if [[ ! -d /var/www/html/ ]]; then
 	mkdir -p /var/www/html/
 fi
