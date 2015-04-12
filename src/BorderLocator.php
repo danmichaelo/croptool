@@ -2,7 +2,6 @@
 
 require('../vendor/phpstats/phpstats/lib/Stats.php');
 
-use PHPStats\Stats;
 use Danmichaelo\Coma\ColorDistance,
 	Danmichaelo\Coma\sRGB;
 
@@ -13,7 +12,7 @@ class BorderLocator
 {
 
 	/**
-	 * GD image resource identifier
+	 * ImageMagick resource
 	 */
 	protected $im;
 
@@ -36,9 +35,12 @@ class BorderLocator
 	function __construct($filename)
 	{
 		$this->filename = $filename;
-		$this->im = imagecreatefromjpeg($filename);
+		$this->im = new \Imagick($filename);
 
-		$this->dim = array( imagesx($this->im), imagesy($this->im) );
+		$this->dim = array(
+			$this->im->getImageWidth(),
+			$this->im->getImageHeight()
+		);
 
 		$this->selection = array(0, 0, $this->dim[0] - 1, $this->dim[1] - 1);
 
@@ -47,7 +49,7 @@ class BorderLocator
 		$this->detect();
 
 		// Free memory
-		imagedestroy($this->im);
+		$this->im->destroy();
 	}
 
 	//scanLine(array(0,0), array(0,1));
@@ -99,17 +101,14 @@ class BorderLocator
 				$line[] = 1;
 			}
 		}
-		return Stats::sum($line) / $length * $step;
+		return array_sum($line) / $length * $step;
 	}
 
 	protected function getColor($x, $y)
 	{
-		$rgb = imagecolorat($this->im, $x, $y);
-		return new sRGB(
-			($rgb >> 16) & 0xFF,
-			($rgb >> 8) & 0xFF,
-			$rgb & 0xFF
-		);
+		$pixel = $this->im->getImagePixelColor($x, $y);
+		$color = $pixel->getColor(); 
+		return new sRGB($color['r'], $color['g'], $color['b']);
 	}
 
 	public function singleDirection($dir, $start, $end, $col)
