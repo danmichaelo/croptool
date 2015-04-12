@@ -73,3 +73,5 @@ else
 	echo "Installing Composer packages"
 	composer install --no-progress --prefer-dist
 fi
+
+chmod ug+x ./vendor/phpexiftool/exiftool/exiftool
