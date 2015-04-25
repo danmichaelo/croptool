@@ -35,7 +35,7 @@ $I18N = new TsIntuition(array(
   <link rel="stylesheet" type="text/css" href="//tools-static.wmflabs.org/cdnjs/ajax/libs/twitter-bootstrap/3.3.4/css/bootstrap.min.css">
   <link rel="stylesheet" type="text/css" href="//tools-static.wmflabs.org/cdnjs/ajax/libs/font-awesome/4.3.0/css/font-awesome.min.css">
   <link rel="stylesheet" type="text/css" href="//tools-static.wmflabs.org/cdnjs/ajax/libs/jquery-jcrop/0.9.12/css/jquery.Jcrop.min.css">
-  <link rel="stylesheet" type="text/css" href="site.css">
+  <link rel="stylesheet" type="text/css" href="app.css">
 
   <script src="//tools-static.wmflabs.org/cdnjs/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
   <script src="//tools-static.wmflabs.org/cdnjs/ajax/libs/twitter-bootstrap/3.3.4/js/bootstrap.min.js"></script>
@@ -43,7 +43,7 @@ $I18N = new TsIntuition(array(
   <script src="//tools-static.wmflabs.org/cdnjs/ajax/libs/angular.js/1.2.28/angular-sanitize.min.js"></script>
   <script src="//tools-static.wmflabs.org/cdnjs/ajax/libs/jquery-jcrop/0.9.12/js/jquery.Jcrop.min.js"></script>
   <script src="//tools-static.wmflabs.org/cdnjs/ajax/libs/angular-local-storage/0.1.5/angular-local-storage.min.js"></script>
-  <script src="crop.js"></script>
+  <script src="app.js"></script>
 
 </head>
 <body ng-controller="AppCtrl">
