@@ -32,17 +32,17 @@ $I18N = new TsIntuition(array(
 
 </script>
 
-  <link rel="stylesheet" type="text/css" href="//netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap.min.css">
-  <link rel="stylesheet" href="css/jquery.Jcrop.css" type="text/css">
-  <link rel="stylesheet" type="text/css" href="//maxcdn.bootstrapcdn.com/font-awesome/4.1.0/css/font-awesome.min.css">
-  <link rel="stylesheet" href="site.css" type="text/css">
+  <link rel="stylesheet" type="text/css" href="//tools-static.wmflabs.org/cdnjs/ajax/libs/twitter-bootstrap/3.3.4/css/bootstrap.min.css">
+  <link rel="stylesheet" type="text/css" href="//tools-static.wmflabs.org/cdnjs/ajax/libs/font-awesome/4.3.0/css/font-awesome.min.css">
+  <link rel="stylesheet" type="text/css" href="//tools-static.wmflabs.org/cdnjs/ajax/libs/jquery-jcrop/0.9.12/css/jquery.Jcrop.min.css">
+  <link rel="stylesheet" type="text/css" href="site.css">
 
-  <script src="//code.jquery.com/jquery-1.11.0.min.js"></script>
-  <script src="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js"></script>
-  <script src="js/jquery.Jcrop.js"></script>
-  <script src="//ajax.googleapis.com/ajax/libs/angularjs/1.2.20/angular.min.js"></script>
-  <script src="//ajax.googleapis.com/ajax/libs/angularjs/1.2.20/angular-sanitize.min.js"></script>
-  <script src="js/angular-local-storage.min.js"></script>
+  <script src="//tools-static.wmflabs.org/cdnjs/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
+  <script src="//tools-static.wmflabs.org/cdnjs/ajax/libs/twitter-bootstrap/3.3.4/js/bootstrap.min.js"></script>
+  <script src="//tools-static.wmflabs.org/cdnjs/ajax/libs/angular.js/1.2.28/angular.min.js"></script>
+  <script src="//tools-static.wmflabs.org/cdnjs/ajax/libs/angular.js/1.2.28/angular-sanitize.min.js"></script>
+  <script src="//tools-static.wmflabs.org/cdnjs/ajax/libs/jquery-jcrop/0.9.12/js/jquery.Jcrop.min.js"></script>
+  <script src="//tools-static.wmflabs.org/cdnjs/ajax/libs/angular-local-storage/0.1.5/angular-local-storage.min.js"></script>
   <script src="crop.js"></script>
 
 </head>
