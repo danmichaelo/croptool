@@ -17,11 +17,6 @@ class OAuthConsumer {
     protected $mwOAuthIW = 'mw';
 
     /**
-     * The API endpoint
-     */
-    protected $apiUrl = 'https://commons.wikimedia.org/w/api.php';
-
-    /**
      * Set this to Special:MyTalk on the above wiki
      */
     protected $mytalkUrl = 'https://commons.wikimedia.org/wiki/Special:MyTalk#Hello.2C_world';
@@ -44,11 +39,6 @@ class OAuthConsumer {
     protected $rsaPublicKeyFile = '../mykey.public';
 
     /**
-     * Username of the authorized user
-     */
-    protected $username = '';
-
-    /**
      * Object carrying out encryption and decryption
      */
     protected $cipher;
@@ -63,21 +53,14 @@ class OAuthConsumer {
      */
     protected $basepath;
 
-    /**
-     * The remote site name
-     */
-    protected $site;
 
     /**
      * Are we on a test/development server?
      */
     protected $testingEnv = false;
 
-    public function __construct($site, $hostname = 'localhost', $basepath = '/', $testingEnv = false, $consumerKey = '', $consumerSecret = '', $localPassphrase = '')
+    public function __construct($hostname = 'localhost', $basepath = '/', $testingEnv = false, $consumerKey = '', $consumerSecret = '', $localPassphrase = '')
     {
-
-        $this->site = $site;
-        $this->apiUrl = 'https://' . $site . '/w/api.php';
 
         $this->hostname = $hostname;
         $this->basepath = $basepath;
@@ -92,7 +75,7 @@ class OAuthConsumer {
         $this->gTokenKey = '';
         $this->gTokenSecret = '';
 
-        // Grab request token from SESSION
+        // Grab temporary request token from SESSION
         if ( isset( $_SESSION['mwKey'] ) && isset( $_SESSION['mwSecret'] ) ) {
             $this->gTokenKey = $_SESSION['mwKey'];
             $this->gTokenSecret = $_SESSION['mwSecret'];
@@ -107,7 +90,7 @@ class OAuthConsumer {
 
         // Fetch the access token if this is the callback from requesting authorization
         if ( isset( $_GET['oauth_verifier'] ) && $_GET['oauth_verifier'] ) {
-            $this->fetchAccessToken();
+            $this->fetchAccessToken($_GET['oauth_verifier']);
             if (isset($_SESSION['title'])) {
                 header('Location: ./?title=' . urlencode(str_replace(' ', '_', $_SESSION['title'])));
             } else {
@@ -127,57 +110,16 @@ class OAuthConsumer {
 
     }
 
-    public function getApiUrl()
-    {
-        return $this->apiUrl;
-    }
-
-    public function authorized()
-    {
-        if (!isset($this->_authorized)) {
-            $this->_authorized = $this->checkAuthorization();
-        }
-        return $this->_authorized;
-    }
-
     public function getUserAgent()
     {
         return $this->gUserAgent;
-    }
-
-    private function checkAuthorization()
-    {
-        // Check authorization
-        // First fetch the username
-        $res = $this->doApiQuery( array(
-            'format' => 'json',
-            'action' => 'query',
-            'meta' => 'userinfo',
-        ) );
-
-        if ( isset( $res->error->code ) && $res->error->code === 'mwoauth-invalid-authorization' ) {
-            $this->authError = $res->error;
-            // We're not authorized!
-            return false;
-        }
-
-        if ( !isset( $res->query->userinfo ) ) {
-            $this->authError = 'Bad API response';
-            return false;
-        }
-        if ( isset( $res->query->userinfo->anon ) ) {
-            $this->authError = 'Not logged in';
-            return false;
-        }
-        $this->username = $res->query->userinfo->name;
-        return true;
     }
 
     /**
      * Handle a callback to fetch the access token
      * @return void
      */
-    private function fetchAccessToken() {
+    private function fetchAccessToken($oauth_verifier) {
 
         $url = $this->mwOAuthUrl . '/token';
         $url .= strpos( $url, '?' ) ? '&' : '?';
@@ -187,7 +129,7 @@ class OAuthConsumer {
             // OAuth information
             'oauth_consumer_key' => $this->gConsumerKey,
             'oauth_token' => $this->gTokenKey, // request token
-            'oauth_verifier' => $_GET['oauth_verifier'],
+            'oauth_verifier' => $oauth_verifier,
             'oauth_version' => '1.0',
             'oauth_nonce' => md5( microtime() . mt_rand() ),
             'oauth_timestamp' => time(),
@@ -355,11 +297,8 @@ class OAuthConsumer {
         setcookie('mwKey', '', time() - 3600, $this->basepath, '', !$this->testingEnv, true);
         setcookie('mwSecret', '', time() - 3600, $this->basepath, '', !$this->testingEnv, true);
 
-        $this->_authorized = false;
         $this->gTokenKey = '';
         $this->gTokenSecret = '';
-        $this->username = '';
-        $this->authError = 'Not logged in';
     }
 
     /**
@@ -368,7 +307,7 @@ class OAuthConsumer {
      */
     function doAuthorizationRedirect() {
 
-        // First, we need to fetch a request token.
+        // First, we need to fetch a temporary request token.
         // The request is signed with an empty token secret and no token key.
         $this->gTokenSecret = '';
         $url = $this->mwOAuthUrl . '/initiate';
@@ -433,69 +372,31 @@ class OAuthConsumer {
     }
 
     /**
-     * Send an API query with OAuth authorization
-     *
+     * Sign request and return OAuth header for use with an API request
+     * @param string $method  HTTP method
+     * @param string $url  API URL
      * @param array $post Post data
-     * @param string $enctype Encoding type
-     * @return array API results
+     *
+     * @return string
      */
-    function doApiQuery( $post, $multipart = false ) {
-
-        $headerArr = array(
-            // OAuth information
+    public function signRequestAndReturnHeader($method, $url, $data = [])
+    {
+        $headers = array(
             'oauth_consumer_key' => $this->gConsumerKey,
             'oauth_token' => $this->gTokenKey,
             'oauth_version' => '1.0',
             'oauth_nonce' => md5( microtime() . mt_rand() ),
             'oauth_timestamp' => time(),
-
-            // We're using secret key signatures here.
             'oauth_signature_method' => $this->signatureMethod,
         );
 
-        $ch = curl_init();
-
-        curl_setopt( $ch, CURLOPT_POST, true );
-        if ($multipart == true) {
-            $signature = $this->signRequest( 'POST', $this->apiUrl, $headerArr );
-            curl_setopt( $ch, CURLOPT_POSTFIELDS, $post );
-        } else {
-            $signature = $this->signRequest( 'POST', $this->apiUrl, $post + $headerArr );
-            curl_setopt( $ch, CURLOPT_POSTFIELDS, http_build_query($post) );
-        }
-        $headerArr['oauth_signature'] = $signature;
-
+        $headers['oauth_signature'] = $this->signRequest($method, $url, $data + $headers);
         $header = array();
-        foreach ( $headerArr as $k => $v ) {
+        foreach ( $headers as $k => $v ) {
             $header[] = rawurlencode( $k ) . '="' . rawurlencode( $v ) . '"';
         }
-        $header = array('Authorization: OAuth ' . join( ', ', $header ));
-
-        curl_setopt( $ch, CURLOPT_URL, $this->apiUrl );
-        curl_setopt( $ch, CURLOPT_HTTPHEADER, $header );
-        //curl_setopt( $ch, CURLOPT_SSL_VERIFYPEER, false );
-        curl_setopt( $ch, CURLOPT_USERAGENT, $this->gUserAgent );
-        curl_setopt( $ch, CURLOPT_HEADER, 0 );
-        curl_setopt( $ch, CURLOPT_RETURNTRANSFER, 1 );
-        $data = curl_exec( $ch );
-        $info = curl_getinfo($ch);
-        curl_close($ch);
-        if ( !$data ) {
-            header( "HTTP/1.1 500 Internal Server Error" );
-            echo 'Curl error: ' . htmlspecialchars( curl_error( $ch ) );
-            exit(0);
-        }
-
-        //print_r($info);
-        //print_r($post);
-        //print_r($data);
-        //die;
-        return json_decode( $data );
-    }
-
-    public function getUsername()
-    {
-        return $this->username;
+        $header = 'Authorization: OAuth ' . join( ', ', $header );
+        return $header;
     }
 
 }

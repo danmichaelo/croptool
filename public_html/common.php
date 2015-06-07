@@ -94,4 +94,4 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST')
         : 'en.wikipedia.org'; // use enwp as default to force re-authorization for 1.1 users
 }
 
-$oauth = new OAuthConsumer($site, $hostname, $basepath, $testingEnv, $config['consumerKey'], $config['consumerSecret'], $config['localPassphrase']);
+$oauth = new OAuthConsumer($hostname, $basepath, $testingEnv, $config['consumerKey'], $config['consumerSecret'], $config['localPassphrase']);
