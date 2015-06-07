@@ -337,6 +337,7 @@ controller('AppCtrl', ['$scope', '$http', '$timeout', '$q', '$window', 'LoginSer
             overwrite: $scope.overwrite,
             comment: $scope.cropresults.uploadComments[$scope.overwrite],
             filename: $scope.newTitle,
+            elems: $scope.cropresults.page.elems,
             store: true
         }).
         success(function(response) {

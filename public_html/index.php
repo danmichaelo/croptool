@@ -379,10 +379,32 @@ $I18N = new TsIntuition(array(
 
                 <form ng-submit="upload()" role="form">
 
-                    <p ng-non-bindable>
-                        <i class="fa fa-info-circle"></i>
-                        <?php echo $I18N->msg( 'previewform-template-removal-notice'); ?>
-                    </p>
+                    <div class="form-group" ng-show="cropresults.page.elems.tpl_remove_border !== undefined">
+                        <label>
+                            <input type="checkbox" ng-model="cropresults.page.elems.tpl_remove_border">
+                            <span ng-non-bindable>
+                            <?php echo $I18N->msg( 'previewform-remove-tpl-remove-border' ); ?>
+                            </span>
+                        </label>
+                    </div>
+
+                    <div class="form-group" ng-show="cropresults.page.elems.tpl_watermark !== undefined">
+                        <label>
+                            <input type="checkbox" ng-model="cropresults.page.elems.tpl_watermark">
+                            <span ng-non-bindable>
+                            <?php echo $I18N->msg( 'previewform-remove-tpl-watermark' ); ?>
+                            </span>
+                        </label>
+                    </div>
+
+                    <div class="form-group" ng-show="cropresults.page.elems.cat_border !== undefined">
+                        <label>
+                            <input type="checkbox" ng-model="cropresults.page.elems.cat_border">
+                            <span ng-non-bindable>
+                                <?php echo $I18N->msg( 'previewform-remove-cat-border' ); ?>                            
+                            </span>
+                        </label>
+                    </div>
 
                     <div class="form-group">
                         <label for="uploadComment">

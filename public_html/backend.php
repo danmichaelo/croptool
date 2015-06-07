@@ -70,6 +70,11 @@ switch ($action) {
         echo json_encode($ct->fetchImage($title));
         exit;
 
+    case 'analyzepage':
+
+        echo json_encode($ct->analyzePage($title));
+        exit;
+
     case 'locateBorder':
 
         $info = $ct->fetchImage($title);

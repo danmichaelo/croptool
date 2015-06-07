@@ -27,3 +27,6 @@ footer a:link, footer a:visited {
 footer p {
     margin: 0;
 }
+label {
+    font-weight: normal;
+}

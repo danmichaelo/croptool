@@ -54,7 +54,11 @@ $messages['en'] = array(
     'previewform-lossless-explanation' => 'The resulting image is $1 px wider and $2 px higher than the region you selected. <a href="$3">Why?</a> Note that the extra pixels included are in the left and/or top part of the image.',
     'previewform-precise' => 'A precise crop was performed.',
     'previewform-overwrite-policy' => 'Please make sure you are familiar with <a href="$1">Commons:Overwriting existing files</a>.',
-    'previewform-template-removal-notice' => 'The templates <tt>{{crop}}</tt> and <tt>{{remove border}}</tt> will be removed if found.',
+
+    'previewform-remove-tpl-remove-border' => 'Remove template: <tt>{{remove border}}</tt>',
+    'previewform-remove-tpl-watermark' => 'Remove template: <tt>{{watermark}}</tt>',
+    'previewform-remove-cat-border' => 'Remove category: <tt>{{images with border}}</tt>',
+
     'previewform-overwrite' => 'Overwrite original',
     'previewform-create-new' => 'Upload as new file',
 	'previewform-new-title' => 'New filename',

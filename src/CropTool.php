@@ -12,6 +12,12 @@ class CropTool {
 
     public $api;
 
+    protected $elem_matches = array(
+        'tpl_remove_border' => '/{{\s*(crop|remove ?borders?)\s*}}\s*/i',
+        'tpl_watermark' => '/{{\s*(wmr|(remove |image)?water ?m(a|e)rk(ed)?)\s*}}\s*/i',
+        'cat_border' => '/\[\[category:images(?: |_)with(?: |_)borders\]\]\s*/i',
+    );
+
     public function __construct(MwApiClient $apiClient = null, Curl $curl = null, Logger $logger = null)
     {
         $this->publicPath = dirname(dirname(__FILE__)) . '/public_html/';
@@ -106,16 +112,49 @@ class CropTool {
             'rename' => 'Cropped version of [[File:' . $title . ']] using [[Commons:CropTool|CropTool]].',
         );
 
+        $res['page'] = $this->analyzePage($title);
+
         $this->logger->addInfo('[main] ' . substr($sha1, 0, 7) . ' Did crop using method: ' . $cm);
 
         return $res;
     }
 
-    public function removeBorderTemplateAndCat($text)
+    public function analyzePage($title)
     {
-        $text = preg_replace('/{{crop}}\s*/i', '', $text);
-        $text = preg_replace('/{{remove border}}\s*/i', '', $text);
-        $text = preg_replace('/\[\[category:images(?: |_)with(?: |_)borders\]\]\s*/i', '', $text);
+        $response = $this->api->request(array(
+            'action' => 'parse',
+            'prop' => 'wikitext',
+            'format' => 'json',
+            'page' => 'File:' . $title
+        ), false, false);
+
+        $wikitext = $response->parse->wikitext->{'*'};
+
+        $res = array(
+            'title' => $title,
+            'text' => $wikitext,
+            'elems' => array(),
+        );
+
+        if (preg_match($this->elem_matches['tpl_remove_border'], $wikitext)) $res['elems']['tpl_remove_border'] = true;
+        if (preg_match($this->elem_matches['tpl_watermark'], $wikitext)) $res['elems']['tpl_watermark'] = true;
+        if (preg_match($this->elem_matches['cat_border'], $wikitext)) $res['elems']['cat_border'] = true;
+
+        return $res;
+    }
+
+    public function removeBorderTemplateAndCat($text, $elems)
+    {
+        if (isset($elems->tpl_remove_border) && $elems->tpl_remove_border) {
+            $text = preg_replace($this->elem_matches['tpl_remove_border'], '', $text);
+        }
+        if (isset($elems->tpl_watermark) && $elems->tpl_watermark) {
+            $text = preg_replace($this->elem_matches['tpl_watermark'], '', $text);
+        }
+        if (isset($elems->cat_border) && $elems->cat_border) {
+            $text = preg_replace($this->elem_matches['cat_border'], '', $text);
+        }
+
         return $text;
     }
 
@@ -192,7 +231,7 @@ class CropTool {
             if ($input->overwrite == 'overwrite') {
                 $this->logger->addInfo('[main] ' . substr($sha1, 0, 7) . ' Uploaded cropped file using the same name');
 
-                $wikitext2 = $this->removeBorderTemplateAndCat($wikitext);
+                $wikitext2 = $this->removeBorderTemplateAndCat($wikitext, $input->elems);
 
                 if ($wikitext != $wikitext2) {
 
