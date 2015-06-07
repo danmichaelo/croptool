@@ -2,8 +2,8 @@
 
 require 'common.php';
 
-$ct = new CropTool($apiClient);
-$apiClient = new MwApiClient($site, $oauth);
+$apiClient = new MwApiClient($site, $oauth, null, $log);
+$ct = new CropTool($apiClient, null, $log);
 
 
 if ($_SERVER['REQUEST_METHOD'] == 'POST')

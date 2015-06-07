@@ -10,7 +10,8 @@
         "shuber/curl": "master-dev",
         "danmichaelo/coma": "master-dev",
         "phpexiftool/phpexiftool": "master-dev",
-        "rollbar/rollbar": "~0.11.0"
+        "rollbar/rollbar": "~0.11.0",
+        "monolog/monolog": "~1.13"
     },
     "require-dev": {
         "phpunit/phpunit": "3.7.*"

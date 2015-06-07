@@ -1,5 +1,7 @@
 <?php
 
+use Monolog\Logger;
+
 /**
 * Simple MediaWiki API client
 */
@@ -24,10 +26,12 @@ class MwApiClient
      */
     protected $username = null;
 
-    function __construct($site, OAuthConsumer $oauth = null, Curl $curl = null)
+    function __construct($site, OAuthConsumer $oauth = null, Curl $curl = null, Logger $logger = null)
     {
         $this->site = $site;
         $this->api_url = 'https://' . $site . '/w/api.php';
+
+        $this->logger = $logger ?: new Logger;
 
         $this->oauth = $oauth ?: new OAuthConsumer;
         $this->user_agent = $this->oauth->getUserAgent();
@@ -130,6 +134,9 @@ class MwApiClient
         }
 
         $data = json_decode( $data );
+        if (isset($data->error)) {
+            $this->logger->addError('[api] Received error: ' . $data->error->code . ' : ' . $data->error->info);
+        }
 
         //print_r($info);
         //print_r($args);

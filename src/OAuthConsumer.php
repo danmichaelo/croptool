@@ -1,5 +1,7 @@
 <?php
 
+use Monolog\Logger;
+
 // See also: http://oauth.googlecode.com/svn/code/php/OAuth.php
 
 class OAuthConsumer {
@@ -59,7 +61,7 @@ class OAuthConsumer {
      */
     protected $testingEnv = false;
 
-    public function __construct($hostname = 'localhost', $basepath = '/', $testingEnv = false, $consumerKey = '', $consumerSecret = '', $localPassphrase = '')
+    public function __construct($hostname = 'localhost', $basepath = '/', $testingEnv = false, $consumerKey = '', $consumerSecret = '', $localPassphrase = '', $logger = null)
     {
 
         $this->hostname = $hostname;
@@ -68,6 +70,7 @@ class OAuthConsumer {
         $this->gConsumerKey = $consumerKey;
         $this->gConsumerSecret = $consumerSecret;
         $this->cookieKey = base64_decode($localPassphrase);
+        $this->logger = $logger ?: new Logger;
 
         $this->cipher = new Cryptastic;
 
@@ -90,6 +93,7 @@ class OAuthConsumer {
 
         // Fetch the access token if this is the callback from requesting authorization
         if ( isset( $_GET['oauth_verifier'] ) && $_GET['oauth_verifier'] ) {
+            $this->logger->addInfo('[oauth] ' . substr(sha1($this->gTokenKey), 0, 7) . ': Successful authorization');
             $this->fetchAccessToken($_GET['oauth_verifier']);
             if (isset($_SESSION['title'])) {
                 header('Location: ./?title=' . urlencode(str_replace(' ', '_', $_SESSION['title'])));
@@ -150,6 +154,7 @@ class OAuthConsumer {
         $data = curl_exec( $ch );
         if ( !$data ) {
             header( "HTTP/1.1 500 Internal Server Error" );
+            $this->logger->addError('[oauth] ' . substr(sha1($this->gTokenKey), 0, 7) . ': Failed to fetch permanent token, got curl error: ' .  curl_error( $ch ));
             echo 'Curl error: ' . htmlspecialchars( curl_error( $ch ) );
             exit(0);
         }
@@ -158,11 +163,13 @@ class OAuthConsumer {
 
         if ( is_object( $token ) && isset( $token->error ) ) {
             header( "HTTP/1.1 500 Internal Server Error" );
+            $this->logger->addError('[oauth] ' . substr(sha1($this->gTokenKey), 0, 7) . ': Failed to fetch permanent token: ' . htmlspecialchars( $token->error ) );
             echo 'Error retrieving token: ' . htmlspecialchars( $token->error );
             exit(0);
         }
         if ( !is_object( $token ) || !isset( $token->key ) || !isset( $token->secret ) ) {
             header( "HTTP/1.1 500 Internal Server Error" );
+            $this->logger->addError('[oauth] ' . substr(sha1($this->gTokenKey), 0, 7) . ': Failed to fetch permanent token, got invalid response.');
             echo 'Invalid response from token request';
             exit(0);
         }
@@ -181,6 +188,7 @@ class OAuthConsumer {
             true   // httponly
         )) {
             header( "HTTP/1.1 500 Internal Server Error" );
+            $this->logger->addError('[oauth] Failed to store permanent token');
             echo 'Failed to store key';
             exit(0);
         }
@@ -195,6 +203,7 @@ class OAuthConsumer {
             true   // httponly
         )) {
             header( "HTTP/1.1 500 Internal Server Error" );
+            $this->logger->addError('[oauth] Failed to store permanent token');
             echo 'Failed to store secret. Length: ' . strlen($this->cipher->encrypt($this->gTokenSecret, $this->cookieKey, true));
             exit(0);
         }
@@ -287,6 +296,8 @@ class OAuthConsumer {
 
     public function doLogout()
     {
+        $this->logger->addInfo('[oauth] Destroy authorization (logout)');
+
         setcookie('mwKey', '', time() - 3600, $this->basepath, $this->hostname, !$this->testingEnv, true);
         setcookie('mwSecret', '', time() - 3600, $this->basepath, $this->hostname, !$this->testingEnv, true);
 
@@ -336,6 +347,7 @@ class OAuthConsumer {
         $data = curl_exec( $ch );
         if ( !$data ) {
             header( "HTTP/1.1 500 Internal Server Error" );
+            $this->logger->addError('[oauth] No data received: ' . curl_error( $ch ));
             echo 'Curl error: ' . htmlspecialchars( curl_error( $ch ) );
             exit(0);
         }
@@ -344,11 +356,13 @@ class OAuthConsumer {
 
         if ( is_object( $token ) && isset( $token->error ) ) {
             header( "HTTP/1.1 500 Internal Server Error" );
+            $this->logger->addError('[oauth] Failed to initiate: ' . htmlspecialchars( $token->error ) );
             echo 'Error retrieving token: ' . htmlspecialchars( $token->error );
             exit(0);
         }
         if ( !is_object( $token ) || !isset( $token->key ) || !isset( $token->secret ) ) {
             header( "HTTP/1.1 500 Internal Server Error" );
+            $this->logger->addError('[oauth] Invalid response from initiate request');
             echo 'Invalid response from token request';
             exit(0);
         }
@@ -367,6 +381,8 @@ class OAuthConsumer {
             'oauth_token' => $token->key,
             'oauth_consumer_key' => $this->gConsumerKey,
         ) );
+
+        $this->logger->addInfo('[oauth] ' . substr(sha1($token->key), 0, 7) . ': Requesting authorization');
         header( "Location: $url" );
         echo 'Please see <a href="' . htmlspecialchars( $url ) . '">' . htmlspecialchars( $url ) . '</a>';
     }

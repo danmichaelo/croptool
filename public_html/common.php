@@ -9,6 +9,8 @@ require('../vendor/autoload.php');
 #require('../BorderLocator.php');
 ini_set('display_errors', false);
 
+use Monolog\Logger;
+use Monolog\Handler\StreamHandler;
 
 /**
  * A file containing the following keys:
@@ -36,6 +38,18 @@ if (isset($config['rollbarToken'])) {
     ));
 
 }
+
+// create a log channel
+$logfile = dirname(dirname(__FILE__)) . '/logs/croptool.log';
+if (!file_exists($logfile)) {
+    @touch($logfile);
+}
+if (!is_writable($logfile)) {
+    header( "HTTP/1.1 500 Internal Server Error" );
+    die("Log file " . $logfile . " is not writable");
+}
+$log = new Logger('croptool');
+$log->pushHandler(new StreamHandler($logfile, Logger::INFO));
 
 function shutdown() {
     $error = error_get_last();
@@ -94,4 +108,4 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST')
         : 'en.wikipedia.org'; // use enwp as default to force re-authorization for 1.1 users
 }
 
-$oauth = new OAuthConsumer($hostname, $basepath, $testingEnv, $config['consumerKey'], $config['consumerSecret'], $config['localPassphrase']);
+$oauth = new OAuthConsumer($hostname, $basepath, $testingEnv, $config['consumerKey'], $config['consumerSecret'], $config['localPassphrase'], $log);

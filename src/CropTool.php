@@ -1,5 +1,7 @@
 <?php
 
+use Monolog\Logger;
+
 class CropTool {
 
     protected $log_file = '../data/log.txt';
@@ -10,12 +12,13 @@ class CropTool {
 
     public $api;
 
-    public function __construct(MwApiClient $apiClient = null, Curl $curl = null)
+    public function __construct(MwApiClient $apiClient = null, Curl $curl = null, Logger $logger = null)
     {
         $this->publicPath = dirname(dirname(__FILE__)) . '/public_html/';
 
         $this->api = $apiClient ?: new MwApiClient;
         $this->curl = $curl ?: new Curl;
+        $this->logger = $logger ?: new Logger;
         $this->curl->cookie_file = $this->api->cookie_file;
         $this->curl->user_agent = $this->api->user_agent;
         $this->curl->follow_redirects = false;
@@ -103,6 +106,8 @@ class CropTool {
             'rename' => 'Cropped version of [[File:' . $title . ']] using [[Commons:CropTool|CropTool]].',
         );
 
+        $this->logger->addInfo('[main] ' . substr($sha1, 0, 7) . ' Did crop using method: ' . $cm);
+
         return $res;
     }
 
@@ -182,25 +187,34 @@ class CropTool {
             return $response;
         }
 
-        if ($response->upload->result == 'Success' && $input->overwrite == 'overwrite') {
+        if ($response->upload->result == 'Success') {
 
-            $wikitext2 = $this->removeBorderTemplateAndCat($wikitext);
+            if ($input->overwrite == 'overwrite') {
+                $this->logger->addInfo('[main] ' . substr($sha1, 0, 7) . ' Uploaded cropped file using the same name');
 
-            if ($wikitext != $wikitext2) {
+                $wikitext2 = $this->removeBorderTemplateAndCat($wikitext);
 
-                $token = $this->api->getEditToken($title);
+                if ($wikitext != $wikitext2) {
 
-                $response2 = $this->api->request(array(
-                    'action' => 'edit',
-                    'format' => 'json',
-                    'summary' => 'Border removed using [[Commons:CropTool|CropTool]]',
-                    'token' => $token,
-                    'title' => 'File:' . $title,
-                    'text' => $wikitext2
-                ));
+                    $token = $this->api->getEditToken($title);
 
+                    $this->api->request(array(
+                        'action' => 'edit',
+                        'format' => 'json',
+                        'summary' => 'Border removed using [[Commons:CropTool|CropTool]]',
+                        'token' => $token,
+                        'title' => 'File:' . $title,
+                        'text' => $wikitext2
+                    ));
+
+                    $this->logger->addInfo('[main] ' . substr($sha1, 0, 7) . ' Updated wikitext');
+
+                }
+            } else {
+                $this->logger->addInfo('[main] ' . substr($sha1, 0, 7) . ' Uploaded file as "' . $input->filename . '"');                
             }
-
+        } else {
+            $this->logger->addError('[main] ' . substr($sha1, 0, 7) . ' Upload failed!');
         }
 
         $line = $args['filename'] . "\t" . $user . "\n";
@@ -248,7 +262,7 @@ class CropTool {
 
         $ext = $this->getFileExt($image_mime);
         if ($ext === false) {
-            return array('error' => 'File had unknown mime type ' . $image_mime);
+            return array('error' => 'Sorry, the file type is not supported: ' . $image_mime);
         }
 
         // 2. Get original file
@@ -300,6 +314,8 @@ class CropTool {
             'width' => $thumbDim[0],
             'height' => $thumbDim[1]
         );
+
+        $this->logger->addInfo('[main] ' . substr($sha1, 0, 7) . ' Got file "' . $title . '"');
 
         return $res;
     }
