@@ -70,15 +70,17 @@ $hostname = isset($_SERVER['HTTP_X_FORWARDED_SERVER'])
                 ? $_SERVER['HTTP_X_FORWARDED_SERVER']
                 : $_SERVER['SERVER_NAME'];
 
+$hostnameProd = 'tools.wmflabs.org';
+
 if ($hostname == 'tools.wmflabs.org, tools-eqiad.wmflabs.org' || $hostname == 'tools-eqiad.wmflabs.org') {
-    $hostname = 'tools.wmflabs.org';
+    $hostname = $hostnameProd;
 }
 
 $basepath = dirname( $_SERVER['SCRIPT_NAME'] );
-$testingEnv = ($hostname !== 'tools.wmflabs.org');
+$testingEnv = ($hostname !== $hostnameProd);
 
 session_name('croptool');
-session_set_cookie_params(0, $basepath, $hostname);
+session_set_cookie_params(0, $basepath, $hostnameProd);
 session_start();
 
 if (isset($_GET['title'])) {
@@ -108,4 +110,4 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST')
         : 'en.wikipedia.org'; // use enwp as default to force re-authorization for 1.1 users
 }
 
-$oauth = new OAuthConsumer($hostname, $basepath, $testingEnv, $config['consumerKey'], $config['consumerSecret'], $config['localPassphrase'], $log);
+$oauth = new OAuthConsumer($hostnameProd, $basepath, $testingEnv, $config['consumerKey'], $config['consumerSecret'], $config['localPassphrase'], $log);
