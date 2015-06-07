@@ -214,6 +214,8 @@ class CropTool {
                 $wikitext .= $tpl;
             }
             //$wikitext .= "\n[[Category:Test uploads]]";
+
+            $wikitext = $this->removeBorderTemplateAndCat($wikitext, $input->elems);
             $args['text'] = $wikitext;
 
         }
