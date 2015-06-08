@@ -235,7 +235,8 @@ class CropTool {
         //$this->curl['Content-Disposition'] = $title;
         $response = $this->api->request($args, true);
 
-        if (!isset($response->upload)) {
+        if (isset($response->error)) {
+            $this->logger->addError('[main] ' . substr($sha1, 0, 7) . ' Upload failed');
             return $response;
         }
 
@@ -266,8 +267,6 @@ class CropTool {
             } else {
                 $this->logger->addInfo('[main] ' . substr($sha1, 0, 7) . ' Uploaded file as "' . $input->filename . '"');                
             }
-        } else {
-            $this->logger->addError('[main] ' . substr($sha1, 0, 7) . ' Upload failed!');
         }
 
         $line = $args['filename'] . "\t" . $user . "\n";
