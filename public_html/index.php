@@ -373,32 +373,7 @@ $I18N = new TsIntuition(array(
                     <?php echo $I18N->msg( 'previewform-precise'); ?>
                 </p>
 
-                <div style="color:red;padding:10px;" ng-show="error">
-                    {{error}}
-                </div>
-
                 <form ng-submit="upload()" role="form">
-
-                    <div class="form-group" ng-show="cropresults.page.elems.border !== undefined">
-                        <label title="<?php echo $I18N->msg( 'previewform-removed-border-help' ); ?>">
-                            <input type="checkbox" ng-model="cropresults.page.elems.border" ng-change="updateUploadComment()">
-                            <?php echo $I18N->msg( 'previewform-removed-border' ); ?>
-                        </label>
-                    </div>
-
-                    <div class="form-group" ng-show="cropresults.page.elems.watermark !== undefined">
-                        <label title="<?php echo $I18N->msg( 'previewform-removed-watermark-help' ); ?>">
-                            <input type="checkbox" ng-model="cropresults.page.elems.watermark" ng-change="updateUploadComment()">
-                            <?php echo $I18N->msg( 'previewform-removed-watermark' ); ?>
-                        </label>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="uploadComment">
-                            <?php echo $I18N->msg( 'previewform-upload-comment' ); ?>:
-                        </label>
-                        <textarea rows="4" id="uploadComment" type="text" class="form-control" ng-model="uploadComment" ng-disabled="busy"></textarea>
-                    </div>
 
                     <p ng-show="site == 'commons.wikimedia.org'">
                         <i class="fa fa-warning"></i>
@@ -427,6 +402,31 @@ $I18N = new TsIntuition(array(
                         <span class="help-block" ng-show="exists[site + ':' + newTitle] === true">
                             <?php echo $I18N->msg( 'previewform-new-title-exists', array('variables' => array('{{newTitle}}')) ); ?>
                         </span>
+                    </div>
+
+                    <div class="form-group" ng-show="cropresults.page.elems.border !== undefined">
+                        <label title="<?php echo $I18N->msg( 'previewform-removed-border-help' ); ?>">
+                            <input type="checkbox" ng-model="cropresults.page.elems.border" ng-change="updateUploadComment()">
+                            <?php echo $I18N->msg( 'previewform-removed-border' ); ?>
+                        </label>
+                    </div>
+
+                    <div class="form-group" ng-show="cropresults.page.elems.watermark !== undefined">
+                        <label title="<?php echo $I18N->msg( 'previewform-removed-watermark-help' ); ?>">
+                            <input type="checkbox" ng-model="cropresults.page.elems.watermark" ng-change="updateUploadComment()">
+                            <?php echo $I18N->msg( 'previewform-removed-watermark' ); ?>
+                        </label>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="uploadComment">
+                            <?php echo $I18N->msg( 'previewform-upload-comment' ); ?>:
+                        </label>
+                        <textarea rows="4" id="uploadComment" type="text" class="form-control" ng-model="uploadComment" ng-disabled="busy"></textarea>
+                    </div>
+
+                    <div style="color:red;padding:10px;" ng-show="error">
+                        {{error}}
                     </div>
 
                     <button type="button" class="btn btn-large" ng-click="back()" ng-disabled="busy">
