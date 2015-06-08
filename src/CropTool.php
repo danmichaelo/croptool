@@ -145,17 +145,22 @@ class CropTool {
 
     public function removeBorderTemplateAndCat($text, $elems)
     {
+        $removed = array();
+
         if (isset($elems->tpl_remove_border) && $elems->tpl_remove_border) {
             $text = preg_replace($this->elem_matches['tpl_remove_border'], '', $text);
+            $removed['border'] = true;
         }
         if (isset($elems->tpl_watermark) && $elems->tpl_watermark) {
             $text = preg_replace($this->elem_matches['tpl_watermark'], '', $text);
+            $removed['watermark'] = true;
         }
         if (isset($elems->cat_border) && $elems->cat_border) {
             $text = preg_replace($this->elem_matches['cat_border'], '', $text);
+            $removed['border'] = true;
         }
 
-        return $text;
+        return array($removed, $text);
     }
 
     public function upload($input) {
@@ -215,7 +220,7 @@ class CropTool {
             }
             //$wikitext .= "\n[[Category:Test uploads]]";
 
-            $wikitext = $this->removeBorderTemplateAndCat($wikitext, $input->elems);
+            list($removed, $wikitext) = $this->removeBorderTemplateAndCat($wikitext, $input->elems);
             $args['text'] = $wikitext;
 
         }
@@ -233,16 +238,17 @@ class CropTool {
             if ($input->overwrite == 'overwrite') {
                 $this->logger->addInfo('[main] ' . substr($sha1, 0, 7) . ' Uploaded cropped file using the same name');
 
-                $wikitext2 = $this->removeBorderTemplateAndCat($wikitext, $input->elems);
+                list($removed, $wikitext2) = $this->removeBorderTemplateAndCat($wikitext, $input->elems);
+                $removed = array_keys($removed);
 
-                if ($wikitext != $wikitext2) {
+                if (count($removed) != 0) {
 
                     $token = $this->api->getEditToken($title);
 
                     $this->api->request(array(
                         'action' => 'edit',
                         'format' => 'json',
-                        'summary' => 'Border removed using [[Commons:CropTool|CropTool]]',
+                        'summary' => 'Removed ' . (implode(' and ', $removed)) . ' using [[Commons:CropTool|CropTool]]',
                         'token' => $token,
                         'title' => 'File:' . $title,
                         'text' => $wikitext2
