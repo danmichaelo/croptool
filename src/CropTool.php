@@ -211,8 +211,8 @@ class CropTool {
 
             $args['filename'] = $input->filename;
 
-            $tpl = "{{Extracted from|" . $title . "}}\n";
-            $x = mb_stripos($wikitext, "[[category:");
+            $tpl = "\n{{Extracted from|" . $title . "}}\n";
+            $x = mb_stripos($wikitext, "\s*[[category:");
             if ($x !== false) {
                 $wikitext = mb_substr($wikitext, 0, $x) . $tpl . mb_substr($wikitext, $x);
             } else {
