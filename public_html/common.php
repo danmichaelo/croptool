@@ -12,6 +12,23 @@ ini_set('display_errors', false);
 use Monolog\Logger;
 use Monolog\Handler\StreamHandler;
 
+
+/**
+ * The array_get method from Laravel
+ *
+ * @param array  $data
+ * @param string $key
+ * @param string $default
+ *
+ * @return mixed
+ */
+function array_get($data, $key, $default = null) {
+    if (!is_array($data)) {
+        return $default;
+    }
+    return isset($data[$key]) ? $data[$key] : $default;
+}
+
 /**
  * A file containing the following keys:
  * - consumerKey: The "consumer token" given to you when registering your app
@@ -110,4 +127,4 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST')
         : 'en.wikipedia.org'; // use enwp as default to force re-authorization for 1.1 users
 }
 
-$oauth = new OAuthConsumer($hostnameProd, $basepath, $testingEnv, $config['consumerKey'], $config['consumerSecret'], $config['localPassphrase'], $log);
+$oauth = new OAuthConsumer($hostnameProd, $basepath, $testingEnv, $config, $log);

@@ -2,7 +2,7 @@
 
 require 'common.php';
 
-$apiClient = new MwApiClient($site, $oauth, null, $log);
+$apiClient = new MwApiClient($site, $oauth, null, $log, $config);
 $ct = new CropTool($apiClient, null, $log);
 
 

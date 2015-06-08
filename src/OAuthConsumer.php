@@ -23,7 +23,7 @@ class OAuthConsumer {
      */
     protected $mytalkUrl = 'https://commons.wikimedia.org/wiki/Special:MyTalk#Hello.2C_world';
 
-    private $gUserAgent = 'CropTool/1.1 (+tools.wmflabs.org/croptool)';
+    private $gUserAgent;
     private $gConsumerKey = '';
     private $gConsumerSecret = '';
     private $gTokenKey = '';
@@ -61,15 +61,15 @@ class OAuthConsumer {
      */
     protected $testingEnv = false;
 
-    public function __construct($hostname = 'localhost', $basepath = '/', $testingEnv = false, $consumerKey = '', $consumerSecret = '', $localPassphrase = '', $logger = null)
+    public function __construct($hostname = 'localhost', $basepath = '/', $testingEnv = false, $config = array(), $logger = null)
     {
-
         $this->hostname = $hostname;
         $this->basepath = $basepath;
         $this->testingEnv = $testingEnv;
-        $this->gConsumerKey = $consumerKey;
-        $this->gConsumerSecret = $consumerSecret;
-        $this->cookieKey = base64_decode($localPassphrase);
+        $this->gUserAgent = $config['userAgent'];
+        $this->gConsumerKey = $config['consumerKey'];
+        $this->gConsumerSecret = $config['consumerSecret'];
+        $this->cookieKey = base64_decode($config['localPassphrase']);
         $this->logger = $logger ?: new Logger;
 
         $this->cipher = new Cryptastic;

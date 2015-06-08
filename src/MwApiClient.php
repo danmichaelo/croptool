@@ -26,7 +26,7 @@ class MwApiClient
      */
     protected $username = null;
 
-    function __construct($site, OAuthConsumer $oauth = null, Curl $curl = null, Logger $logger = null)
+    function __construct($site, OAuthConsumer $oauth = null, Curl $curl = null, Logger $logger = null, $config = array())
     {
         $this->site = $site;
         $this->api_url = 'https://' . $site . '/w/api.php';
@@ -34,7 +34,7 @@ class MwApiClient
         $this->logger = $logger ?: new Logger;
 
         $this->oauth = $oauth ?: new OAuthConsumer;
-        $this->user_agent = $this->oauth->getUserAgent();
+        $this->user_agent = array_get($config, 'userAgent', '');
 
         $this->curl = $curl ?: new Curl;
         $this->curl->cookie_file = $this->cookie_file;
@@ -127,7 +127,7 @@ class MwApiClient
             curl_setopt( $ch, CURLOPT_HTTPHEADER, array($oauthHeader) );
         }
         //curl_setopt( $ch, CURLOPT_SSL_VERIFYPEER, false );
-        curl_setopt( $ch, CURLOPT_USERAGENT, $this->gUserAgent );
+        curl_setopt( $ch, CURLOPT_USERAGENT, $this->user_agent );
         curl_setopt( $ch, CURLOPT_HEADER, 0 );
         curl_setopt( $ch, CURLOPT_RETURNTRANSFER, 1 );
         $data = curl_exec( $ch );
