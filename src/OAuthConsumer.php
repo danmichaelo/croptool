@@ -119,6 +119,11 @@ class OAuthConsumer {
         return $this->gUserAgent;
     }
 
+    public function hasTokenSecret()
+    {
+        return $this->gTokenSecret != '';
+    }
+
     /**
      * Handle a callback to fetch the access token
      * @return void

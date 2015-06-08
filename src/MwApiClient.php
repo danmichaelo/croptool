@@ -55,6 +55,12 @@ class MwApiClient
 
     private function checkAuthorization()
     {
+        $this->username = null;
+        if (!$this->oauth->hasTokenSecret()) {
+            // No reason to make a request if we have no token
+            return false;
+        }
+
         // Check authorization
         // First fetch the username
         $res = $this->request( array(
