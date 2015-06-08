@@ -400,7 +400,7 @@ class OAuthConsumer {
      *
      * @return string
      */
-    public function signRequestAndReturnHeader($method, $url, $data = [])
+    public function signRequestAndReturnHeader($method, $url, $data = array())
     {
         $headers = array(
             'oauth_consumer_key' => $this->gConsumerKey,
