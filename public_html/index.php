@@ -379,30 +379,17 @@ $I18N = new TsIntuition(array(
 
                 <form ng-submit="upload()" role="form">
 
-                    <div class="form-group" ng-show="cropresults.page.elems.tpl_remove_border !== undefined">
-                        <label>
-                            <input type="checkbox" ng-model="cropresults.page.elems.tpl_remove_border">
-                            <span ng-non-bindable>
-                            <?php echo $I18N->msg( 'previewform-remove-tpl-remove-border' ); ?>
-                            </span>
+                    <div class="form-group" ng-show="cropresults.page.elems.border !== undefined">
+                        <label title="<?php echo $I18N->msg( 'previewform-removed-border-help' ); ?>">
+                            <input type="checkbox" ng-model="cropresults.page.elems.border" ng-change="updateUploadComment()">
+                            <?php echo $I18N->msg( 'previewform-removed-border' ); ?>
                         </label>
                     </div>
 
-                    <div class="form-group" ng-show="cropresults.page.elems.tpl_watermark !== undefined">
-                        <label>
-                            <input type="checkbox" ng-model="cropresults.page.elems.tpl_watermark">
-                            <span ng-non-bindable>
-                            <?php echo $I18N->msg( 'previewform-remove-tpl-watermark' ); ?>
-                            </span>
-                        </label>
-                    </div>
-
-                    <div class="form-group" ng-show="cropresults.page.elems.cat_border !== undefined">
-                        <label>
-                            <input type="checkbox" ng-model="cropresults.page.elems.cat_border">
-                            <span ng-non-bindable>
-                                <?php echo $I18N->msg( 'previewform-remove-cat-border' ); ?>                            
-                            </span>
+                    <div class="form-group" ng-show="cropresults.page.elems.watermark !== undefined">
+                        <label title="<?php echo $I18N->msg( 'previewform-removed-watermark-help' ); ?>">
+                            <input type="checkbox" ng-model="cropresults.page.elems.watermark" ng-change="updateUploadComment()">
+                            <?php echo $I18N->msg( 'previewform-removed-watermark' ); ?>
                         </label>
                     </div>
 
@@ -410,7 +397,7 @@ $I18N = new TsIntuition(array(
                         <label for="uploadComment">
                             <?php echo $I18N->msg( 'previewform-upload-comment' ); ?>:
                         </label>
-                        <input id="uploadComment" type="text" class="form-control" ng-model="cropresults.uploadComments[overwrite]" ng-disabled="busy">
+                        <textarea rows="4" id="uploadComment" type="text" class="form-control" ng-model="uploadComment" ng-disabled="busy"></textarea>
                     </div>
 
                     <p ng-show="site == 'commons.wikimedia.org'">
@@ -422,13 +409,13 @@ $I18N = new TsIntuition(array(
 
                     <div class="radio">
                         <label>
-                            <input type="radio" name="overwrite" ng-model="overwrite" value="overwrite" ng-disabled="busy">
+                            <input type="radio" name="overwrite" ng-model="overwrite" value="overwrite" ng-disabled="busy" ng-change="updateUploadComment()">
                             <?php echo $I18N->msg( 'previewform-overwrite'); ?>
                         </label>
                     </div>
                     <div class="radio">
                         <label>
-                            <input type="radio" name="overwrite" ng-model="overwrite" value="rename" ng-disabled="busy">
+                            <input type="radio" name="overwrite" ng-model="overwrite" value="rename" ng-disabled="busy" ng-change="updateUploadComment()">
                             <?php echo $I18N->msg( 'previewform-create-new'); ?>
                         </label>
                     </div>

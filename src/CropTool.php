@@ -105,13 +105,18 @@ class CropTool {
 
         $s1 = getimagesize($srcPath);
         $s2 = getimagesize($destPath);
-        $cropPercentX = round(($s1[0]-$s2[0]) / $s1[0] * 100);
-        $cropPercentY = round(($s1[1]-$s2[1]) / $s1[1] * 100);
-        $res['uploadComments'] = array(
-            'overwrite' => 'Cropped ' . ($cropPercentX ?: ' < 1') . ' % horizontally and ' . ($cropPercentY ?: '< 1') . ' % vertically using [[Commons:CropTool|CropTool]] with ' . ($cm == 'lossless' ? 'lossless mode' : 'precise mode') . '.',
-            'rename' => 'Cropped version of [[File:' . $title . ']] using [[Commons:CropTool|CropTool]].',
-        );
+        $dim = array();
+        if ($s1[0] != $s2[0]) {
+            $cropPercentX = round(($s1[0]-$s2[0]) / $s1[0] * 100);
+            $dim[] = ($cropPercentX ?: ' < 1') . ' % horizontally';
+        }
+        if ($s1[1] != $s2[1]) {
+            $cropPercentY = round(($s1[1]-$s2[1]) / $s1[1] * 100);
+            $dim[] = ($cropPercentY ?: ' < 1') . ' % vertically';
+        }
 
+        $using = 'using [[Commons:CropTool|CropTool]] with ' . ($cm == 'lossless' ? 'lossless mode' : 'precise mode') . '.';
+        $res['dim'] = implode(' and ', $dim) . ' ' . $using;
         $res['page'] = $this->analyzePage($title);
 
         $this->logger->addInfo('[main] ' . substr($sha1, 0, 7) . ' Did crop using method: ' . $cm);
@@ -136,9 +141,9 @@ class CropTool {
             'elems' => array(),
         );
 
-        if (preg_match($this->elem_matches['tpl_remove_border'], $wikitext)) $res['elems']['tpl_remove_border'] = true;
-        if (preg_match($this->elem_matches['tpl_watermark'], $wikitext)) $res['elems']['tpl_watermark'] = true;
-        if (preg_match($this->elem_matches['cat_border'], $wikitext)) $res['elems']['cat_border'] = true;
+        if (preg_match($this->elem_matches['tpl_remove_border'], $wikitext)) $res['elems']['border'] = true;
+        if (preg_match($this->elem_matches['tpl_watermark'], $wikitext)) $res['elems']['watermark'] = true;
+        if (preg_match($this->elem_matches['cat_border'], $wikitext)) $res['elems']['border'] = true;
 
         return $res;
     }
@@ -147,17 +152,18 @@ class CropTool {
     {
         $removed = array();
 
-        if (isset($elems->tpl_remove_border) && $elems->tpl_remove_border) {
-            $text = preg_replace($this->elem_matches['tpl_remove_border'], '', $text);
-            $removed['border'] = true;
+        if (isset($elems->border) && $elems->border) {
+            $t2 = preg_replace(array(
+                $this->elem_matches['tpl_remove_border'],
+                $this->elem_matches['cat_border'],
+            ), array('', ''), $text);
+            if ($t2 != $text) $removed['border'] = true;
+            $text = $t2;
         }
-        if (isset($elems->tpl_watermark) && $elems->tpl_watermark) {
-            $text = preg_replace($this->elem_matches['tpl_watermark'], '', $text);
-            $removed['watermark'] = true;
-        }
-        if (isset($elems->cat_border) && $elems->cat_border) {
-            $text = preg_replace($this->elem_matches['cat_border'], '', $text);
-            $removed['border'] = true;
+        if (isset($elems->watermark) && $elems->watermark) {
+            $t2 = preg_replace($this->elem_matches['tpl_watermark'], '', $text);
+            if ($t2 != $text) $removed['watermark'] = true;
+            $text = $t2;
         }
 
         return array($removed, $text);

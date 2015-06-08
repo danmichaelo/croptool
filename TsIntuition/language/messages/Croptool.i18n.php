@@ -55,9 +55,10 @@ $messages['en'] = array(
     'previewform-precise' => 'A precise crop was performed.',
     'previewform-overwrite-policy' => 'Please make sure you are familiar with <a href="$1">Commons:Overwriting existing files</a>.',
 
-    'previewform-remove-tpl-remove-border' => 'Remove template: <tt>{{remove border}}</tt>',
-    'previewform-remove-tpl-watermark' => 'Remove template: <tt>{{watermark}}</tt>',
-    'previewform-remove-cat-border' => 'Remove category: <tt>{{images with border}}</tt>',
+    'previewform-removed-border' => 'I\'ve removed the border',
+    'previewform-removed-border-help' => 'Confirms removal of the \'remove border\' template',
+    'previewform-removed-watermark' => 'I\'ve removed the watermark',
+    'previewform-removed-watermark-help' => 'Confirms removal of the \'watermark\' template',
 
     'previewform-overwrite' => 'Overwrite original',
     'previewform-create-new' => 'Upload as new file',

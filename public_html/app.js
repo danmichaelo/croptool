@@ -315,6 +315,7 @@ controller('AppCtrl', ['$scope', '$http', '$timeout', '$q', '$window', 'LoginSer
                 alert(response.error);
             } else {
                 $scope.cropresults = response;
+                $scope.updateUploadComment();
             }
         }).
         error(function(response, status, headers) {
@@ -335,7 +336,7 @@ controller('AppCtrl', ['$scope', '$http', '$timeout', '$q', '$window', 'LoginSer
             title: $scope.title,
             site: $scope.site,
             overwrite: $scope.overwrite,
-            comment: $scope.cropresults.uploadComments[$scope.overwrite],
+            comment: $scope.uploadComment,
             filename: $scope.newTitle,
             elems: $scope.cropresults.page.elems,
             store: true
@@ -482,6 +483,38 @@ controller('AppCtrl', ['$scope', '$http', '$timeout', '$q', '$window', 'LoginSer
         }
 
     });
+
+    $scope.updateUploadComment = function() {
+
+        // Cropped {x % using CropTool}
+        // Removed border by cropping {x % using CropTool}
+        // Removed watermark by cropping {x % using CropTool}
+
+        // [[File:X]] cropped x % using CropTool
+        // Removed border from [[File:X]] by cropping {x % using CropTool}
+        // Removed watermark from [[File:X]] by cropping {x % using CropTool}
+
+        var s = '';
+        if ($scope.cropresults.page.elems.border || $scope.cropresults.page.elems.watermark) {
+            if ($scope.cropresults.page.elems.border) {
+                s = 'Removed border';
+            } else if ($scope.cropresults.page.elems.watermark) {
+                s = 'Removed watermark'
+            }
+            if ($scope.overwrite == 'rename') {
+                s += ' from [[File:' + $scope.title + ']]';
+            }
+            s += ' by cropping';
+        } else {
+            if ($scope.overwrite == 'rename') {
+                s += '[[File:' + $scope.title + ']] cropped';
+            } else {
+                s += 'Cropped';
+            }
+        }
+        s += ' ' + $scope.cropresults.dim;
+        $scope.uploadComment = s;
+    };
 
     $scope.$watch('newTitle', function() {
 
