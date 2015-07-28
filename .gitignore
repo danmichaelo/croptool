@@ -7,3 +7,5 @@ oauth.ini
 *.log
 composer.phar
 .vagrant
+connections.csv
+ENV
