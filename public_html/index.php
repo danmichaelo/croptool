@@ -74,7 +74,7 @@ $I18N = new TsIntuition(array(
     </div>
 
     <h1 style="padding:.4em 0; margin: 0 0 .3em 0;">
-        <a href ng-click="imageUrl = ''; openFile()">
+        <a href ng-click="imageUrlOrTitle = ''; openFile()">
             <i class="fa fa-crop"></i>
             <?php echo $I18N->msg( 'title' ); ?>
         </a>
@@ -142,10 +142,10 @@ $I18N = new TsIntuition(array(
                     <div class="row">
 
                         <div class="form-group col-sm-8" ng-class="{ 'has-error': exists[site+':'+title] === false, 'has-success': exists[site+':'+title] === true }">
-                            <label class="sr-only" for="imageUrl">
+                            <label class="sr-only" for="imageUrlOrTitle">
                                 <?php echo $I18N->msg( 'titleform-file-label' ); ?>
                             </label>
-                            <input type="text" ng-model="imageUrl" class="form-control" placeholder="<?php echo $I18N->msg( 'titleform-file-label' ); ?>">
+                            <input type="text" ng-model="imageUrlOrTitle" class="form-control" placeholder="<?php echo $I18N->msg( 'titleform-file-label' ); ?>">
                             <span class="help-block" ng-show="exists[site+':'+title] === false">
                                 <?php echo $I18N->msg( 'titleform-file-not-found', array('variables' => array('{{title}}', '{{site}}')) ); ?>
                             </span>

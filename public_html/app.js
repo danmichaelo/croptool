@@ -224,9 +224,9 @@ controller('AppCtrl', ['$scope', '$http', '$timeout', '$q', '$window', 'LoginSer
             });
     };
 
-    function parseImageUrl( imageUrl ) {
+    function parseImageUrlOrTitle( imageUrlOrTitle ) {
 
-        var matches = imageUrl.match(/\/\/([a-z]+)\.(wikimedia.org|wikipedia.org)\/wiki\/(.*)$/),
+        var matches = imageUrlOrTitle.match(/\/\/([a-z]+)\.(wikimedia.org|wikipedia.org)\/wiki\/(.*)$/),
             site = 'commons.wikimedia.org',
             title = '';
 
@@ -234,7 +234,7 @@ controller('AppCtrl', ['$scope', '$http', '$timeout', '$q', '$window', 'LoginSer
             site = matches[1] + '.' + matches[2];
             title = matches[3];
         } else {
-            title = imageUrl;
+            title = imageUrlOrTitle;
         }
 
         title = decodeURIComponent(title)
@@ -248,12 +248,12 @@ controller('AppCtrl', ['$scope', '$http', '$timeout', '$q', '$window', 'LoginSer
     $scope.openFile = function(updateHistory) {
 
         if (updateHistory !== false) {
-            var newUrl = location.href.split('?', 1)[0] + ($scope.imageUrl ? '?title=' + encodeURIComponent($scope.imageUrl.replace(/ /g, '_')) : '');
+            var newUrl = location.href.split('?', 1)[0] + ($scope.imageUrlOrTitle ? '?title=' + encodeURIComponent($scope.imageUrlOrTitle.replace(/ /g, '_')) : '');
             window.history.pushState(null, null, newUrl);
             everPushedSomething = true;
         }
 
-        if (!$scope.imageUrl) {
+        if (!$scope.imageUrlOrTitle) {
             if (jcrop_api) {
                 jcrop_api.destroy();
                 $('#cropbox').removeAttr('style');
@@ -267,7 +267,7 @@ controller('AppCtrl', ['$scope', '$http', '$timeout', '$q', '$window', 'LoginSer
             return;
         }
 
-        var o = parseImageUrl($scope.imageUrl);
+        var o = parseImageUrlOrTitle($scope.imageUrlOrTitle);
         $scope.site = o.site;
         $scope.title = o.title;
         fetchImage();
@@ -356,16 +356,16 @@ controller('AppCtrl', ['$scope', '$http', '$timeout', '$q', '$window', 'LoginSer
             return;
         }
         $scope.$apply(function() {
-            console.log('LOCATION CHANGED: ' + getParameterByName('imageUrl'));
-            $scope.imageUrl = getParameterByName('imageUrl');
+            console.log('LOCATION CHANGED: ' + getParameterByName('imageUrlOrTitle'));
+            $scope.imageUrlOrTitle = getParameterByName('imageUrlOrTitle');
             $scope.openFile(false);
         });
     });
 
     var tmp = getParameterByName('title');
-    if (!tmp) tmp = getParameterByName('imageUrl');  // deprecated
+    if (!tmp) tmp = getParameterByName('imageUrlOrTitle');  // deprecated
     $scope.currentUrl = tmp;
-    $scope.imageUrl = $scope.currentUrl;
+    $scope.imageUrlOrTitle = $scope.currentUrl;
 
     $scope.openFile(false);
 
@@ -412,14 +412,14 @@ controller('AppCtrl', ['$scope', '$http', '$timeout', '$q', '$window', 'LoginSer
                 timeout: canceler.promise,
             }).success(function(response) {
                 var key = site + ':' + title;
-                
+
                 $scope.error = response.error;
 
                 if (response.error) {
                     $scope.error = response.error;
                 } else {
                     $scope.exists[key] = response.exists;
-                    // console.log($scope.exists);                    
+                    // console.log($scope.exists);
                 }
                 canceler = null;
             });
@@ -427,40 +427,18 @@ controller('AppCtrl', ['$scope', '$http', '$timeout', '$q', '$window', 'LoginSer
         }, 300);
     }
 
-    $scope.$watch('imageUrl', function() {
+    $scope.$watch('imageUrlOrTitle', function() {
 
-        var o = parseImageUrl( $scope.imageUrl ),
+        var o = parseImageUrlOrTitle( $scope.imageUrlOrTitle ),
             key = o.site + ':' + o.title;
 
         $scope.site = o.site;
         $scope.title = o.title;
 
-        if ($scope.imageUrl !== undefined && $scope.exists[key] === undefined) {
-
-            var imageUrl = decodeURIComponent($scope.imageUrl)
-                .replace(' ', '_', 'g');
-
-            // TODO: We should strip off the query string, but we must be a bit careful since
-            // we have decoded the URI, and so might have '?' in the actual URI:
-            // https://commons.wikimedia.org/wiki/File:Svg_convex_hull?_country.png?uselang=nb
-
-            $scope.imageUrl = imageUrl;
-
-            // var imageUrl = $scope.imageUrl
-            //     .replace(new RegExp('^(https://|http://)'), '');
-                // .replace(new RegExp('^commons.wikimedia.org/wiki/'), '');
-            //if (fname !== $scope.filename) {
-            // Decode URL
-            // imageUrl = decodeURIComponent(imageUrl);
-            // //}
-            // imageUrl = imageUrl.replace(/^File:/, '')
-            //     .replace('_', ' ', 'g');
-
-            // console.log('Image url changed. Site: ' + $scope.site, ' title: ' + $scope.title);
-
-            if ($scope.imageUrl !== $scope.currentUrl) {
+        if ($scope.imageUrlOrTitle !== undefined && $scope.exists[key] === undefined) {
+            if ($scope.imageUrlOrTitle !== $scope.currentUrl) {
                 $scope.error = '';
-                $scope.currentUrl = $scope.imageUrl;
+                $scope.currentUrl = $scope.imageUrlOrTitle;
                 fileExists( $scope.site, $scope.title );
             }
         }
@@ -501,7 +479,7 @@ controller('AppCtrl', ['$scope', '$http', '$timeout', '$q', '$window', 'LoginSer
 
     $scope.$watch('newTitle', function() {
 
-        // TODO: !!! pageExists -> imageUrlExists
+        // TODO: !!! pageExists -> imageUrlOrTitleExists
 
         if ($scope.newTitle && $scope.exists[$scope.site + ':' + $scope.newTitle] === undefined) {
             fileExists($scope.site, $scope.newTitle);
