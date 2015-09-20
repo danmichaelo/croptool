@@ -237,7 +237,7 @@ controller('AppCtrl', ['$scope', '$http', '$timeout', '$q', '$window', 'LoginSer
             title = imageUrl;
         }
 
-        title = title
+        title = decodeURIComponent(title)
             .replace(/_/g, ' ')
             .replace(/^[^:]+:/, '');  // Strip off File:, Fil:, etc.
 
