@@ -30,3 +30,6 @@ footer p {
 label {
     font-weight: normal;
 }
+.transparentBg {
+    background-image: url("res/transparent.png?1");
+}

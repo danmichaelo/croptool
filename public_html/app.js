@@ -132,10 +132,10 @@ controller('AppCtrl', ['$scope', '$http', '$timeout', '$q', '$window', 'LoginSer
     }
 
     //LocalStorageService.setPrefix('croptool');
-    $scope.showNotice = !LocalStorageService.get('croptool-notice-2');
+    $scope.showNotice = !LocalStorageService.get('croptool-notice-3');
 
     $scope.dismissNotice = function() {
-        LocalStorageService.add('croptool-notice-2','hide');
+        LocalStorageService.add('croptool-notice-3','hide');
         $scope.showNotice = false;
     }
 
@@ -197,6 +197,8 @@ controller('AppCtrl', ['$scope', '$http', '$timeout', '$q', '$window', 'LoginSer
                     console.log('Enabling Jcrop');
 
                     $('#cropbox').Jcrop({
+                        bgColor: 'transparent',
+                        addClass: 'transparentBg',
                         onSelect: function(c) {
                             $scope.$apply(function() { updateCoords(c); });
                         },

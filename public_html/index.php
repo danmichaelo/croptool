@@ -57,11 +57,9 @@ $I18N = new TsIntuition(array(
         **************************************************************************************************** -->
 
     <div ng-show="showNotice" style="padding: .3em; background: #eeee88; text-align:center; border-bottom-right-radius: 5px; border-bottom-left-radius: 5px;">
-        <span style="float:right;">
-            <a href ng-click="dismissNotice();">[hide]</a>
-        </span>
-        3. august: Added support for other Wikimedia sites than Commons, such as Wikipedia.
-        <a href="//github.com/danmichaelo/croptool/issues/31">Report any errors here</a>
+        <a style="float:right; padding: .1em 2em;" href="#" ng-click="dismissNotice();">[Dismiss]</a>
+        20 Sept: CropTool now supports cropping PNG files.
+        <a href="https://github.com/danmichaelo/croptool/issues">Report any issues here</a>
     </div>
 
     <!-- ********************************************************************************************************
@@ -286,17 +284,19 @@ $I18N = new TsIntuition(array(
                         </span>
                     </p>
 
-                    <?php echo $I18N->msg( 'cropform-method' ); ?>
+                    <div ng-show="metadata.mime == 'image/jpeg'">
+                        <?php echo $I18N->msg( 'cropform-method' ); ?>
 
-                    <div class="form-group">
-                        <label class="radio-inline">
-                            <input type="radio" name="cropmethod" value="precise" ng-model="cropmethod">
-                            <?php echo $I18N->msg( 'cropform-method-precise' ); ?>
-                        </label>
-                        <label class="radio-inline">
-                            <input type="radio" name="cropmethod" value="lossless" ng-model="cropmethod">
-                            <?php echo $I18N->msg( 'cropform-method-lossless' ); ?>
-                        </label>
+                        <div class="form-group">
+                            <label class="radio-inline">
+                                <input type="radio" name="cropmethod" value="precise" ng-model="cropmethod">
+                                <?php echo $I18N->msg( 'cropform-method-precise' ); ?>
+                            </label>
+                            <label class="radio-inline">
+                                <input type="radio" name="cropmethod" value="lossless" ng-model="cropmethod">
+                                <?php echo $I18N->msg( 'cropform-method-lossless' ); ?>
+                            </label>
+                        </div>
                     </div>
 
                     <button type="submit" class="btn btn-large btn-primary" ng-disabled="!crop_dim || busy">
@@ -313,7 +313,7 @@ $I18N = new TsIntuition(array(
 
                 </div>
 
-                <div ng-show="!busy">
+                <div ng-show="!busy && metadata.mime == 'image/jpeg'">
 
                     <p>
                         <i class="fa fa-question-circle"></i> <?php echo $I18N->msg( 'cropform-help' ); ?>:

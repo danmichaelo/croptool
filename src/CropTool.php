@@ -288,6 +288,8 @@ class CropTool {
         switch ($image_mime) {
             case 'image/jpeg':
                 return '.jpg';
+            case 'image/png':
+                return '.png';
         }
         return false;
     }
