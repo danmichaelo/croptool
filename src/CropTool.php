@@ -16,6 +16,7 @@ class CropTool {
         'tpl_remove_border' => '/{{\s*(crop|remove ?borders?)(\s*|\|[^\}]+)}}\s*/i',
         'tpl_watermark' => '/{{\s*(wmr|(remove |image)?water ?m(a|e)rk(ed)?)(\s*|\|[^\}]+)}}\s*/i',
         'cat_border' => '/\[\[category:images(?: |_)with(?: |_)borders\]\]\s*/i',
+        'tpl_review' => '/{{\s*(license|flickr|panoramio|openstreetmap|openphoto)[ -]?review\s*(\|[^\}]+)?}}\s*/i',
     );
 
     public function __construct(MwApiClient $apiClient = null, Curl $curl = null, Logger $logger = null)
@@ -181,6 +182,15 @@ class CropTool {
         return array($removed, $text);
     }
 
+    /**
+     * License review templates should not be copied into new files.
+     * See <https://github.com/danmichaelo/croptool/issues/41>
+     */
+    public function removeReviewTemplates($text)
+    {
+        return preg_replace($this->elem_matches['tpl_review'], '', $text);
+    }
+
     public function upload($input) {
 
         if (!$this->api->authorized()) {
@@ -239,6 +249,7 @@ class CropTool {
             //$wikitext .= "\n[[Category:Test uploads]]";
 
             list($removed, $wikitext) = $this->removeBorderTemplateAndCat($wikitext, $input->elems);
+            $wikitext = $this->removeReviewTemplates($wikitext);
             $args['text'] = $wikitext;
 
         }
