@@ -1,8 +1,5 @@
 <?php
 
-use PHPExiftool\Exiftool,
-    Monolog\Logger;
-
 /**
  * Class that does the actual cropping
  */
@@ -27,9 +24,6 @@ class Image
         $image = new Imagick($path);
         $sf = explode(',', $image->GetImageProperty('jpeg:sampling-factor'));
         $this->samplingFactor = $sf[0];
-
-        $logger = new Logger('exiftool');
-        $this->exiftool = new Exiftool($logger);
 
         switch($this->orientation)
         {
@@ -219,8 +213,6 @@ class Image
 
         chmod($destPath, 0664);
 
-        $this->copyMetadata($destPath);
-
         $cropped = new Image();
         $cropped->load($destPath);
 
@@ -230,16 +222,6 @@ class Image
             'width' => $cropped->width,
             'height' => $cropped->height
         );
-    }
-
-    public function copyMetadata($destPath)
-    {
-        // Reference: http://owl.phy.queensu.ca/~phil/exiftool/exiftool_pod.html
-        $this->exiftool->executeCommand(sprintf('-overwrite_original -quiet -TagsFromFile %s -all:all %s',
-            escapeshellarg($this->srcPath),
-            escapeshellarg($destPath)
-        ));
-
     }
 
     public function thumb($destPath, $maxWidth, $maxHeight)

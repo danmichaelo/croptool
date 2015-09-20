@@ -74,4 +74,4 @@ else
 	composer install --no-progress --prefer-dist
 fi
 
-chmod ug+x ./vendor/phpexiftool/exiftool/exiftool
+# chmod ug+x ./vendor/phpexiftool/exiftool/exiftool
