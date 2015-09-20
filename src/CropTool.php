@@ -13,8 +13,8 @@ class CropTool {
     public $api;
 
     protected $elem_matches = array(
-        'tpl_remove_border' => '/{{\s*(crop|remove ?borders?)\s*}}\s*/i',
-        'tpl_watermark' => '/{{\s*(wmr|(remove |image)?water ?m(a|e)rk(ed)?)\s*}}\s*/i',
+        'tpl_remove_border' => '/{{\s*(crop|remove ?borders?)(\s*|\|[^\}]+)}}\s*/i',
+        'tpl_watermark' => '/{{\s*(wmr|(remove |image)?water ?m(a|e)rk(ed)?)(\s*|\|[^\}]+)}}\s*/i',
         'cat_border' => '/\[\[category:images(?: |_)with(?: |_)borders\]\]\s*/i',
     );
 
