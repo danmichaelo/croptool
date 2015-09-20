@@ -58,8 +58,8 @@ $I18N = new TsIntuition(array(
 
     <div ng-show="showNotice" style="padding: .3em; background: #eeee88; text-align:center; border-bottom-right-radius: 5px; border-bottom-left-radius: 5px;">
         <a style="float:right; padding: .1em 2em;" href="#" ng-click="dismissNotice();">[Dismiss]</a>
-        20 Sept: CropTool now supports cropping PNG files.
-        <a href="https://github.com/danmichaelo/croptool/issues">Report any issues here</a>
+        20 Sept: CropTool now supports PNG and (animated) GIF files.
+        <a href="https://github.com/danmichaelo/croptool/issues">Report issues here</a>
     </div>
 
     <!-- ********************************************************************************************************

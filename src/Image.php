@@ -119,6 +119,42 @@ class Image
         return $rect;
     }
 
+    public function gifCrop($destPath, $x, $y, $width, $height)
+    {
+        if (file_exists($destPath)) {
+            unlink($destPath);
+        }
+
+        // Get coords orientated in the same direction as the image:
+        $coords = $this->getCropCoordinates($x, $y, $width, $height);
+
+        // Load img:
+        $im = new \Imagick($this->srcPath);
+
+        $im = $im->coalesceImages();
+
+        foreach ($im as $frame) {
+            $frame->cropImage($coords['width'], $coords['height'], $coords['x'], $coords['y']);
+            $frame->thumbnailImage($coords['width'], $coords['height']);
+            $frame->setImagePage($coords['width'], $coords['height'], 0, 0);
+        }
+
+        $im = $im->deconstructImages();
+        $im->writeImages($destPath, true);
+
+        $im->destroy();
+
+        chmod($destPath, 0664);
+
+        return array(
+            'method' => 'gif',
+            'name' => Image::$filesFolder . basename($destPath) . '?ts=' . time(),
+            'width' => $width,
+            'height' => $height
+        );
+
+    }
+
     public function preciseCrop($destPath, $x, $y, $width, $height)
     {
         if (file_exists($destPath)) {

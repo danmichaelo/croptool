@@ -76,7 +76,9 @@ class CropTool {
 
         $image = new Image;
         $image->load($srcPath);
-        if ($cm == 'precise') {
+        if ($response->imageinfo[0]->mime == 'image/gif') {
+            $res = $image->gifCrop($destPath, $new_x, $new_y, $new_width, $new_height);
+        } else if ($cm == 'precise') {
             $res = $image->preciseCrop($destPath, $new_x, $new_y, $new_width, $new_height);
         } else if ($cm == 'lossless') {
             $res = $image->losslessCrop($destPath, $new_x, $new_y, $new_width, $new_height);
@@ -89,19 +91,29 @@ class CropTool {
         }
 
         // Make thumb
-        $thumbName = 'files/' . $sha1 . '_cropped_thumb' . $ext;
-        $thumbPath = $this->publicPath . '/' . $thumbName;
-        $thumb = new Image;
-        $thumb->load($destPath);
-        $thumbDim = $thumb->thumb($thumbPath, 800, 800);
-        chmod($thumbPath, 0664);
+        if ($response->imageinfo[0]->mime == 'image/gif') {
+            $thumbName = 'files/' . $sha1 . '_cropped' . $ext;
+            $res['thumb'] = array(
+                'cached' => true,
+                'name' => $thumbName . '?ts=' . time(),
+                'width' => $thumbDim[0],
+                'height' => $thumbDim[1],
+            );
+        } else {
+            $thumbName = 'files/' . $sha1 . '_cropped_thumb' . $ext;
+            $thumbPath = $this->publicPath . '/' . $thumbName;
+            $thumb = new Image;
+            $thumb->load($destPath);
+            $thumbDim = $thumb->thumb($thumbPath, 800, 800);
+            chmod($thumbPath, 0664);
 
-        $res['thumb'] = array(
-            'cached' => true,
-            'name' => $thumbName . '?ts=' . time(),
-            'width' => $thumbDim[0],
-            'height' => $thumbDim[1],
-        );
+            $res['thumb'] = array(
+                'cached' => true,
+                'name' => $thumbName . '?ts=' . time(),
+                'width' => $thumbDim[0],
+                'height' => $thumbDim[1],
+            );
+        }
 
         $s1 = getimagesize($srcPath);
         $s2 = getimagesize($destPath);
@@ -115,7 +127,7 @@ class CropTool {
             $dim[] = ($cropPercentY ?: ' < 1') . ' % vertically';
         }
 
-        $using = 'using [[Commons:CropTool|CropTool]] with ' . ($cm == 'lossless' ? 'lossless mode' : 'precise mode') . '.';
+        $using = 'using [[Commons:CropTool|CropTool]] with ' . $res['method'] . ' mode.';
         $res['dim'] = implode(' and ', $dim) . ' ' . $using;
         $res['page'] = $this->analyzePage($title);
 
@@ -290,6 +302,8 @@ class CropTool {
                 return '.jpg';
             case 'image/png':
                 return '.png';
+            case 'image/gif':
+                return '.gif';
         }
         return false;
     }
@@ -348,26 +362,39 @@ class CropTool {
 
         // 3. Make thumb
 
-        $thumbName = 'files/' . $sha1 . '_thumb' . $ext;
-        $thumbPath = $this->publicPath . '/' . $thumbName;
+        if ($image_mime == 'image/gif') {
 
-        $image = new Image();
-        if (!$image->load($abs_path)) {
-            $res['error'] = $image->error;
-            return $res;
+            $res['thumb'] = array(
+                'cached' => true,
+                'name' => 'files/' . $sha1 . $ext,
+                'width' => $image_size[0],
+                'height' => $image_size[1]
+            );
+
+        } else {
+
+            $thumbName = 'files/' . $sha1 . '_thumb' . $ext;
+            $thumbPath = $this->publicPath . '/' . $thumbName;
+
+            $image = new Image();
+            if (!$image->load($abs_path)) {
+                $res['error'] = $image->error;
+                return $res;
+            }
+            $thumbDim = $image->thumb($thumbPath, 800, 800);
+            chmod($thumbPath, 0664);
+
+            $res['orientation'] = $image->orientation;
+            $res['samplingFactor'] = $image->samplingFactor;
+
+            $res['thumb'] = array(
+                'cached' => true,
+                'name' => $thumbName,
+                'width' => $thumbDim[0],
+                'height' => $thumbDim[1]
+            );
+
         }
-        $thumbDim = $image->thumb($thumbPath, 800, 800);
-        chmod($thumbPath, 0664);
-
-        $res['orientation'] = $image->orientation;
-        $res['samplingFactor'] = $image->samplingFactor;
-
-        $res['thumb'] = array(
-            'cached' => true,
-            'name' => $thumbName,
-            'width' => $thumbDim[0],
-            'height' => $thumbDim[1]
-        );
 
         $this->logger->addInfo('[main] ' . substr($sha1, 0, 7) . ' Got file "' . $title . '"');
 
