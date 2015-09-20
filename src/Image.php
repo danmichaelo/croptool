@@ -161,8 +161,10 @@ class Image
         // Load img:
         $im = new \Imagick($this->srcPath);
 
+        $im->setImagePage(0, 0, 0, 0);  // Reset virtual canvas, like +repage
         $im->cropImage($coords['width'], $coords['height'], $coords['x'], $coords['y']);
-        
+        $im->setImagePage(0, 0, 0, 0);  // Reset virtual canvas, like +repage
+
         // Imagick will copy metadata to the destination file
         $im->writeImage($destPath);
         $im->destroy();
