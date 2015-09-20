@@ -10,13 +10,11 @@ service('LoginService', ['$http', '$rootScope', function($http, $rootScope) {
     var that = this;
 
     this.checkLogin = function(response) {
-        console.log(response);
         if (response.user) {
             that.user = { name: response.user };
         } else {
             that.user = undefined;
         }
-        console.log(that.user);
         that.loginResponse = response;
         $rootScope.$broadcast('loginStatusChanged', response);
     };
@@ -47,19 +45,6 @@ controller('LoginCtrl', ['$scope', '$http', 'LoginService', function($scope, $ht
     $scope.user = LoginService.user;
     $scope.ready = false;
 
-    $scope.tuscLogin = function() {
-        $http.post('backend.php', { username: $scope.username, password: $scope.password}).
-        success(function(response) {
-            LoginService.checkLogin(response);
-            $scope.user = LoginService.user;
-            if (!$scope.user) {
-                $scope.loginerror = "Login failed";
-            } else {
-                $scope.loginerror = undefined;
-            }
-        });
-    };
-
     $scope.oauthLogin = function() {
         window.location.href = './backend.php?action=authorize';
     };
@@ -75,7 +60,6 @@ controller('LoginCtrl', ['$scope', '$http', 'LoginService', function($scope, $ht
 
     $scope.$on('loginStatusChanged', function() {
 
-        console.log('Login status changed: ' + (LoginService.user ? 'logged in' : 'not logged in'));
         $scope.user = LoginService.user;
         $scope.ready = true;
         if (LoginService.loginResponse.error) {
@@ -96,7 +80,7 @@ controller('AppCtrl', ['$scope', '$http', '$timeout', '$q', '$window', 'LoginSer
         everPushedSomething = false,
         pixelratio = [1,1];
 
-    
+
     $scope.site = '';     // Site-part of the URL
     $scope.title = '';    // Title-part of the URL
 
@@ -127,8 +111,6 @@ controller('AppCtrl', ['$scope', '$http', '$timeout', '$q', '$window', 'LoginSer
             right: $scope.metadata.original.width - new_offset[0] - new_size[0],
             bottom: $scope.metadata.original.height - new_offset[1] - new_size[1],
         };
-
-        //$('#cropped_size').html(new_size[0] + 'x' + new_size[1] + ' px, x offset: ' + new_offset[0] + ' px, y offset: ' + new_offset[1] + ' px');
     }
 
     //LocalStorageService.setPrefix('croptool');
@@ -146,7 +128,9 @@ controller('AppCtrl', ['$scope', '$http', '$timeout', '$q', '$window', 'LoginSer
 
     $scope.$on('loginStatusChanged', function() {
 
-        console.log('[appctrl] Login status changed: ' + LoginService.user);
+        if (LoginService.user) {
+            console.log('[AppCtrl] Logged in as ' + LoginService.user.name);
+        }
 
         $scope.status = '';
         $scope.user = LoginService.user;
@@ -297,7 +281,6 @@ controller('AppCtrl', ['$scope', '$http', '$timeout', '$q', '$window', 'LoginSer
 
         $scope.error = '';
         $scope.busy = true;
-        //$scope.status = 'Please wait while cropping...';
 
         $http.post('backend.php', {
             title: $scope.title,
@@ -332,7 +315,6 @@ controller('AppCtrl', ['$scope', '$http', '$timeout', '$q', '$window', 'LoginSer
 
         $scope.busy = true;
         $scope.error = '';
-        //$scope.uploadresults = { status: 'Working' };
 
         $http.post('backend.php', {
             title: $scope.title,
@@ -367,7 +349,6 @@ controller('AppCtrl', ['$scope', '$http', '$timeout', '$q', '$window', 'LoginSer
     };
 
     angular.element($window).bind('popstate', function(e) {
-    //window.addEventListener('popstate', function(e) {
 
         if (!everPushedSomething) {
             // Chrome and Safari always emit a popstate event on page load, but Firefox doesn't.

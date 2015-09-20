@@ -15,9 +15,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST')
     if (isset($input->store)) {
         echo json_encode($ct->upload($input));
 
-    } else if (isset($_POST['username']) && isset($_POST['password'])) {
-        echo json_encode($ct->tuscLogin($_POST['username'], $_POST['password']));
-
     } else if (isset($_GET['action']) && ($_GET['action'] == 'logout')) {
         echo json_encode($ct->logout());
 

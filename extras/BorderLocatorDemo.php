@@ -7,7 +7,6 @@ require '../vendor/autoload.php';
 require '../BorderLocator.php';
 
 use Danmichaelo\Coma\sRGB;
-use PHPExiftool\Exiftool;
 
 ini_set('memory_limit', '1024M');
 
