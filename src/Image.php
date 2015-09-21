@@ -113,8 +113,9 @@ class Image
         return $rect;
     }
 
-    public function gifCrop($destPath, $x, $y, $width, $height)
+   public function gifCrop($destPath, $x, $y, $width, $height)
     {
+
         if (file_exists($destPath)) {
             unlink($destPath);
         }
@@ -122,21 +123,29 @@ class Image
         // Get coords orientated in the same direction as the image:
         $coords = $this->getCropCoordinates($x, $y, $width, $height);
 
-        // Load img:
-        $im = new \Imagick($this->srcPath);
+        $dim = $coords['width'] . 'x' . $coords['height'] . '+' . $coords['x'] .'+' . $coords['y'] . '!';
 
-        $im = $im->coalesceImages();
+        $cmd = sprintf('convert %s -crop %s %s',
+            escapeshellarg($this->srcPath),
+            escapeshellarg($dim),
+            escapeshellarg($destPath)
+        );
+        $cmd_res = exec($cmd, $output, $return_var);
 
-        foreach ($im as $frame) {
-            $frame->cropImage($coords['width'], $coords['height'], $coords['x'], $coords['y']);
-            $frame->thumbnailImage($coords['width'], $coords['height']);
-            $frame->setImagePage($coords['width'], $coords['height'], 0, 0);
+        if ($cmd_res != "" || $return_var != 0) {
+            $res = array('method' => 'gif', 'error' => $cmd_res);
+            if (empty($cmd_res)) {
+                switch ($return_var) {
+                    case 127:
+                        $res['error'] = 'convert command not found';
+                        break;
+                    default:
+                        $res['error'] = 'Unknown error ' . $return_var;
+                        break;
+                }
+            }
+            return $res;
         }
-
-        $im = $im->deconstructImages();
-        $im->writeImages($destPath, true);
-
-        $im->destroy();
 
         chmod($destPath, 0664);
 
@@ -147,7 +156,7 @@ class Image
             'height' => $height
         );
 
-    }
+    } 
 
     public function preciseCrop($destPath, $x, $y, $width, $height)
     {
