@@ -344,6 +344,13 @@ class CropTool {
             return array('error' => 'Sorry, the file type is not supported: ' . $image_mime);
         }
 
+        // Bail out early if given a file larger than 100 megapixles.
+        // A 100 megapixel image requires almost 500 MB of memory
+        $megaPixels = $image_size[0] * $image_size[1] / 1e6;
+        if ($megaPixels > 100) {
+            return array('error' => 'Sorry, the file is too large (' . round($megaPixels) . ' megapixels). CropTool supports files up to 100 megapixels.');
+        }
+
         // 2. Get original file
 
         $orig_name = 'files/' . $sha1 . $ext;
