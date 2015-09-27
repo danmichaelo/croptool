@@ -3,13 +3,31 @@
 }
 html, body {
     height: 100%;
+    background: #fcfcfc;
 }
-.container{
+
+h1 {
+    margin-top: 10px;
+    margin-bottom: 15px;
+    padding: 0;
+    font-size: 30px;
+}
+
+h2 {
+    margin-top: 10px;
+    margin-bottom: 10px;
+    font-weight: normal;
+    font-size: 24px;
+}
+
+.container2 {
+    padding: 1vw 2vw;
     min-height: 100%;
     height: auto !important;
     height: 100%;
     margin: 0 auto -35px; /* the bottom margin is the negative value of the footer's height */
 }
+
 footer, .push {
     height: 35px; /* .push must be the same height as .footer */
 }
@@ -32,4 +50,70 @@ label {
 }
 .transparentBg {
     background-image: url("res/transparent.png?1");
+}
+
+.row2 {
+    display: flex;
+    flex-wrap: wrap;
+}
+.leftcol {
+    flex-shrink: 0;
+    flex-grow: .5;
+    padding: 10px 10px 10px 0;
+}
+.leftcol .inner {
+    box-shadow: 3px 3px 10px #999;
+}
+.rightcol {
+    margin-top: 10px;
+    margin-bottom: 10px;
+    width: 200px;
+    flex-grow: 1;
+    padding: 15px;
+    background: #fff;
+    box-shadow: 3px 3px 10px #999;
+}
+
+form {
+    margin-bottom:.8em;
+}
+
+/* From: http://angular-ui.github.io/bootstrap/ */
+.nav, .pagination, .carousel, .panel-title a { cursor: pointer; }
+
+
+/* Avoid flicker on popover */
+.checkbox-inline, .radio-inline {
+    margin-left: 0 !important;
+    padding-right: 10px;
+}
+
+
+
+
+.mainLoader {
+  height: 6px;
+  width: 100%;
+  position: relative;
+  overflow: hidden;
+  background-color: #ddd;
+}
+.mainLoader:before{
+  display: block;
+  position: absolute;
+  content: "";
+  left: -200px;
+  width: 200px;
+  height: 6px;
+  background-color: #2980b9;
+  animation: mainLoaderLoading 2s linear infinite;
+}
+
+@keyframes mainLoaderLoading {
+    from {left: -200px; width: 30%;}
+    50% {width: 30%;}
+    70% {width: 70%;}
+    80% { left: 50%;}
+    95% {left: 120%;}
+    to {left: 100%;}
 }

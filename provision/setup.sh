@@ -13,6 +13,10 @@ apt-get install -y libjpeg-progs > /dev/null
 echo "Installing Nginx"
 apt-get install -y nginx > /dev/null
 
+echo "Installing Node.js and NPM"
+apt-get install -y build-essential nodejs npm
+ln -s /usr/bin/nodejs /usr/bin/node
+
 echo "Installing NTP"
 apt-get install -y ntp > /dev/null
 ntpdate pool.ntp.org
@@ -78,5 +82,9 @@ else
 	echo "Installing Composer packages"
 	composer install --no-progress --prefer-dist
 fi
+
+
+npm install --silent -g bower
+bower install --allow-root
 
 # chmod ug+x ./vendor/phpexiftool/exiftool/exiftool

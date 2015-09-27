@@ -35,20 +35,25 @@ $I18N = new TsIntuition(array(
   <link rel="stylesheet" type="text/css" href="//tools-static.wmflabs.org/cdnjs/ajax/libs/twitter-bootstrap/3.3.4/css/bootstrap.min.css">
   <link rel="stylesheet" type="text/css" href="//tools-static.wmflabs.org/cdnjs/ajax/libs/font-awesome/4.3.0/css/font-awesome.min.css">
   <link rel="stylesheet" type="text/css" href="//tools-static.wmflabs.org/cdnjs/ajax/libs/jquery-jcrop/0.9.12/css/jquery.Jcrop.min.css">
+  <link rel="stylesheet" type="text/css" href="components/ladda/dist/ladda-themeless.min.css">
   <link rel="stylesheet" type="text/css" href="app.css">
 
   <script src="//tools-static.wmflabs.org/cdnjs/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
   <script src="//tools-static.wmflabs.org/cdnjs/ajax/libs/twitter-bootstrap/3.3.4/js/bootstrap.min.js"></script>
   <script src="//tools-static.wmflabs.org/cdnjs/ajax/libs/angular.js/1.2.28/angular.min.js"></script>
   <script src="//tools-static.wmflabs.org/cdnjs/ajax/libs/angular.js/1.2.28/angular-sanitize.min.js"></script>
+  <script src="//tools-static.wmflabs.org/cdnjs/ajax/libs/angular-ui-bootstrap/0.13.4/ui-bootstrap-tpls.min.js"></script>
   <script src="//tools-static.wmflabs.org/cdnjs/ajax/libs/jquery-jcrop/0.9.12/js/jquery.Jcrop.min.js"></script>
   <script src="//tools-static.wmflabs.org/cdnjs/ajax/libs/angular-local-storage/0.1.5/angular-local-storage.min.js"></script>
+  <script src="components/ladda/js/spin.js"></script>
+  <script src="components/ladda/js/ladda.js"></script>
+  <script src="components/angular-ladda/dist/angular-ladda.min.js"></script>
   <script src="app.js"></script>
 
 </head>
 <body ng-controller="AppCtrl">
 
-<div class="container">
+<div class="container2">
 
     <?php echo $testingEnv ? '<p style="position:absolute; right:0; top: 0; font-size: 80%; background: yellow;"><strong>NOTE:</strong> We are in a testing environment</p>' : ''; ?>
 
@@ -73,11 +78,13 @@ $I18N = new TsIntuition(array(
         </div>
     </div>
 
-    <h1 style="padding:.4em 0; margin: 0 0 .3em 0;">
+    <h1>
         <a href ng-click="imageUrlOrTitle = ''; openFile()">
             <i class="fa fa-crop"></i>
-            <?php echo $I18N->msg( 'title' ); ?>
-        </a>
+            <?php echo $I18N->msg( 'title' ); ?></a>
+        <span ng-show="metadata">
+        : {{title}}
+        </span>
     </h1>
 
     <!-- ********************************************************************************************************
@@ -183,14 +190,13 @@ $I18N = new TsIntuition(array(
         Fetching image data and metadata
         **************************************************************************************************** -->
 
-    <div ng-show="user && !metadata && busy">
-
-        <h2>File:{{title}}</h2> 
+    <div ng-show="!metadata && busy">
 
         <p>
             <?php echo $I18N->msg( 'fetching-progress' ); ?>
         </p>
-        <img src="res/spinner.gif" alt="Spinner" style="width:220px; height:20px;">
+
+        <div class="mainLoader" style="margin-top: 1em;"></div>
 
     </div>
 
@@ -204,59 +210,71 @@ $I18N = new TsIntuition(array(
              Header
              **************************************************************************************************** -->
         <div>
-            <h2>File:{{title}}</h2> 
             <p>
+                <a href="{{metadata.description}}">View at {{site}}</a>.
                 <?php echo $I18N->msg( 'original-dimensions', array('variables' => array(
                     '{{metadata.original.width}}', '{{metadata.original.height}}'
                 ))); ?>
 
-                <span ng-show="metadata.thumb">
-                    <?php echo $I18N->msg( 'thumb-dimensions', array('variables' => array(
-                    '{{metadata.thumb.width}}', '{{metadata.thumb.height}}'
-                    ))); ?>
+                <span ng-show="crop_dim && !cropresults">
+                    Crop: {{crop_dim.w}} x {{crop_dim.h}} px.
                 </span>
-                <a href="{{metadata.description}}">
-                    View at {{site}}
-                </a>
+
+                <span ng-show="cropresults">
+                    Crop: {{cropresults.width}} x {{cropresults.height}} px.
+                </span>
             </p>
         </div>
 
 
         <!-- ********************************************************************************************************
-             Crop form
+             Main form
              **************************************************************************************************** -->
-        <div class="row" ng-show="metadata && !metadata.error && !cropresults" style="padding-bottom:1.5em;">
+        <div class="row2" ng-show="metadata && !metadata.error" style="padding-bottom:1.5em;">
 
 
             <!-- ********************************************************************************************************
                  Left column
                  **************************************************************************************************** -->
-            <div class="col-lg-9">
+            <div class="leftcol" style="min-width:600px;">
 
-                <div class="well">
+
+                <!-- ********************************************************************************************************
+                     Step 1
+                     **************************************************************************************************** -->
+                <div ng-show="!cropresults" class="inner" style="width:{{metadata.thumb ? metadata.thumb.width : metadata.original.width}}px; margin-left:auto; margin-right:auto;">
 
                     <!-- This is the image we're attaching Jcrop to -->
                     <img id="cropbox" ng-src="{{metadata.thumb ? metadata.thumb.name : metadata.original.name}}">
 
                 </div>
 
-              </div>
+                <!-- ********************************************************************************************************
+                     Step 2 & Step 3
+                     **************************************************************************************************** -->
+                <div ng-show="cropresults" class="inner transparentBg" style="width:{{cropresults.thumb ? cropresults.thumb.width : cropresults.width}}px; margin-left:auto; margin-right:auto;">
+
+                    <img ng-src="{{cropresults.thumb ? cropresults.thumb.name : cropresults.name}}" class="img-responsive" />
+
+                </div>
+
+            </div>
 
 
             <!-- ********************************************************************************************************
                  Right column
                  **************************************************************************************************** -->
-            <div class="col-lg-3">
+            <div class="rightcol">
 
-                <div style="color:red;padding:10px;" ng-show="error">
-                    {{error}}
-                </div>
+                <!-- ********************************************************************************************************
+                     Step 1: Select crop region
+                     **************************************************************************************************** -->
 
-                <div style="color:red;padding:10px;" ng-show="metadata.error">
-                    {{metadata.error}}
-                </div>
+                <form ng-show="!cropresults" ng-submit="preview()" role="form">
 
-                <form ng-submit="preview()" role="form">
+                    <div style="color:red;padding:10px;" ng-show="error">
+                        {{error}}
+                    </div>
 
                     <input type="hidden" id="x" name="x" />
                     <input type="hidden" id="y" name="y" />
@@ -265,13 +283,12 @@ $I18N = new TsIntuition(array(
 
                     <input type="hidden" name="title" ng-model="title" />
 
-                    <p ng-show="!crop_dim">
+                    <p>
                         <?php echo $I18N->msg( 'cropform-select-region', array('variables' => array(
                             'locateBorder();'
                         ))); ?>
                         <img src="res/spinner1.gif" ng-show="borderLocatorBusy">
                     </p>
-
 
                     <p ng-show="crop_dim">
                         <span id="cropped_size">
@@ -288,218 +305,158 @@ $I18N = new TsIntuition(array(
                         <?php echo $I18N->msg( 'cropform-method' ); ?>
 
                         <div class="form-group">
-                            <label class="radio-inline">
+                            <label class="radio-inline"
+                                popover="<?php echo $I18N->msg( 'cropform-method-precise-help' ); ?>"
+                                popover-trigger="mouseenter"
+                                popover-animation="false"
+                                popover-append-to-body="true"
+                                popover-placement="bottom"
+                                popover-popup-delay="0.5"
+                            >
                                 <input type="radio" name="cropmethod" value="precise" ng-model="cropmethod">
                                 <?php echo $I18N->msg( 'cropform-method-precise' ); ?>
                             </label>
-                            <label class="radio-inline">
+                            <label class="radio-inline"
+                                popover="<?php echo $I18N->msg( 'cropform-method-lossless-help' ); ?>"
+                                popover-trigger="mouseenter"
+                                popover-animation="false"
+                                popover-append-to-body="true"
+                                popover-placement="bottom"
+                                popover-popup-delay="0.5"
+                            >
                                 <input type="radio" name="cropmethod" value="lossless" ng-model="cropmethod">
                                 <?php echo $I18N->msg( 'cropform-method-lossless' ); ?>
                             </label>
                         </div>
                     </div>
 
-                    <button type="submit" class="btn btn-large btn-primary" ng-disabled="!crop_dim || busy">
-                        <?php echo $I18N->msg( 'cropform-preview-btn' ); ?>
-                    </button>
+                    <button type="submit"
+                        class="btn btn-primary"
+                        ng-disabled="!crop_dim"
+                        ladda="busy"
+                        data-style="slide-up"><?php echo $I18N->msg( 'cropform-preview-btn' ); ?></button>
+
                 </form>
 
-                <div ng-show="busy">
 
-                    <p>
-                        <?php echo $I18N->msg( 'cropping-progress' ); ?>
-                    </p>
-                    <img src="res/spinner.gif" alt="Spinner" style="width:220px; height:20px;">
+                <!-- ********************************************************************************************************
+                     Step 2: Preview crop
+                     **************************************************************************************************** -->
 
-                </div>
+                <div ng-show="cropresults && !uploadresults">
 
-                <div ng-show="!busy && metadata.mime == 'image/jpeg'">
-
-                    <p>
-                        <i class="fa fa-question-circle"></i> <?php echo $I18N->msg( 'cropform-help' ); ?>:
+                    <p ng-show="cropresults.method=='precise'">
+                        <?php echo $I18N->msg( 'previewform-precise'); ?>
                     </p>
 
-                    <ul>
-                        <li>
-                            <?php echo $I18N->msg( 'cropform-method-precise-help' ); ?>
-                        </li>
-                        <li>
-                            <?php echo $I18N->msg( 'cropform-method-lossless-help' ); ?>
-                        </li>
-                    </ul>
-                </div>
-
-            </div>
-        </div>
-
-
-        <!-- ********************************************************************************************************
-             Preview form
-             **************************************************************************************************** -->
-        <div class="row" ng-show="cropresults && !uploadresults" style="padding-bottom:1.5em;">
-
-
-            <!-- ********************************************************************************************************
-                 Left column
-                 **************************************************************************************************** -->
-            <div class="col-md-9">
-
-                <div class="well">
-
-                    <img ng-src="{{cropresults.thumb.name}}" class="img-responsive" />
-
-                </div>
-
-            </div>
-
-
-            <!-- ********************************************************************************************************
-                 Right column
-                 **************************************************************************************************** -->
-            <div class="col-md-3">
-
-                <p ng-show="cropresults.method=='lossless'">
-                    <?php echo $I18N->msg( 'previewform-lossless'); ?>
-                    <span ng-show="cropresults.width!=crop_dim.w || cropresults.height!=crop_dim.h">
-                        <?php echo $I18N->msg( 'previewform-lossless-explanation', array('variables' => array(
-                            '{{cropresults.width - crop_dim.w}}',
-                            '{{cropresults.height - crop_dim.h}}',
-                            '//en.wikipedia.org/wiki/JPEG#Lossless_editing'
-                        ))); ?>
-                    </span>
-                </p>
-
-                <p ng-show="cropresults.method=='precise'">
-                    <?php echo $I18N->msg( 'previewform-precise'); ?>
-                </p>
-
-                <form ng-submit="upload()" role="form">
-
-                    <p ng-show="site == 'commons.wikimedia.org'">
-                        <i class="fa fa-warning"></i>
-                        <?php echo $I18N->msg( 'previewform-overwrite-policy', array('variables' => array(
-                            'https://commons.wikimedia.org/wiki/Commons:Overwriting existing files'
-                        ))); ?>
-                    </p>
-
-                    <div class="radio">
-                        <label>
-                            <input type="radio" name="overwrite" ng-model="overwrite" value="overwrite" ng-disabled="busy" ng-change="updateUploadComment()">
-                            <?php echo $I18N->msg( 'previewform-overwrite'); ?>
-                        </label>
-                    </div>
-                    <div class="radio">
-                        <label>
-                            <input type="radio" name="overwrite" ng-model="overwrite" value="rename" ng-disabled="busy" ng-change="updateUploadComment()">
-                            <?php echo $I18N->msg( 'previewform-create-new'); ?>
-                        </label>
-                    </div>
-                    <div class="form-group" ng-show="overwrite=='rename'" ng-class="{ 'has-error': exists[site + ':' + newTitle] === true, 'has-success': exists[site + ':' + newTitle] === false }">
-                        <label class="sr-only" for="newTitle">
-                            <?php echo $I18N->msg( 'previewform-new-title' ); ?>
-                        </label>
-                        <input id="newTitle" type="text" class="form-control" ng-model="newTitle" ng-disabled="busy">
-                        <span class="help-block" ng-show="exists[site + ':' + newTitle] === true">
-                            <?php echo $I18N->msg( 'previewform-new-title-exists', array('variables' => array('{{newTitle}}')) ); ?>
+                    <p ng-show="cropresults.method=='lossless'">
+                        <?php echo $I18N->msg( 'previewform-lossless'); ?>
+                        <span ng-show="cropresults.width!=crop_dim.w || cropresults.height!=crop_dim.h">
+                            <?php echo $I18N->msg( 'previewform-lossless-explanation', array('variables' => array(
+                                '{{cropresults.width - crop_dim.w}}',
+                                '{{cropresults.height - crop_dim.h}}',
+                                '//en.wikipedia.org/wiki/JPEG#Lossless_editing'
+                            ))); ?>
                         </span>
-                    </div>
-
-                    <div class="form-group" ng-show="cropresults.page.elems.border !== undefined">
-                        <label title="<?php echo $I18N->msg( 'previewform-removed-border-help' ); ?>">
-                            <input type="checkbox" ng-model="cropresults.page.elems.border" ng-change="updateUploadComment()">
-                            <?php echo $I18N->msg( 'previewform-removed-border' ); ?>
-                        </label>
-                    </div>
-
-                    <div class="form-group" ng-show="cropresults.page.elems.watermark !== undefined">
-                        <label title="<?php echo $I18N->msg( 'previewform-removed-watermark-help' ); ?>">
-                            <input type="checkbox" ng-model="cropresults.page.elems.watermark" ng-change="updateUploadComment()">
-                            <?php echo $I18N->msg( 'previewform-removed-watermark' ); ?>
-                        </label>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="uploadComment">
-                            <?php echo $I18N->msg( 'previewform-upload-comment' ); ?>:
-                        </label>
-                        <textarea rows="4" id="uploadComment" type="text" class="form-control" ng-model="uploadComment" ng-disabled="busy"></textarea>
-                    </div>
-
-                    <div style="color:red;padding:10px;" ng-show="error">
-                        {{error}}
-                    </div>
-
-                    <button type="button" class="btn btn-large" ng-click="back()" ng-disabled="busy">
-                        <?php echo $I18N->msg( 'previewform-back-btn'); ?>
-                    </button>
-                    <button type="submit" class="btn btn-large btn-primary" ng-disabled="busy">
-                        <?php echo $I18N->msg( 'previewform-upload-btn'); ?>
-                    </button>
-
-                </form>
-
-                <!-- Spinner -->
-                <div ng-show="busy">
-                    <p>
-                        <?php echo $I18N->msg( 'upload-progress' ); ?>
                     </p>
-                    <img src="res/spinner.gif" alt="Spinner" style="width:220px; height:20px;">
+
+                    <form ng-submit="upload()" role="form">
+
+                        <div class="form-group">
+                            <label class="radio-inline">
+                                <input type="radio" name="overwrite" ng-model="overwrite" value="overwrite" ng-disabled="busy" ng-change="updateUploadComment()">
+                                <?php echo $I18N->msg( 'previewform-overwrite' ); ?>
+                            </label>
+                            <label class="radio-inline">
+                                <input type="radio" name="overwrite" ng-model="overwrite" value="rename" ng-disabled="busy" ng-change="updateUploadComment()">
+                                <?php echo $I18N->msg( 'previewform-create-new' ); ?>
+                            </label>
+                        </div>
+
+                        <p ng-show="site == 'commons.wikimedia.org' && overwrite=='overwrite'">
+                            <i class="fa fa-warning"></i>
+                            <?php echo $I18N->msg( 'previewform-overwrite-policy', array('variables' => array(
+                                'https://commons.wikimedia.org/wiki/Commons:Overwriting existing files'
+                            ))); ?>
+                        </p>
+
+                        <div class="form-group" ng-show="overwrite=='rename'" ng-class="{ 'has-error': exists[site + ':' + newTitle] === true, 'has-success': exists[site + ':' + newTitle] === false }">
+                            <label class="sr-only" for="newTitle">
+                                <?php echo $I18N->msg( 'previewform-new-title' ); ?>
+                            </label>
+                            <input id="newTitle" type="text" class="form-control" ng-model="newTitle" ng-disabled="busy">
+                            <span class="help-block" ng-show="exists[site + ':' + newTitle] === true">
+                                <?php echo $I18N->msg( 'previewform-new-title-exists', array('variables' => array('{{newTitle}}')) ); ?>
+                            </span>
+                        </div>
+
+                        <div class="form-group" ng-show="cropresults.page.elems.border !== undefined">
+                            <label title="<?php echo $I18N->msg( 'previewform-removed-border-help' ); ?>">
+                                <input type="checkbox" ng-model="cropresults.page.elems.border" ng-change="updateUploadComment()">
+                                <?php echo $I18N->msg( 'previewform-removed-border' ); ?>
+                            </label>
+                        </div>
+
+                        <div class="form-group" ng-show="cropresults.page.elems.watermark !== undefined">
+                            <label title="<?php echo $I18N->msg( 'previewform-removed-watermark-help' ); ?>">
+                                <input type="checkbox" ng-model="cropresults.page.elems.watermark" ng-change="updateUploadComment()">
+                                <?php echo $I18N->msg( 'previewform-removed-watermark' ); ?>
+                            </label>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="uploadComment">
+                                <?php echo $I18N->msg( 'previewform-upload-comment' ); ?>:
+                            </label>
+                            <textarea rows="4" id="uploadComment" type="text" class="form-control" ng-model="uploadComment" ng-disabled="busy"></textarea>
+                        </div>
+
+                        <div style="color:red; margin-bottom: 1em;" ng-show="error">
+                            {{error}}
+                        </div>
+
+                        <button type="button" class="btn btn-large" ng-click="back()" ng-disabled="busy">
+                            <?php echo $I18N->msg( 'previewform-back-btn'); ?>
+                        </button>
+
+                        <button type="submit"
+                            class="btn btn-large btn-primary"
+                            ladda="busy"
+                            data-style="slide-up"><?php echo $I18N->msg( 'previewform-upload-btn' ); ?></button>
+
+                    </form>
+
+                </div>
+
+                <!-- ********************************************************************************************************
+                     Step 3: Upload complete
+                     **************************************************************************************************** -->
+
+                <div ng-show="uploadresults">
+                    <div ng-show="status">
+                        {{status}}
+                    </div>
+
+                    <p ng-show="uploadresults.result == 'Success'" style="background: url(res/yes_check-24px.png) left no-repeat; padding: 5px 5px 5px 30px;">
+                        <?php echo $I18N->msg( 'results-success'); ?>
+                    </p>
+                    <p ng-show="uploadresults.result == 'Success'">
+                        <?php echo $I18N->msg( 'results-success-details', array('variables' => array(
+                            '{{uploadresults.imageinfo.descriptionurl}}?action=purge',
+                            '{{uploadresults.filename}}'
+                        ))); ?>
+                    </p>
+
+                    <p ng-show="uploadresults.error" style="background: url(res/x_mark-24px.png) left no-repeat; padding: 5px 5px 5px 30px;">
+                        <?php echo $I18N->msg( 'results-failure', array('variables' => array(
+                            '{{uploadresults.error.info}}'
+                        ))); ?>
+                    </p>
                 </div>
 
             </div>
-
         </div>
-
-
-        <!-- ********************************************************************************************************
-             Result
-             **************************************************************************************************** -->
-        <div class="row" ng-show="uploadresults" style="padding-bottom:1.5em;">
-
-            <!-- ********************************************************************************************************
-                 Left column
-                 **************************************************************************************************** -->
-            <div class="col-md-9">
-
-                <div class="well">
-
-                    <img ng-src="{{cropresults.thumb.name}}" class="img-responsive" />
-
-                </div>
-
-            </div>
-
-
-            <!-- ********************************************************************************************************
-                 Right column
-                 **************************************************************************************************** -->
-            <div class="col-md-3">
-
-                <div ng-show="status">
-                    {{status}}
-                </div>
-
-                <p ng-show="uploadresults.result == 'Success'" style="background: url(res/yes_check-24px.png) left no-repeat; padding: 5px 5px 5px 30px;">
-                    <?php echo $I18N->msg( 'results-success'); ?>
-                </p>
-                <p ng-show="uploadresults.result == 'Success'">
-                    <?php echo $I18N->msg( 'results-success-details', array('variables' => array(
-                        '{{uploadresults.imageinfo.descriptionurl}}?action=purge',
-                        '{{uploadresults.filename}}'
-                    ))); ?>
-                </p>
-
-                <p ng-show="uploadresults.error" style="background: url(res/x_mark-24px.png) left no-repeat; padding: 5px 5px 5px 30px;">
-                    <?php echo $I18N->msg( 'results-failure', array('variables' => array(
-                        '{{uploadresults.error.info}}'
-                    ))); ?>
-                </p>
-
-            </div>
-        </div>
-
     </div>
-
 
     <div class="push"></div>
 </div>

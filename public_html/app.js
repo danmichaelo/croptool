@@ -1,7 +1,7 @@
 'use strict';
 
 // Declare app level module which depends on filters, and services
-angular.module('croptool', ['LocalStorageModule', 'ngSanitize']).
+angular.module('croptool', ['LocalStorageModule', 'ngSanitize', 'ui.bootstrap', 'angular-ladda']).
 
 service('LoginService', ['$http', '$rootScope', function($http, $rootScope) {
 
@@ -101,8 +101,6 @@ controller('AppCtrl', ['$scope', '$http', '$timeout', '$q', '$window', 'LoginSer
             Math.round(c.y * pixelratio[1])
         ];
 
-        console.log(c);
-
         $scope.crop_dim = {
             x: new_offset[0],
             y: new_offset[1],
@@ -170,6 +168,8 @@ controller('AppCtrl', ['$scope', '$http', '$timeout', '$q', '$window', 'LoginSer
 
             if ($scope.metadata.thumb) {
                 pixelratio = [$scope.metadata.original.width/$scope.metadata.thumb.width, $scope.metadata.original.height/$scope.metadata.thumb.height];
+            } else {
+                pixelratio = [1,1];
             }
 
             if (!response.error) {

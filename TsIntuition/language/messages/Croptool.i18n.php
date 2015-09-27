@@ -32,7 +32,7 @@ $messages['en'] = array(
 	'titleform-file-found' => 'File «$1» found on «$2».',
 	'titleform-file-not-found' => 'File «$1» not found on «$2».',
 
-	'fetching-progress' => 'Please wait while fetching image data and metadata... This might take some time depending on the filesize of the image...',
+	'fetching-progress' => 'Please wait while fetching image data and metadata... This might take some time depending on the image size...',
 
 	'original-dimensions' => 'Original: $1 x $2 px.',
 	'thumb-dimensions' => 'Thumbnail: $1 x $2 px.',
@@ -43,8 +43,8 @@ $messages['en'] = array(
 	'cropform-method' => 'Crop method:',
 	'cropform-method-precise' => 'Precise',
 	'cropform-method-lossless' => 'Lossless',
-	'cropform-method-precise-help' => 'The <strong>precise</strong> method respects your selection, but as is usual with precise cropping, the process involves a small quality loss.',
-	'cropform-method-lossless-help' => 'The <strong>lossless</strong> method makes use of jpegtran, treating the image in terms of blocks (8x8 or 16x16 px depending on sampling). If the upper left part of the crop region does not fall on a block boundary, the crop region will have to be increased so that it does. The resulting image will therefore in general be a few pixels larger than requested, but never smaller than requested, and never more than 16 px larger.',
+	'cropform-method-precise-help' => 'This method fully respects your selection, but as is usual with precise cropping, the process involves a small quality loss.',
+	'cropform-method-lossless-help' => 'This method makes use of jpegtran, treating the image in terms of blocks (8x8 or 16x16 px depending on sampling). If the upper left part of the crop region does not fall on a block boundary, the crop region will have to be increased so that it does. The resulting image will therefore in general be a few pixels larger than requested, but never smaller than requested, and never more than 16 px larger.',
 	'cropform-preview-btn' => 'Preview',
 	'cropform-help' => 'Help',
 
@@ -53,14 +53,14 @@ $messages['en'] = array(
     'previewform-lossless' => 'A lossless crop was performed.',
     'previewform-lossless-explanation' => 'The resulting image is $1 px wider and $2 px higher than the region you selected. <a href="$3">Why?</a> Note that the extra pixels included are in the left and/or top part of the image.',
     'previewform-precise' => 'A precise crop was performed.',
-    'previewform-overwrite-policy' => 'Please make sure you are familiar with <a href="$1">Commons:Overwriting existing files</a>.',
+    'previewform-overwrite-policy' => 'Before overwriting, make sure you are familiar with <a href="$1">COM:CROP</a>.',
 
     'previewform-removed-border' => 'I\'ve removed the border',
     'previewform-removed-border-help' => 'Confirms removal of the \'remove border\' template',
     'previewform-removed-watermark' => 'I\'ve removed the watermark',
     'previewform-removed-watermark-help' => 'Confirms removal of the \'watermark\' template',
 
-    'previewform-overwrite' => 'Overwrite original',
+    'previewform-overwrite' => 'Overwrite',
     'previewform-create-new' => 'Upload as new file',
 	'previewform-new-title' => 'New filename',
 	'previewform-new-title-exists' => 'File «$1» already exists.',
