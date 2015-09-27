@@ -13,6 +13,11 @@ apt-get install -y libjpeg-progs > /dev/null
 echo "Installing Nginx"
 apt-get install -y nginx > /dev/null
 
+echo "Installing NTP"
+apt-get install -y ntp > /dev/null
+ntpdate pool.ntp.org
+service ntp restart
+
 echo "Installing PHP"
 apt-get install -y php5-fpm php5-cli php5-mcrypt php5-imagick php5-curl > /dev/null
 ln -sf /etc/php5/mods-available/mcrypt.ini /etc/php5/fpm/conf.d/20-mcrypt.ini
