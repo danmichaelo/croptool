@@ -370,6 +370,14 @@ class CropTool {
             }
         }
 
+        $image = new Image($abs_path, $image_mime);
+        if (!$image->load()) {
+            $res['error'] = $image->error;
+            return $res;
+        }
+        $res['orientation'] = $image->orientation;
+        $res['samplingFactor'] = $image->samplingFactor;
+
         // 3. Make thumb
 
         if ($image_mime != 'image/gif' && $image_size[0] > 800) {
@@ -377,16 +385,8 @@ class CropTool {
             $thumbName = 'files/' . $sha1 . '_thumb' . $ext;
             $thumbPath = $this->publicPath . '/' . $thumbName;
 
-            $image = new Image($abs_path, $image_mime);
-            if (!$image->load()) {
-                $res['error'] = $image->error;
-                return $res;
-            }
             $thumbDim = $image->thumb($thumbPath, 800, 800);
             chmod($thumbPath, 0664);
-
-            $res['orientation'] = $image->orientation;
-            $res['samplingFactor'] = $image->samplingFactor;
 
             $res['thumb'] = array(
                 'cached' => true,
