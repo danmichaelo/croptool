@@ -11,42 +11,60 @@ class Image
 
     public $error;
 
+    protected $path;
+    protected $mime;
+
     public $orientation;
     public $samplingFactor;
 
-    public function load($path)
+    public function __construct($path, $mime)
     {
         $this->srcPath = $path;
+        $this->mime = $mime;
+    }
 
-        $exif = exif_read_data($this->srcPath, 'IFD0');
-        $this->orientation = isset($exif['Orientation']) ? intval($exif['Orientation']) : 0;
+    public function load()
+    {
+        if ($this->mime != 'image/jpeg') {
 
-        $image = new Imagick($path);
-        $sf = explode(',', $image->GetImageProperty('jpeg:sampling-factor'));
-        $this->samplingFactor = $sf[0];
+            $this->orientation = 0;
+            $image = new Imagick($this->srcPath);
+            $this->width = $image->getImageWidth();
+            $this->height = $image->getImageHeight();
 
-        switch($this->orientation)
-        {
-            case imagick::ORIENTATION_UNDEFINED:    // 0
-            case imagick::ORIENTATION_TOPLEFT:      // 1 : no rotation
-            case imagick::ORIENTATION_BOTTOMRIGHT:  // 3 : 180 deg
-                $this->width = $image->getImageWidth();
-                $this->height = $image->getImageHeight();
-                break;
+        } else {
+            $exif = exif_read_data($this->srcPath, 'IFD0');
+            $this->orientation = isset($exif['Orientation']) ? intval($exif['Orientation']) : 0;
 
-            case imagick::ORIENTATION_RIGHTTOP:     // 6 : 90 deg CW
-            case imagick::ORIENTATION_LEFTBOTTOM:   // 8 : 90 deg CCW
-                $this->width = $image->getImageHeight();
-                $this->height = $image->getImageWidth();
-                break;
+            $image = new Imagick($this->srcPath);
+            $sf = explode(',', $image->GetImageProperty('jpeg:sampling-factor'));
+            $this->samplingFactor = $sf[0];
 
-            default:
-                $this->error = 'Unsupported EXIF orientation "' . $this->orientation . '"';
-                return false;
+            switch($this->orientation)
+            {
+                case imagick::ORIENTATION_UNDEFINED:    // 0
+                case imagick::ORIENTATION_TOPLEFT:      // 1 : no rotation
+                case imagick::ORIENTATION_BOTTOMRIGHT:  // 3 : 180 deg
+                    $this->width = $image->getImageWidth();
+                    $this->height = $image->getImageHeight();
+                    break;
+
+                case imagick::ORIENTATION_RIGHTTOP:     // 6 : 90 deg CW
+                case imagick::ORIENTATION_LEFTBOTTOM:   // 8 : 90 deg CCW
+                    $this->width = $image->getImageHeight();
+                    $this->height = $image->getImageWidth();
+                    break;
+
+                default:
+                    $this->error = 'Unsupported EXIF orientation "' . $this->orientation . '"';
+                    return false;
+            }
         }
 
+        $image->destroy();
+
         if (!$this->width || !$this->height) {
-            unlink($path);
+            unlink($this->srcPath);
             $this->error = 'Invalid image file. Refreshing the page might help in some cases.';
             return false;
         }
@@ -224,8 +242,8 @@ class Image
 
         chmod($destPath, 0664);
 
-        $cropped = new Image();
-        $cropped->load($destPath);
+        $cropped = new Image($destPath, $this->mime);
+        $cropped->load();
 
         return array(
             'method' => 'lossless',

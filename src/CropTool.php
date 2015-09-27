@@ -75,8 +75,8 @@ class CropTool {
 
         $cm = $input->cropmethod;
 
-        $image = new Image;
-        $image->load($srcPath);
+        $image = new Image($srcPath, $response->imageinfo[0]->mime);
+        $image->load();
         if ($response->imageinfo[0]->mime == 'image/gif') {
             $res = $image->gifCrop($destPath, $new_x, $new_y, $new_width, $new_height);
         } else if ($cm == 'precise') {
@@ -103,8 +103,8 @@ class CropTool {
         } else {
             $thumbName = 'files/' . $sha1 . '_cropped_thumb' . $ext;
             $thumbPath = $this->publicPath . '/' . $thumbName;
-            $thumb = new Image;
-            $thumb->load($destPath);
+            $thumb = new Image($destPath, $response->imageinfo[0]->mime);
+            $thumb->load();
             $thumbDim = $thumb->thumb($thumbPath, 800, 800);
             chmod($thumbPath, 0664);
 
@@ -394,8 +394,8 @@ class CropTool {
             $thumbName = 'files/' . $sha1 . '_thumb' . $ext;
             $thumbPath = $this->publicPath . '/' . $thumbName;
 
-            $image = new Image();
-            if (!$image->load($abs_path)) {
+            $image = new Image($abs_path, $image_mime);
+            if (!$image->load()) {
                 $res['error'] = $image->error;
                 return $res;
             }
