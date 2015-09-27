@@ -92,15 +92,7 @@ class CropTool {
         }
 
         // Make thumb
-        if ($response->imageinfo[0]->mime == 'image/gif') {
-            $thumbName = 'files/' . $sha1 . '_cropped' . $ext;
-            $res['thumb'] = array(
-                'cached' => true,
-                'name' => $thumbName . '?ts=' . time(),
-                'width' => $thumbDim[0],
-                'height' => $thumbDim[1],
-            );
-        } else {
+        if ($response->imageinfo[0]->mime != 'image/gif' && $new_width > 800) {
             $thumbName = 'files/' . $sha1 . '_cropped_thumb' . $ext;
             $thumbPath = $this->publicPath . '/' . $thumbName;
             $thumb = new Image($destPath, $response->imageinfo[0]->mime);
@@ -380,16 +372,7 @@ class CropTool {
 
         // 3. Make thumb
 
-        if ($image_mime == 'image/gif') {
-
-            $res['thumb'] = array(
-                'cached' => true,
-                'name' => 'files/' . $sha1 . $ext,
-                'width' => $image_size[0],
-                'height' => $image_size[1]
-            );
-
-        } else {
+        if ($image_mime != 'image/gif' && $image_size[0] > 800) {
 
             $thumbName = 'files/' . $sha1 . '_thumb' . $ext;
             $thumbPath = $this->publicPath . '/' . $thumbName;
