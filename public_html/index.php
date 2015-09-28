@@ -242,7 +242,7 @@ $I18N = new TsIntuition(array(
                 <!-- ********************************************************************************************************
                      Step 1
                      **************************************************************************************************** -->
-                <div ng-show="!cropresults" class="inner" style="width:{{metadata.thumb ? metadata.thumb.width : metadata.original.width}}px; margin-left:auto; margin-right:auto;">
+                <div ng-show="!cropresults" class="inner" ng-style="{'width': (metadata.thumb ? metadata.thumb.width : metadata.original.width) + 'px', 'margin-left': 'auto', 'margin-right': 'auto'}">
 
                     <!-- This is the image we're attaching Jcrop to -->
                     <img id="cropbox" ng-src="{{metadata.thumb ? metadata.thumb.name : metadata.original.name}}">
@@ -252,7 +252,7 @@ $I18N = new TsIntuition(array(
                 <!-- ********************************************************************************************************
                      Step 2 & Step 3
                      **************************************************************************************************** -->
-                <div ng-show="cropresults" class="inner transparentBg" style="width:{{cropresults.thumb ? cropresults.thumb.width : cropresults.width}}px; margin-left:auto; margin-right:auto;">
+                <div ng-show="cropresults" class="inner transparentBg" ng-style="{'width': (cropresults.thumb ? cropresults.thumb.width : cropresults.width) + 'px', 'margin-left': 'auto', 'margin-right': 'auto'}">
 
                     <img ng-src="{{cropresults.thumb ? cropresults.thumb.name : cropresults.name}}" class="img-responsive" />
 
