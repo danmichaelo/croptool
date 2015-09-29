@@ -49,27 +49,27 @@ if (isset($exif['IFD0']) && isset($exif['IFD0']['Orientation'])) {
 $bl = new BorderLocator($fname);
 $area = $bl->selection;
 
-print 'Left: ' . $area[0] . ' px, top: ' . $area[1] . ' px, right: ' . ($bl->dim[0] - 1 - $area[2])  . ' px, bottom: ' . ($bl->dim[1] - 1 - $area[3]) . ' px';
+print 'Left: ' . $area[0] . ' px, top: ' . $area[1] . ' px, right: ' . ($bl->dim[0] - 1 - $area[2]) . ' px, bottom: ' . ($bl->dim[1] - 1 - $area[3]) . ' px';
 
 
 
 print "<table style='font-size:80%; font-family:monospace;' border='1' cellpadding='2' cellspacing='0'>";
 print '<tr><th>Pass:</th><th>Left:</th><th>Top:</th><th>Right:</th><th>Bottom:</th>';
 foreach ($bl->debugData['passes'] as $n => $pass) {
-  print '<tr><th>' . ($n+1) . '</th>';
-  foreach (array('left','top','right','bottom') as $dir) {
+  print '<tr><th>' . ($n + 1) . '</th>';
+  foreach (array('left', 'top', 'right', 'bottom') as $dir) {
 
-    if (isset($pass[$dir])) {
-      $c = $pass[$dir]['color'];
-      $ic = (new sRGB($c))->inverse()->toHex();
-      print '<td style="background: ' . $c . '; color: ' . $ic . '">';
-      foreach ($pass[$dir]['lines'] as $lineno => $line) {
-        print $lineno . ' : ' . sprintf('%.2f', floatval($line['fill'])) . ' ' . sprintf('%.2f', floatval($line['change'])) . '<br>';
-      }
-      print "</td>";
-    } else {
-      print "<td></td>";
-    }
+	if (isset($pass[$dir])) {
+	  $c = $pass[$dir]['color'];
+	  $ic = (new sRGB($c))->inverse()->toHex();
+	  print '<td style="background: ' . $c . '; color: ' . $ic . '">';
+	  foreach ($pass[$dir]['lines'] as $lineno => $line) {
+		print $lineno . ' : ' . sprintf('%.2f', floatval($line['fill'])) . ' ' . sprintf('%.2f', floatval($line['change'])) . '<br>';
+	  }
+	  print "</td>";
+	} else {
+	  print "<td></td>";
+	}
   }
   print "</tr>";
 }
@@ -83,16 +83,16 @@ echo 'Selection: ' . (1 + $area[2] - $area[0]) . ',' . (1 + $area[3] - $area[1])
 
 // Script end
 function rutime($ru, $rus, $index) {
-    return ($ru["ru_$index.tv_sec"]*1000 + intval($ru["ru_$index.tv_usec"]/1000))
-     -  ($rus["ru_$index.tv_sec"]*1000 + intval($rus["ru_$index.tv_usec"]/1000));
+	return ($ru["ru_$index.tv_sec"]*1000 + intval($ru["ru_$index.tv_usec"]/1000))
+	 -  ($rus["ru_$index.tv_sec"]*1000 + intval($rus["ru_$index.tv_usec"]/1000));
 }
 $ru = getrusage();
 echo "This process used " . rutime($ru, $rustart, "utime") .
-    " ms for its computations<br>\n";
+	" ms for its computations<br>\n";
 echo "It spent " . rutime($ru, $rustart, "stime") .
-    " ms in system calls<br>\n";
+	" ms in system calls<br>\n";
 
-echo "Peak memory allocated " . (memory_get_peak_usage(true)/1024/1024) . " MB<br>\n";
+echo "Peak memory allocated " . (memory_get_peak_usage(true) / 1024 / 1024) . " MB<br>\n";
 
 
 $im = imagecreatefromjpeg($fname);
