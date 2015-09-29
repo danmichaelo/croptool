@@ -10,9 +10,19 @@ class BorderLocator
 {
 
 	/**
+	 * File name
+	 */
+	protected $filename;
+
+	/**
 	 * ImageMagick resource
 	 */
 	protected $im;
+
+	/**
+	 * ColorDistance resource
+	 */
+	protected $colorconv;
 
 	/**
 	 * Image dimensions (width, height)
@@ -105,7 +115,7 @@ class BorderLocator
 	protected function getColor($x, $y)
 	{
 		$pixel = $this->im->getImagePixelColor($x, $y);
-		$color = $pixel->getColor(); 
+		$color = $pixel->getColor();
 		return new sRGB($color['r'], $color['g'], $color['b']);
 	}
 
@@ -155,6 +165,7 @@ class BorderLocator
 
 		$top = array();
 		$x = $start;
+		$s = 0;
 		$last_s = null;
 		$xVals = range($start, $end, $step);
 		$firstLine = true;

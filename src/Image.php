@@ -23,7 +23,7 @@ class Image
 
     public function __construct($path, $mime)
     {
-        $this->srcPath = $path;
+        $this->path = $path;
         $this->mime = $mime;
         $this->_load();
     }
@@ -33,15 +33,15 @@ class Image
         if ($this->mime != 'image/jpeg') {
 
             $this->orientation = 0;
-            $image = new \Imagick($this->srcPath);
+            $image = new \Imagick($this->path);
             $this->width = $image->getImageWidth();
             $this->height = $image->getImageHeight();
 
         } else {
-            $exif = @exif_read_data($this->srcPath, 'IFD0');
+            $exif = @exif_read_data($this->path, 'IFD0');
             $this->orientation = (isset($exif) && isset($exif['Orientation'])) ? intval($exif['Orientation']) : 0;
 
-            $image = new \Imagick($this->srcPath);
+            $image = new \Imagick($this->path);
             $sf = explode(',', $image->GetImageProperty('jpeg:sampling-factor'));
             $this->samplingFactor = $sf[0];
 
@@ -69,12 +69,10 @@ class Image
         $image->destroy();
 
         if (!$this->width || !$this->height) {
-            unlink($this->srcPath);
+            unlink($this->path);
             $this->error = 'Invalid image file. Refreshing the page might help in some cases.';
             return false;
         }
-
-        $this->aspectRatio = $this->width / $this->height;
 
         return true;
     }
@@ -193,7 +191,7 @@ class Image
 
     public function preciseCrop($destPath, $coords)
     {
-        $image = new \Imagick($this->srcPath);
+        $image = new \Imagick($this->path);
 
         $image->setImagePage(0, 0, 0, 0);  // Reset virtual canvas, like +repage
         $image->cropImage($coords['width'], $coords['height'], $coords['x'], $coords['y']);
@@ -209,7 +207,7 @@ class Image
     {
         $cmd_res = exec($cmd, $output, $return_var);
         $cmd = explode(' ', $cmd);
-        if ($cmd_res != "" || $return_var != 0) {
+        if ($cmd_res != "" || $return_var !== 0) {
             if (empty($cmd_res)) {
                 switch ($return_var) {
                     case 127:
@@ -227,7 +225,7 @@ class Image
         $dim = $coords['width'] . 'x' . $coords['height'] . '+' . $coords['x'] .'+' . $coords['y'] . '!';
 
         $cmd = sprintf('convert %s -crop %s %s',
-            escapeshellarg($this->srcPath),
+            escapeshellarg($this->path),
             escapeshellarg($dim),
             escapeshellarg($destPath)
         );
@@ -240,7 +238,7 @@ class Image
         $cmd = sprintf('%s -copy all -crop %s %s > %s',
             Image::$pathToJpegTran,
             escapeshellarg($dim),
-            escapeshellarg($this->srcPath),
+            escapeshellarg($this->path),
             escapeshellarg($destPath)
         );
         $this->exec($cmd);
@@ -251,7 +249,7 @@ class Image
         try
         {
             $im = new \Imagick;
-            $im->readImage($this->srcPath);
+            $im->readImage($this->path);
 
             switch($this->orientation)
             {

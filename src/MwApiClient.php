@@ -20,13 +20,17 @@ class MwApiClient
 
     public $cookie_file = '../data/cookiejar.txt';
     public $user_agent;
+    protected $logger;
+    protected $oauth;
+    protected $curl;
+    public $authError;
 
     /**
      * Username of the authorized user
      */
     protected $username = null;
 
-    function __construct($site, OAuthConsumer $oauth = null, Curl $curl = null, Logger $logger = null, $config = array())
+    public function __construct($site, OAuthConsumer $oauth = null, Curl $curl = null, Logger $logger = null, $config = array())
     {
         $this->site = $site;
         $this->api_url = 'https://' . $site . '/w/api.php';
@@ -126,12 +130,11 @@ class MwApiClient
         if ($signed) {
             curl_setopt( $ch, CURLOPT_HTTPHEADER, array($oauthHeader) );
         }
-        //curl_setopt( $ch, CURLOPT_SSL_VERIFYPEER, false );
         curl_setopt( $ch, CURLOPT_USERAGENT, $this->user_agent );
         curl_setopt( $ch, CURLOPT_HEADER, 0 );
         curl_setopt( $ch, CURLOPT_RETURNTRANSFER, 1 );
         $data = curl_exec( $ch );
-        $info = curl_getinfo($ch);
+
         curl_close($ch);
         if ( !$data ) {
             header( "HTTP/1.1 500 Internal Server Error" );
@@ -144,10 +147,6 @@ class MwApiClient
             $this->logger->addError('[api] Received error: ' . $data->error->code . ' : ' . $data->error->info);
         }
 
-        //print_r($info);
-        //print_r($args);
-        //print_r($data);
-        //die;
         return $data;
     }
 

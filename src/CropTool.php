@@ -11,6 +11,8 @@ class CropTool {
     protected $publicPath;
 
     public $api;
+    protected $curl;
+    protected $logger;
 
     protected $elem_matches = array(
         'tpl_remove_border' => '/{{\s*(crop|remove ?borders?)(\s*|\|[^\}]+)}}\s*/i',
@@ -199,7 +201,6 @@ class CropTool {
             'format' => 'json',
             'token' => $token,
             'comment' => $input->comment,
-            //'file' => $imData,
             'file' => (version_compare(PHP_VERSION, '5.5.0') >= 0)
                 ? new CURLFile($path)
                 : '@' . $path
@@ -221,7 +222,6 @@ class CropTool {
             } else {
                 $wikitext .= $tpl;
             }
-            //$wikitext .= "\n[[Category:Test uploads]]";
 
             list($removed, $wikitext) = $this->removeBorderTemplateAndCat($wikitext, $input->elems);
             $wikitext = $this->removeReviewTemplates($wikitext);
@@ -229,8 +229,6 @@ class CropTool {
 
         }
 
-        //$this->curl->headers['Content-Type'] = 'multipart/form-data';
-        //$this->curl['Content-Disposition'] = $title;
         $response = $this->api->request($args, true);
 
         if (isset($response->error)) {
@@ -273,9 +271,6 @@ class CropTool {
         $cnt = intval(file_get_contents($this->count_file));
         $cnt ++;
         file_put_contents($this->count_file, $cnt);
-
-        // print_r($response);
-        //     [body] => {"servedby":"mw1202","error":{"code":"fileexists-forbidden","info":"A file with name \"Hubert_Dolez.jpg\" already exists, and cannot be overwritten.","filekey":"11t6pa776pf8.43jfs5.3174940.jpg","sessionkey":"11t6pa776pf8.43jfs5.3174940.jpg","invalidparameter":"filename"}}
 
         return $response->upload;
     }

@@ -4,7 +4,7 @@ class CropToolTest extends PHPUnit_Framework_TestCase
 {
     public function testRemoveBorderTemplateAndCat()
     {
-        $ct = new CropTool;
+        $ct = new CropTool();
 
         $txt = $ct->removeBorderTemplateAndCat('abc [[Category:Images with borders]] def');
         $this->assertEquals('abc def', $txt);
