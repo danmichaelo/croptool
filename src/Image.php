@@ -33,9 +33,9 @@ class Image
         if ($this->mime != 'image/jpeg') {
 
             $this->orientation = 0;
-            $image = new \Imagick($this->path);
-            $this->width = $image->getImageWidth();
-            $this->height = $image->getImageHeight();
+            $sz = getimagesize($this->path);
+            $this->width = $sz[0];
+            $this->height = $sz[1];
 
         } else {
             $exif = @exif_read_data($this->path, 'IFD0');
@@ -64,9 +64,9 @@ class Image
                     $this->error = 'Unsupported EXIF orientation "' . $this->orientation . '"';
                     return false;
             }
-        }
 
-        $image->destroy();
+            $image->destroy();
+        }
 
         if (!$this->width || !$this->height) {
             unlink($this->path);
