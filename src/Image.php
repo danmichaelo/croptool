@@ -33,8 +33,8 @@ class Image
             $this->height = $image->getImageHeight();
 
         } else {
-            $exif = exif_read_data($this->srcPath, 'IFD0');
-            $this->orientation = isset($exif['Orientation']) ? intval($exif['Orientation']) : 0;
+            $exif = @exif_read_data($this->srcPath, 'IFD0');
+            $this->orientation = (isset($exif) && isset($exif['Orientation'])) ? intval($exif['Orientation']) : 0;
 
             $image = new Imagick($this->srcPath);
             $sf = explode(',', $image->GetImageProperty('jpeg:sampling-factor'));
