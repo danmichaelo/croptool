@@ -91,7 +91,7 @@ class CropTool {
 
         // Make thumb
         $image = new Image($destPath, $response->imageinfo[0]->mime);
-        $res['thumb'] = $image->thumb($this->publicPath . '/files/' . $sha1 . '_cropped_thumb' . $ext, $new_width);
+        $res['thumb'] = $image->thumb($this->publicPath . '/files/' . $sha1 . '_cropped_thumb' . $ext);
 
         $dim = array();
         if ($s1[0] != $s2[0]) {
@@ -362,7 +362,7 @@ class CropTool {
         $res['samplingFactor'] = $image->samplingFactor;
 
         // 3. Make thumb
-        $res['thumb'] = $image->thumb($this->publicPath . '/files/' . $sha1 . '_thumb' . $ext, $image_size[0]);
+        $res['thumb'] = $image->thumb($this->publicPath . '/files/' . $sha1 . '_thumb' . $ext);
 
         $this->logger->addInfo('[main] ' . substr($sha1, 0, 7) . ' Got file "' . $title . '"');
 

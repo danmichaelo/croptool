@@ -18,6 +18,9 @@ class Image
     public $width;
     public $height;
 
+    protected $thumbWidth = 800;
+    protected $thumbHeight = 800;
+
     public function __construct($path, $mime)
     {
         $this->srcPath = $path;
@@ -243,7 +246,7 @@ class Image
         $this->exec($cmd);
     }
 
-    public function _thumb($destPath, $maxWidth, $maxHeight)
+    public function _thumb($thumbPath, $maxWidth, $maxHeight)
     {
         try
         {
@@ -284,17 +287,10 @@ class Image
             $w = $im->getImageWidth();
             $h = $im->getImageHeight();
 
-            // Set compression level (1 lowest quality, 100 highest quality)
             $im->setImageCompressionQuality(75);
-            // Strip out unneeded meta data
             $im->stripImage();
-            // Writes resultant image to output directory
-            $im->writeImage($destPath);
-            // Destroys Imagick object, freeing allocated resources in the process
+            $im->writeImage($thumbPath);
             $im->destroy();
-
-            // $im->writeImage($destPath);
-            // $im->destroy();
         }
         catch(Exception $e)
         {
@@ -304,7 +300,7 @@ class Image
         return array($w, $h);
     }
 
-    public function thumb($thumb_path, $new_width)
+    public function thumb($thumb_path)
     {
         if ($this->mime == 'image/gif') {
             return null;
@@ -313,11 +309,11 @@ class Image
             not all browsers respects EXIF orientation. The thumbnail
             will be "hard oriented".
         */
-        if ($this->orientation <= 1 && $new_width <= 800) {
+        if ($this->orientation <= 1 && $this->width <= $this->thumbWidth && $this->height <= $this->thumbHeight) {
             return null;
         }
 
-        $dim = $this->_thumb($thumb_path, 800, 800);
+        $dim = $this->_thumb($thumb_path, $this->thumbWidth, $this->thumbHeight);
         chmod($thumb_path, 0664);
 
         return array(
