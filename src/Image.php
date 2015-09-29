@@ -220,28 +220,27 @@ class Image
         }
     }
 
+    public function cropUsingCmd($cmd, $destPath, $dim)
+    {
+        $cmd = str_replace(
+            array('{src}', '{dest}', '{dim}'),
+            array(escapeshellarg($this->path), escapeshellarg($destPath), escapeshellarg($dim)),
+            $cmd
+        );
+        $this->exec($cmd);
+    }
+
     public function gifCrop($destPath, $coords)
     {
         $dim = $coords['width'] . 'x' . $coords['height'] . '+' . $coords['x'] .'+' . $coords['y'] . '!';
-
-        $cmd = sprintf('convert %s -crop %s %s',
-            escapeshellarg($this->path),
-            escapeshellarg($dim),
-            escapeshellarg($destPath)
-        );
-        $this->exec($cmd);
+        $this->cropUsingCmd('convert {src} -crop {dim} {dest}', $destPath, $dim);
     }
 
     public function losslessCrop($destPath, $coords)
     {
         $dim = $coords['width'] . 'x' . $coords['height'] . '+' . $coords['x'] .'+' . $coords['y'];
-        $cmd = sprintf('%s -copy all -crop %s %s > %s',
-            Image::$pathToJpegTran,
-            escapeshellarg($dim),
-            escapeshellarg($this->path),
-            escapeshellarg($destPath)
-        );
-        $this->exec($cmd);
+        $this->cropUsingCmd(Image::$pathToJpegTran . ' -copy all -crop {dim} {src} > {dest}',
+            $destPath, $dim);
     }
 
     public function _thumb($thumbPath, $maxWidth, $maxHeight)
