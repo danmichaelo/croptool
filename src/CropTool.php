@@ -73,43 +73,26 @@ class CropTool {
         $new_x = intval($input->x);
         $new_y = intval($input->y);
 
-        $cm = $input->cropmethod;
+        $cropMethod = $input->cropmethod;
+        if ($response->imageinfo[0]->mime == 'image/gif') {
+            $cropMethod = 'gif';
+        }
 
         $image = new Image($srcPath, $response->imageinfo[0]->mime);
-        $image->load();
-        if ($response->imageinfo[0]->mime == 'image/gif') {
-            $res = $image->gifCrop($destPath, $new_x, $new_y, $new_width, $new_height);
-        } else if ($cm == 'precise') {
-            $res = $image->preciseCrop($destPath, $new_x, $new_y, $new_width, $new_height);
-        } else if ($cm == 'lossless') {
-            $res = $image->losslessCrop($destPath, $new_x, $new_y, $new_width, $new_height);
-        } else {
-            die('Unknown crop method');
-        }
-        chmod($destPath, 0664);
-        if (isset($res['error'])) {
-            return $res;
-        }
-
-        // Make thumb
-        if ($response->imageinfo[0]->mime != 'image/gif' && $new_width > 800) {
-            $thumbName = 'files/' . $sha1 . '_cropped_thumb' . $ext;
-            $thumbPath = $this->publicPath . '/' . $thumbName;
-            $thumb = new Image($destPath, $response->imageinfo[0]->mime);
-            $thumb->load();
-            $thumbDim = $thumb->thumb($thumbPath, 800, 800);
-            chmod($thumbPath, 0664);
-
-            $res['thumb'] = array(
-                'cached' => true,
-                'name' => $thumbName . '?ts=' . time(),
-                'width' => $thumbDim[0],
-                'height' => $thumbDim[1],
+        $s1 = array($image->width, $image->height);
+        try {
+            $res = $image->crop($cropMethod, $destPath, $new_x, $new_y, $new_width, $new_height);
+        } catch (CropFailed $error) {
+            return array(
+                'error' => 'Crop failed: ' . $error->getMessage(),
             );
         }
+        $s2 = array($res['width'], $res['height']);
 
-        $s1 = getimagesize($srcPath);
-        $s2 = getimagesize($destPath);
+        // Make thumb
+        $image = new Image($destPath, $response->imageinfo[0]->mime);
+        $res['thumb'] = $image->thumb($this->publicPath . '/files/' . $sha1 . '_cropped_thumb' . $ext, $new_width);
+
         $dim = array();
         if ($s1[0] != $s2[0]) {
             $cropPercentX = round(($s1[0]-$s2[0]) / $s1[0] * 100);
@@ -371,7 +354,7 @@ class CropTool {
         }
 
         $image = new Image($abs_path, $image_mime);
-        if (!$image->load()) {
+        if (isset($image->error)) {
             $res['error'] = $image->error;
             return $res;
         }
@@ -379,23 +362,7 @@ class CropTool {
         $res['samplingFactor'] = $image->samplingFactor;
 
         // 3. Make thumb
-
-        if ($image_mime != 'image/gif' && $image_size[0] > 800) {
-
-            $thumbName = 'files/' . $sha1 . '_thumb' . $ext;
-            $thumbPath = $this->publicPath . '/' . $thumbName;
-
-            $thumbDim = $image->thumb($thumbPath, 800, 800);
-            chmod($thumbPath, 0664);
-
-            $res['thumb'] = array(
-                'cached' => true,
-                'name' => $thumbName,
-                'width' => $thumbDim[0],
-                'height' => $thumbDim[1]
-            );
-
-        }
+        $res['thumb'] = $image->thumb($this->publicPath . '/files/' . $sha1 . '_thumb' . $ext, $image_size[0]);
 
         $this->logger->addInfo('[main] ' . substr($sha1, 0, 7) . ' Got file "' . $title . '"');
 

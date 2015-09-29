@@ -303,7 +303,7 @@ controller('AppCtrl', ['$scope', '$http', '$timeout', '$q', '$window', 'LoginSer
             console.log(response);
 
             if (response.error) {
-                alert(response.error);
+                $scope.error = '[Error] ' + response.error;
             } else {
                 $scope.cropresults = response;
                 $scope.updateUploadComment();

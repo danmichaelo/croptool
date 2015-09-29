@@ -272,10 +272,6 @@ $I18N = new TsIntuition(array(
 
                 <form ng-show="!cropresults" ng-submit="preview()" role="form">
 
-                    <div style="color:red;padding:10px;" ng-show="error">
-                        {{error}}
-                    </div>
-
                     <input type="hidden" id="x" name="x" />
                     <input type="hidden" id="y" name="y" />
                     <input type="hidden" id="w" name="w" />
@@ -328,6 +324,10 @@ $I18N = new TsIntuition(array(
                                 <?php echo $I18N->msg( 'cropform-method-lossless' ); ?>
                             </label>
                         </div>
+                    </div>
+
+                    <div style="color:red; padding:1em 0;" ng-show="error">
+                        {{error}}
                     </div>
 
                     <button type="submit"

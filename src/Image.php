@@ -11,24 +11,26 @@ class Image
 
     public $error;
 
-    protected $path;
-    protected $mime;
-
+    public $path;
+    public $mime;
     public $orientation;
     public $samplingFactor;
+    public $width;
+    public $height;
 
     public function __construct($path, $mime)
     {
         $this->srcPath = $path;
         $this->mime = $mime;
+        $this->_load();
     }
 
-    public function load()
+    public function _load()
     {
         if ($this->mime != 'image/jpeg') {
 
             $this->orientation = 0;
-            $image = new Imagick($this->srcPath);
+            $image = new \Imagick($this->srcPath);
             $this->width = $image->getImageWidth();
             $this->height = $image->getImageHeight();
 
@@ -36,7 +38,7 @@ class Image
             $exif = @exif_read_data($this->srcPath, 'IFD0');
             $this->orientation = (isset($exif) && isset($exif['Orientation'])) ? intval($exif['Orientation']) : 0;
 
-            $image = new Imagick($this->srcPath);
+            $image = new \Imagick($this->srcPath);
             $sf = explode(',', $image->GetImageProperty('jpeg:sampling-factor'));
             $this->samplingFactor = $sf[0];
 
@@ -131,9 +133,31 @@ class Image
         return $rect;
     }
 
-   public function gifCrop($destPath, $x, $y, $width, $height)
+    public function flipped()
     {
+        switch($this->orientation)
+        {
+            case imagick::ORIENTATION_UNDEFINED:    // 0
+            case imagick::ORIENTATION_TOPLEFT:      // 1 : no rotation
+                return false;
 
+            case imagick::ORIENTATION_BOTTOMRIGHT:  // 3 : 180 deg
+                return false;
+
+
+            case imagick::ORIENTATION_RIGHTTOP:     // 6 : 90 deg CW
+                return true;
+
+            case imagick::ORIENTATION_LEFTBOTTOM:   // 8 : 90 deg CCW
+                return true;
+
+            default:
+                die('Unsupported EXIF orientation');
+        }
+    }
+
+    public function crop($method, $destPath, $x, $y, $width, $height)
+    {
         if (file_exists($destPath)) {
             unlink($destPath);
         }
@@ -141,6 +165,62 @@ class Image
         // Get coords orientated in the same direction as the image:
         $coords = $this->getCropCoordinates($x, $y, $width, $height);
 
+        if ($method == 'gif') {
+            $this->gifCrop($destPath, $coords);
+        } else if ($method == 'lossless') {
+            $this->losslessCrop($destPath, $coords);
+            $size = getimagesize($destPath);
+            $width = $this->flipped() ? $size[1] : $size[0];
+            $height = $this->flipped() ? $size[0] : $size[1];
+        } else if ($method == 'precise') {
+            $this->preciseCrop($destPath, $coords);
+        } else {
+            die('Unknown crop method');
+        }
+
+        chmod($destPath, 0664);
+
+        return array(
+            'method' => $method,
+            'name' => Image::$filesFolder . basename($destPath) . '?ts=' . time(),
+            'width' => $width,
+            'height' => $height,
+        );
+    }
+
+    public function preciseCrop($destPath, $coords)
+    {
+        $image = new \Imagick($this->srcPath);
+
+        $image->setImagePage(0, 0, 0, 0);  // Reset virtual canvas, like +repage
+        $image->cropImage($coords['width'], $coords['height'], $coords['x'], $coords['y']);
+        $image->setImagePage(0, 0, 0, 0);  // Reset virtual canvas, like +repage
+
+        // Imagick will copy metadata to the destination file
+        $image->writeImage($destPath);
+
+        $image->destroy();
+    }
+
+    public function exec($cmd)
+    {
+        $cmd_res = exec($cmd, $output, $return_var);
+        $cmd = explode(' ', $cmd);
+        if ($cmd_res != "" || $return_var != 0) {
+            if (empty($cmd_res)) {
+                switch ($return_var) {
+                    case 127:
+                        throw new CropFailed('Command not found: ' . $cmd[0]);
+                    default:
+                        throw new CropFailed('Unknown error ' . $return_var);
+                }
+            }
+            throw new CropFailed($cmd_res);
+        }
+    }
+
+    public function gifCrop($destPath, $coords)
+    {
         $dim = $coords['width'] . 'x' . $coords['height'] . '+' . $coords['x'] .'+' . $coords['y'] . '!';
 
         $cmd = sprintf('convert %s -crop %s %s',
@@ -148,74 +228,11 @@ class Image
             escapeshellarg($dim),
             escapeshellarg($destPath)
         );
-        $cmd_res = exec($cmd, $output, $return_var);
-
-        if ($cmd_res != "" || $return_var != 0) {
-            $res = array('method' => 'gif', 'error' => $cmd_res);
-            if (empty($cmd_res)) {
-                switch ($return_var) {
-                    case 127:
-                        $res['error'] = 'convert command not found';
-                        break;
-                    default:
-                        $res['error'] = 'Unknown error ' . $return_var;
-                        break;
-                }
-            }
-            return $res;
-        }
-
-        chmod($destPath, 0664);
-
-        return array(
-            'method' => 'gif',
-            'name' => Image::$filesFolder . basename($destPath) . '?ts=' . time(),
-            'width' => $width,
-            'height' => $height
-        );
-
-    } 
-
-    public function preciseCrop($destPath, $x, $y, $width, $height)
-    {
-        if (file_exists($destPath)) {
-            unlink($destPath);
-        }
-
-        // Get coords orientated in the same direction as the image:
-        $coords = $this->getCropCoordinates($x, $y, $width, $height);
-
-        // Load img:
-        $im = new \Imagick($this->srcPath);
-
-        $im->setImagePage(0, 0, 0, 0);  // Reset virtual canvas, like +repage
-        $im->cropImage($coords['width'], $coords['height'], $coords['x'], $coords['y']);
-        $im->setImagePage(0, 0, 0, 0);  // Reset virtual canvas, like +repage
-
-        // Imagick will copy metadata to the destination file
-        $im->writeImage($destPath);
-        $im->destroy();
-
-        chmod($destPath, 0664);
-
-        return array(
-            'method' => 'precise',
-            'name' => Image::$filesFolder . basename($destPath) . '?ts=' . time(),
-            'width' => $width,
-            'height' => $height
-        );
-
+        $this->exec($cmd);
     }
 
-    public function losslessCrop($destPath, $x, $y, $width, $height)
+    public function losslessCrop($destPath, $coords)
     {
-        if (file_exists($destPath)) {
-            unlink($destPath);
-        }
-
-        // Get coords orientated in the same direction as the image:
-        $coords = $this->getCropCoordinates($x, $y, $width, $height);
-
         $dim = $coords['width'] . 'x' . $coords['height'] . '+' . $coords['x'] .'+' . $coords['y'];
         $cmd = sprintf('%s -copy all -crop %s %s > %s',
             Image::$pathToJpegTran,
@@ -223,37 +240,10 @@ class Image
             escapeshellarg($this->srcPath),
             escapeshellarg($destPath)
         );
-        $cmd_res = exec($cmd, $output, $return_var);
-
-        if ($cmd_res != "" || $return_var != 0) {
-            $res = array('method' => 'lossless', 'error' => $cmd_res);
-            if (empty($cmd_res)) {
-                switch ($return_var) {
-                    case 127:
-                        $res['error'] = 'jpegtran not found';
-                        break;
-                    default:
-                        $res['error'] = 'Unknown error ' . $return_var;
-                        break;
-                }
-            }
-            return $res;
-        }
-
-        chmod($destPath, 0664);
-
-        $cropped = new Image($destPath, $this->mime);
-        $cropped->load();
-
-        return array(
-            'method' => 'lossless',
-            'name' => Image::$filesFolder . basename($destPath) . '?ts=' . time(),
-            'width' => $cropped->width,
-            'height' => $cropped->height
-        );
+        $this->exec($cmd);
     }
 
-    public function thumb($destPath, $maxWidth, $maxHeight)
+    public function _thumb($destPath, $maxWidth, $maxHeight)
     {
         try
         {
@@ -288,10 +278,21 @@ class Image
             $im->setImageOrientation(\imagick::ORIENTATION_TOPLEFT);
 
             $im->thumbnailImage($maxWidth, $maxHeight, true);
+
             $w = $im->getImageWidth();
             $h = $im->getImageHeight();
+
+            // Set compression level (1 lowest quality, 100 highest quality)
+            $im->setImageCompressionQuality(75);
+            // Strip out unneeded meta data
+            $im->stripImage();
+            // Writes resultant image to output directory
             $im->writeImage($destPath);
+            // Destroys Imagick object, freeing allocated resources in the process
             $im->destroy();
+
+            // $im->writeImage($destPath);
+            // $im->destroy();
         }
         catch(Exception $e)
         {
@@ -299,6 +300,30 @@ class Image
         }
 
         return array($w, $h);
+    }
+
+    public function thumb($thumb_path, $new_width)
+    {
+        if ($this->mime == 'image/gif') {
+            return null;
+        }
+        /* We always create a thumbnail if orientation > 1 because
+            not all browsers respects EXIF orientation. The thumbnail
+            will be "hard oriented".
+        */
+        if ($this->orientation <= 1 && $new_width <= 800) {
+            return null;
+        }
+
+        $dim = $this->_thumb($thumb_path, 800, 800);
+        chmod($thumb_path, 0664);
+
+        return array(
+            'cached' => true,
+            'name' => Image::$filesFolder . basename($thumb_path) . '?ts=' . time(),
+            'width' => $dim[0],
+            'height' => $dim[1],
+        );
     }
 
 }
