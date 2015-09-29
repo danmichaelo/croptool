@@ -22,6 +22,9 @@ apt-get install -y ntp > /dev/null
 ntpdate pool.ntp.org
 service ntp restart
 
+echo "Installing Imagemagick"
+apt-get install -y imagemagick > /dev/null
+
 echo "Installing PHP"
 apt-get install -y php5-fpm php5-cli php5-mcrypt php5-imagick php5-curl > /dev/null
 ln -sf /etc/php5/mods-available/mcrypt.ini /etc/php5/fpm/conf.d/20-mcrypt.ini
