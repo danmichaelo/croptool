@@ -1,7 +1,7 @@
 <?php
 
-use Danmichaelo\Coma\ColorDistance,
-	Danmichaelo\Coma\sRGB;
+use Danmichaelo\Coma\ColorDistance;
+use Danmichaelo\Coma\sRGB;
 
 /**
  * BorderLocator
@@ -119,6 +119,10 @@ class BorderLocator
 		return new sRGB($color['r'], $color['g'], $color['b']);
 	}
 
+	/**
+	 * @param string $dir
+	 * @param sRGB $col
+	 */
 	public function singleDirection($dir, $start, $end, $col)
 	{
 
@@ -144,16 +148,16 @@ class BorderLocator
 		$sel = $this->selection;
 
 		// Step size along the scan direction:
-		$step = max(1, floor( ($this->dim[0] * $this->dim[1]) / (1000 * 1000) ));
+		$step = max(1, floor(($this->dim[0] * $this->dim[1]) / (1000 * 1000)));
 
 		$step = $end > $start
 			? $step
-			: - $step;
+			: -$step;
 
 		// Step size along the scan line (perpendicular to the scan direction):
 		$transverseStep = ($dir == 'left' || $dir == 'right')
-			? max(1, floor( ($sel[3] * 0.01 )))
-			: max(1, floor( ($sel[2] * 0.01 )));
+			? max(1, floor(($sel[3] * 0.01)))
+			: max(1, floor(($sel[2] * 0.01)));
 
 		$l = array(
 			'step' => $step,
@@ -178,8 +182,12 @@ class BorderLocator
 				'fill' => $s,
 				'change' => is_null($last_s) ? 0 : $s - $last_s
 			);
-			if ($firstLine && $s < $minFirstLineColorFill) break;
-			if ($s < $minColorFill) break;
+			if ($firstLine && $s < $minFirstLineColorFill) {
+				break;
+			}
+			if ($s < $minColorFill) {
+				break;
+			}
 			$firstLine = false;
 			$top[] = $s;
 			$last_s = $s;
