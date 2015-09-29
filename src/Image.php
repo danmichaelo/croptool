@@ -277,7 +277,9 @@ class Image
             // thumbnailImage doesn't try to autorotate the image
             $im->setImageOrientation(\imagick::ORIENTATION_TOPLEFT);
 
-            $im->thumbnailImage($maxWidth, $maxHeight, true);
+            if ($im->getImageWidth() > $maxWidth || $im->getImageHeight() > $maxHeight) {
+                $im->thumbnailImage($maxWidth, $maxHeight, true);
+            }
 
             $w = $im->getImageWidth();
             $h = $im->getImageHeight();
