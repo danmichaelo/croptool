@@ -40,9 +40,9 @@ $I18N = new TsIntuition(array(
 
   <script src="//tools-static.wmflabs.org/cdnjs/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
   <script src="//tools-static.wmflabs.org/cdnjs/ajax/libs/twitter-bootstrap/3.3.4/js/bootstrap.min.js"></script>
-  <script src="//tools-static.wmflabs.org/cdnjs/ajax/libs/angular.js/1.2.28/angular.min.js"></script>
-  <script src="//tools-static.wmflabs.org/cdnjs/ajax/libs/angular.js/1.2.28/angular-sanitize.min.js"></script>
-  <script src="//tools-static.wmflabs.org/cdnjs/ajax/libs/angular-ui-bootstrap/0.13.4/ui-bootstrap-tpls.min.js"></script>
+  <script src="//tools-static.wmflabs.org/cdnjs/ajax/libs/angular.js/1.3.20/angular.min.js"></script>
+  <script src="//tools-static.wmflabs.org/cdnjs/ajax/libs/angular.js/1.3.20/angular-sanitize.min.js"></script>
+  <script src="//tools-static.wmflabs.org/cdnjs/ajax/libs/angular-ui-bootstrap/0.14.0/ui-bootstrap-tpls.min.js"></script>
   <script src="//tools-static.wmflabs.org/cdnjs/ajax/libs/jquery-jcrop/0.9.12/js/jquery.Jcrop.min.js"></script>
   <script src="//tools-static.wmflabs.org/cdnjs/ajax/libs/angular-local-storage/0.1.5/angular-local-storage.min.js"></script>
   <script src="components/ladda/js/spin.js"></script>
@@ -322,10 +322,9 @@ $I18N = new TsIntuition(array(
 
                         <div class="form-group">
                             <label class="radio-inline"
-                                popover="<?php echo $I18N->msg('cropform-method-precise-help'); ?>"
+                                uib-popover="<?php echo $I18N->msg('cropform-method-precise-help'); ?>"
                                 popover-trigger="mouseenter"
                                 popover-animation="false"
-                                popover-append-to-body="true"
                                 popover-placement="bottom"
                                 popover-popup-delay="0.5"
                             >
@@ -333,10 +332,9 @@ $I18N = new TsIntuition(array(
                                 <?php echo $I18N->msg('cropform-method-precise'); ?>
                             </label>
                             <label class="radio-inline"
-                                popover="<?php echo $I18N->msg('cropform-method-lossless-help'); ?>"
+                                uib-popover="<?php echo $I18N->msg('cropform-method-lossless-help'); ?>"
                                 popover-trigger="mouseenter"
                                 popover-animation="false"
-                                popover-append-to-body="true"
                                 popover-placement="bottom"
                                 popover-popup-delay="0.5"
                             >
