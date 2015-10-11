@@ -224,6 +224,27 @@ controller('AppCtrl', ['$scope', '$http', '$timeout', '$q', '$window', 'LoginSer
             });
     };
 
+    $scope.aspectRatioChanged = function() {
+        var ratio = 0;
+        if ($scope.aspectratio == 'keep') {
+            ratio = $scope.metadata.original.width / $scope.metadata.original.height;
+        } else if ($scope.aspectratio == 'fixed') {
+            var cx = parseInt($scope.aspectratio_cx),
+                cy = parseInt($scope.aspectratio_cy);
+            if (!cx || cx < 0 || !cy || cy < 0) {
+                // TODO: Indicate invalid state by css class
+                return;
+            }
+            ratio = $scope.aspectratio_cx / $scope.aspectratio_cy;
+        }
+        jcrop_api.setOptions({ aspectRatio: ratio });
+        if ($scope.crop_dim) {
+            var c = jcrop_api.tellSelect();
+            updateCoords(jcrop_api.tellSelect());
+            // jcrop_api.focus();
+        }
+    };
+
     function parseImageUrlOrTitle( imageUrlOrTitle ) {
 
         var matches = imageUrlOrTitle.match(/\/\/([a-z]+)\.(wikimedia.org|wikipedia.org)\/wiki\/(.*)$/),
@@ -377,7 +398,11 @@ controller('AppCtrl', ['$scope', '$http', '$timeout', '$q', '$window', 'LoginSer
 
     $scope.status = 'Checking login';
 
+    // Defaults
     $scope.cropmethod = "precise";
+    $scope.aspectratio = "free";
+    $scope.aspectratio_cx = '16';
+    $scope.aspectratio_cy = '9';
     $scope.overwrite = "overwrite";
 
 

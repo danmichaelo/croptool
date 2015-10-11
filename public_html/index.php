@@ -297,6 +297,28 @@ $I18N = new TsIntuition(array(
                         </span>
                     </p>
 
+                    <div>
+                        <?php echo $I18N->msg('cropform-aspect-ratio'); ?>
+
+                        <div>
+                            <label class="radio-inline">
+                                <input type="radio" name="aspectratio" value="free" ng-model="aspectratio" ng-change="aspectRatioChanged()">
+                                <?php echo $I18N->msg('cropform-aspect-ratio-free'); ?>
+                            </label>
+                            <label class="radio-inline">
+                                <input type="radio" name="aspectratio" value="keep" ng-model="aspectratio" ng-change="aspectRatioChanged()">
+                                <?php echo $I18N->msg('cropform-aspect-ratio-keep'); ?>
+                            </label>
+                            <label class="radio-inline">
+                                <input type="radio" name="aspectratio" value="fixed" ng-model="aspectratio" ng-change="aspectRatioChanged()">
+                                <?php echo $I18N->msg('cropform-aspect-ratio-fixed'); ?>
+                            </label>
+                            <div ng-show="aspectratio=='fixed'" style="border:1px solid #ccc; display:inline-block;">
+                                <input type="text" value="4" ng-model="aspectratio_cx" ng-change="aspectRatioChanged()" style="width:20px; text-align: right; border:none;">:<input type="text" value="3" ng-model="aspectratio_cy" ng-change="aspectRatioChanged()" style="width:20px; border:none;">
+                            </div>
+                        </div>
+                    </div>
+
                     <div ng-show="metadata.mime == 'image/jpeg'">
                         <?php echo $I18N->msg('cropform-method'); ?>
 

@@ -47,6 +47,10 @@ $messages['en'] = array(
 	'cropform-method-lossless-help' => 'This method makes use of jpegtran, treating the image in terms of blocks (8x8 or 16x16 px depending on sampling). If the upper left part of the crop region does not fall on a block boundary, the crop region will have to be increased so that it does. The resulting image will therefore in general be a few pixels larger than requested, but never smaller than requested, and never more than 16 px larger.',
 	'cropform-preview-btn' => 'Preview',
 	'cropform-help' => 'Help',
+	'cropform-aspect-ratio' => 'Aspect ratio:',
+	'cropform-aspect-ratio-free' => 'Free',
+	'cropform-aspect-ratio-keep' => 'Keep',
+	'cropform-aspect-ratio-fixed' => 'Custom',
 
 	'cropping-progress' => 'Please wait while cropping...',
 
