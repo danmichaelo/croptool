@@ -286,18 +286,16 @@ $I18N = new TsIntuition(array(
                         <img src="res/spinner1.gif" ng-show="borderLocatorBusy">
                     </p>
 
-                    <p ng-show="crop_dim">
-                        <span id="cropped_size">
-                            <?php echo $I18N->msg( 'cropform-region', array('variables' => array(
-								'{{crop_dim.x}}',
-								'{{crop_dim.y}}',
-								'{{crop_dim.right}}',
-								'{{crop_dim.bottom}}',
-							))); ?>
-                        </span>
+                    <p ng-show="crop_dim" style="font-size:90%; color: #666; margin-left: 1em;">
+                        <?php echo $I18N->msg( 'cropform-region', array('variables' => array(
+							'{{crop_dim.x}}',
+							'{{crop_dim.y}}',
+							'{{crop_dim.right}}',
+							'{{crop_dim.bottom}}',
+						))); ?>
                     </p>
 
-                    <div>
+                    <div style="margin-bottom:.8em;">
                         <?php echo $I18N->msg('cropform-aspect-ratio'); ?>
 
                         <div>
@@ -314,12 +312,12 @@ $I18N = new TsIntuition(array(
                                 <?php echo $I18N->msg('cropform-aspect-ratio-fixed'); ?>
                             </label>
                             <div ng-show="aspectratio=='fixed'" style="border:1px solid #ccc; display:inline-block;">
-                                <input type="text" value="4" ng-model="aspectratio_cx" ng-change="aspectRatioChanged()" style="width:20px; text-align: right; border:none;">:<input type="text" value="3" ng-model="aspectratio_cy" ng-change="aspectRatioChanged()" style="width:20px; border:none;">
+                                <input type="text" ng-model="aspectratio_cx" ng-change="aspectRatioChanged()" style="width:22px; text-align: right; border:none; outline: none;">:<input type="text" ng-model="aspectratio_cy" ng-change="aspectRatioChanged()" style="width:22px; border:none; outline: none;">
                             </div>
                         </div>
                     </div>
 
-                    <div ng-show="metadata.mime == 'image/jpeg'">
+                    <div ng-show="metadata.mime == 'image/jpeg'" style="margin-bottom:.8em;">
                         <?php echo $I18N->msg('cropform-method'); ?>
 
                         <div class="form-group">

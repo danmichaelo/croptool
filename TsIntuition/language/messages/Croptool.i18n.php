@@ -39,7 +39,7 @@ $messages['en'] = array(
 	'cropped-dimensions' => 'Cropped: $1 x $2 px.',
 
 	'cropform-select-region' => 'Select a crop region by click-and-drag, or try the <a href ng-click="$1">magic border locator</a>.',
-	'cropform-region' => 'Left: $1 px, top: $2 px, right: $3 px, bottom: $4 px.',
+	'cropform-region' => 'Left: $1 px. Right: $3 px.<br>Top: $2 px. Bottom: $4 px.',
 	'cropform-method' => 'Crop method:',
 	'cropform-method-precise' => 'Precise',
 	'cropform-method-lossless' => 'Lossless',
