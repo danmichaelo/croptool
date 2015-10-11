@@ -331,7 +331,7 @@ $I18N = new TsIntuition(array(
                                 popover-placement="bottom"
                                 popover-popup-delay="0.5"
                             >
-                                <input type="radio" name="cropmethod" value="precise" ng-model="cropmethod">
+                                <input type="radio" name="cropmethod" value="precise" ng-model="cropmethod" ng-change="cropMethodChanged()">
                                 <?php echo $I18N->msg('cropform-method-precise'); ?>
                             </label>
                             <label class="radio-inline"
@@ -342,7 +342,7 @@ $I18N = new TsIntuition(array(
                                 popover-placement="bottom"
                                 popover-popup-delay="0.5"
                             >
-                                <input type="radio" name="cropmethod" value="lossless" ng-model="cropmethod">
+                                <input type="radio" name="cropmethod" value="lossless" ng-model="cropmethod" ng-change="cropMethodChanged()">
                                 <?php echo $I18N->msg('cropform-method-lossless'); ?>
                             </label>
                         </div>

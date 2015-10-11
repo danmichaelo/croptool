@@ -183,6 +183,7 @@ controller('AppCtrl', ['$scope', '$http', '$timeout', '$q', '$window', 'LoginSer
                     $('#cropbox').Jcrop({
                         bgColor: 'transparent',
                         addClass: 'transparentBg',
+                        aspectRatio: getAspectRatio(),
                         onSelect: function(c) {
                             $scope.$apply(function() { updateCoords(c); });
                         },
@@ -224,7 +225,11 @@ controller('AppCtrl', ['$scope', '$http', '$timeout', '$q', '$window', 'LoginSer
             });
     };
 
-    $scope.aspectRatioChanged = function() {
+    $scope.cropMethodChanged = function() {
+        LocalStorageService.set('croptool-cropmethod', $scope.cropmethod);
+    };
+
+    function getAspectRatio() {
         var ratio = 0;
         if ($scope.aspectratio == 'keep') {
             ratio = $scope.metadata.original.width / $scope.metadata.original.height;
@@ -237,6 +242,19 @@ controller('AppCtrl', ['$scope', '$http', '$timeout', '$q', '$window', 'LoginSer
             }
             ratio = $scope.aspectratio_cx / $scope.aspectratio_cy;
         }
+        return ratio;
+    }
+
+    $scope.aspectRatioChanged = function() {
+        var ratio = getAspectRatio();
+        if (ratio === null) {
+            return;
+        }
+
+        LocalStorageService.set('croptool-aspectratio', $scope.aspectratio);
+        LocalStorageService.set('croptool-aspectratio-x', $scope.aspectratio_cx);
+        LocalStorageService.set('croptool-aspectratio-y', $scope.aspectratio_cy);
+
         jcrop_api.setOptions({ aspectRatio: ratio });
         if ($scope.crop_dim) {
             var c = jcrop_api.tellSelect();
@@ -399,12 +417,11 @@ controller('AppCtrl', ['$scope', '$http', '$timeout', '$q', '$window', 'LoginSer
     $scope.status = 'Checking login';
 
     // Defaults
-    $scope.cropmethod = "precise";
-    $scope.aspectratio = "free";
-    $scope.aspectratio_cx = '16';
-    $scope.aspectratio_cy = '9';
-    $scope.overwrite = "overwrite";
-
+    $scope.cropmethod = LocalStorageService.get('croptool-cropmethod') || 'precise';
+    $scope.aspectratio = LocalStorageService.get('croptool-aspectratio') || 'free';
+    $scope.aspectratio_cx = LocalStorageService.get('croptool-aspectratio-x') || '16';
+    $scope.aspectratio_cy = LocalStorageService.get('croptool-aspectratio-y') || '9';;
+    $scope.overwrite = LocalStorageService.get('croptool-overwrite') || 'overwrite';;
 
     // On filename change, check with the MediaWiki API if the file exists.
     // Delay 500 ms before checking in case the user is in the process of typing.
@@ -477,6 +494,8 @@ controller('AppCtrl', ['$scope', '$http', '$timeout', '$q', '$window', 'LoginSer
     });
 
     $scope.updateUploadComment = function() {
+
+        LocalStorageService.set('croptool-overwrite', $scope.overwrite);
 
         // Cropped {x % using CropTool}
         // Removed border by cropping {x % using CropTool}
