@@ -7,7 +7,7 @@ html, body {
 }
 
 h1 {
-    margin-top: 10px;
+    margin-top: 20px;
     margin-bottom: 15px;
     padding: 0;
     font-size: 30px;
@@ -21,7 +21,7 @@ h2 {
 }
 
 .container2 {
-    padding: 1vw 2vw;
+    padding: 0 2vw;
     min-height: 100%;
     height: auto !important;
     height: 100%;
