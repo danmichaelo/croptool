@@ -20,7 +20,7 @@ $messages['en'] = array(
 	'logout' => 'Logout',
 
 	'loginform-header' => 'Authorization required',
-	'loginform-blurb' => 'CropTool is a tool for cropping images (currently only jpeg files) at Wikimedia sites. <a href="$1">Learn more</a>.',
+	'loginform-blurb' => 'CropTool is a tool for cropping images (JPG, PNG or GIF files) at Wikimedia sites. <a href="$1">Learn more</a>.',
 	'loginform-help' => 'To use CropTool you need to connect it to your Wikimedia account. This process is secure and your password will not be given to CropTool.',
 	'loginform-submit-button' => 'Connect',
 
