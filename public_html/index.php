@@ -38,13 +38,13 @@ $I18N = new TsIntuition(array(
   <link rel="stylesheet" type="text/css" href="components/ladda/dist/ladda-themeless.min.css">
   <link rel="stylesheet" type="text/css" href="app.css">
 
-  <script src="//tools-static.wmflabs.org/cdnjs/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
+  <script src="//tools-static.wmflabs.org/cdnjs/ajax/libs/jquery/2.1.4/jquery.min.js"></script>
   <script src="//tools-static.wmflabs.org/cdnjs/ajax/libs/twitter-bootstrap/3.3.4/js/bootstrap.min.js"></script>
-  <script src="//tools-static.wmflabs.org/cdnjs/ajax/libs/angular.js/1.3.20/angular.min.js"></script>
-  <script src="//tools-static.wmflabs.org/cdnjs/ajax/libs/angular.js/1.3.20/angular-sanitize.min.js"></script>
+  <script src="//tools-static.wmflabs.org/cdnjs/ajax/libs/angular.js/1.4.7/angular.min.js"></script>
+  <script src="//tools-static.wmflabs.org/cdnjs/ajax/libs/angular.js/1.4.7/angular-sanitize.min.js"></script>
   <script src="//tools-static.wmflabs.org/cdnjs/ajax/libs/angular-ui-bootstrap/0.14.0/ui-bootstrap-tpls.min.js"></script>
   <script src="//tools-static.wmflabs.org/cdnjs/ajax/libs/jquery-jcrop/0.9.12/js/jquery.Jcrop.min.js"></script>
-  <script src="//tools-static.wmflabs.org/cdnjs/ajax/libs/angular-local-storage/0.1.5/angular-local-storage.min.js"></script>
+  <script src="//tools-static.wmflabs.org/cdnjs/ajax/libs/angular-local-storage/0.2.2/angular-local-storage.min.js"></script>
   <script src="components/ladda/js/spin.js"></script>
   <script src="components/ladda/js/ladda.js"></script>
   <script src="components/angular-ladda/dist/angular-ladda.min.js"></script>
