@@ -1,6 +1,6 @@
 ## CropTool
 
-[![Stories in Ready](https://badge.waffle.io/danmichaelo/croptool.png?label=ready)](http://waffle.io/danmichaelo/croptool)
+[![Stories in Ready](https://badge.waffle.io/danmichaelo/croptool.png?label=ready)](https://waffle.io/danmichaelo/croptool)
 
 Tool for cropping images at Wikimedia Commons. Lives at http://tools.wmflabs.org/croptool/ 
 
