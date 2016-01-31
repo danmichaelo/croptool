@@ -109,7 +109,7 @@ $I18N = new TsIntuition(array(
 
                 <p>
                     <?php echo $I18N->msg( 'loginform-blurb', array('variables' => array(
-						'//commons.wikimedia.org/wiki/Commons:CropTool'
+						'//commons.wikimedia.org/wiki/Special:MyLanguage/Commons:CropTool'
 					))); ?>
                 </p>
 
@@ -179,7 +179,7 @@ $I18N = new TsIntuition(array(
             </div>
 
             <div class="panel-footer">
-                <?php echo $I18N->msg('titleform-footer', array('variables' => array('//commons.wikimedia.org/wiki/Commons:CropTool'))); ?>
+                <?php echo $I18N->msg('titleform-footer', array('variables' => array('//commons.wikimedia.org/wiki/Special:MyLanguage/Commons:CropTool'))); ?>
             </div>
 
         </div>
@@ -394,7 +394,7 @@ $I18N = new TsIntuition(array(
                         <p ng-show="site == 'commons.wikimedia.org' && overwrite=='overwrite'">
                             <i class="fa fa-warning"></i>
                             <?php echo $I18N->msg( 'previewform-overwrite-policy', array('variables' => array(
-								'https://commons.wikimedia.org/wiki/Commons:Overwriting existing files'
+								'https://commons.wikimedia.org/wiki/Special:MyLanguage/Commons:Overwriting existing files'
 							))); ?>
                         </p>
 
