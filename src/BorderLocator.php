@@ -72,7 +72,7 @@ class BorderLocator
 	 *
 	 * @param int $x Fixed x
 	 * @param int $y Fixed y
-	 * @param array $color Color value to look for
+	 * @param sRGB $color Color value to look for
 	 * @param int $tolerance
 	 * @return int
 	 */
