@@ -36,5 +36,5 @@ Download deps and configure croptool:
 
 1. `composer install`
 2. `cp config.dist.ini config.ini` and insert OAuth info and the path to jpegtran.
-3. Check that the server can write to `data` and `public_html/files`.
+3. Check that the server can write to `data`, `logs` and `public_html/files`.
 4. `vendor/bin/phpunit`
