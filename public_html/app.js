@@ -325,6 +325,8 @@ controller('AppCtrl', ['$scope', '$http', '$timeout', '$q', '$window', 'LoginSer
         }
 
         $scope.error = '';
+        $scope.allowIgnoreWarnings = false;
+        $scope.ignoreWarnings = false;
         $scope.busy = true;
 
         $http.post('backend.php', {
@@ -356,12 +358,13 @@ controller('AppCtrl', ['$scope', '$http', '$timeout', '$q', '$window', 'LoginSer
 
     };
 
-    $scope.upload = function() {
+    $scope.upload = function(is_retrying) {
 
         $scope.busy = true;
         $scope.error = '';
+        $scope.allowIgnoreWarnings = false;
 
-        $http.post('backend.php', {
+        var params = {
             title: $scope.title,
             site: $scope.site,
             overwrite: $scope.overwrite,
@@ -369,7 +372,13 @@ controller('AppCtrl', ['$scope', '$http', '$timeout', '$q', '$window', 'LoginSer
             filename: $scope.newTitle,
             elems: $scope.cropresults.page.elems,
             store: true
-        }).
+        };
+
+        if ($scope.ignoreWarnings) {
+            params.ignorewarnings = '1';
+        }
+
+        $http.post('backend.php', params).
         success(function(response) {
 
             console.log(response);
@@ -377,6 +386,22 @@ controller('AppCtrl', ['$scope', '$http', '$timeout', '$q', '$window', 'LoginSer
             $scope.busy = false;
             if (response.result === 'Success') {
                 $scope.uploadresults = response; //.imageinfo.descriptionurl;
+
+            } else if (response.result == 'Warning') {
+                var warnings = Object.keys(response.warnings);
+
+                // Don't allow overwriting other files or pages
+                $scope.allowIgnoreWarnings = (warnings.indexOf('exists') == -1 && warnings.indexOf('page-exists') == -1);
+
+                if (warnings.length == 1 && warnings[0] == 'was-deleted') {
+                    // This is safe to ignore. Retry right away, but only once
+                    if (!is_retrying) {
+                        $scope.ignoreWarnings = true;
+                        $scope.upload(true);
+                    }
+                } else {
+                    $scope.error = 'Upload failed because of the following warning(s): ' + warnings.join(', ') + '.';
+                }
 
             } else {
                 $scope.error = 'Upload failed! ';

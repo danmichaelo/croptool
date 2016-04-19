@@ -433,6 +433,13 @@ $I18N = new TsIntuition(array(
                             {{error}}
                         </div>
 
+                        <div ng-show="allowIgnoreWarnings">
+                            <label>
+                                <input type="checkbox" ng-model="ignoreWarnings">
+                                Ignore warnings (please use with care)
+                            </label>
+                        </div>
+
                         <button type="button" class="btn btn-large" ng-click="back()" ng-disabled="busy">
                             <?php echo $I18N->msg('previewform-back-btn'); ?>
                         </button>

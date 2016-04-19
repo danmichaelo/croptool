@@ -229,6 +229,10 @@ class CropTool {
 
         }
 
+        if ($input->ignorewarnings) {
+            $args['ignorewarnings'] = '1';
+        }
+
         $response = $this->api->request($args, true);
 
         if (isset($response->error)) {
