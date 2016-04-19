@@ -358,7 +358,7 @@ controller('AppCtrl', ['$scope', '$http', '$timeout', '$q', '$window', 'LoginSer
 
     };
 
-    $scope.upload = function(is_retrying) {
+    $scope.upload = function(isRetrying) {
 
         $scope.busy = true;
         $scope.error = '';
@@ -395,7 +395,7 @@ controller('AppCtrl', ['$scope', '$http', '$timeout', '$q', '$window', 'LoginSer
 
                 if (warnings.length == 1 && warnings[0] == 'was-deleted') {
                     // This is safe to ignore. Retry right away, but only once
-                    if (!is_retrying) {
+                    if (!isRetrying) {
                         $scope.ignoreWarnings = true;
                         $scope.upload(true);
                     }
