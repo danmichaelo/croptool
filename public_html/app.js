@@ -1,7 +1,15 @@
 'use strict';
 
 // Declare app level module which depends on filters, and services
-angular.module('croptool', ['LocalStorageModule', 'ngSanitize', 'ui.bootstrap', 'angular-ladda']).
+angular.module('croptool', ['LocalStorageModule', 'ngSanitize', 'ui.bootstrap', 'angular-ladda', 'pascalprecht.translate']).
+
+config(['$translateProvider', function($translateProvider) {
+    $translateProvider.useStaticFilesLoader({
+        prefix: 'locale/',
+        suffix: '.json'
+    });
+    $translateProvider.preferredLanguage('en');
+}]).
 
 service('LoginService', ['$http', '$rootScope', function($http, $rootScope) {
 

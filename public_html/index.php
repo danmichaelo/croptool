@@ -1,28 +1,15 @@
 <?php
 
 if ($_SERVER['HTTP_X_FORWARDED_PROTO'] == 'http') {
-	$redirect = "https://".$_SERVER['HTTP_HOST'].$_SERVER['REQUEST_URI'];
-	header("Location: $redirect");
-	exit;
+    $redirect = "https://".$_SERVER['HTTP_HOST'].$_SERVER['REQUEST_URI'];
+    header("Location: $redirect");
+    exit;
 }
-
-require('../TsIntuition/ToolStart.php'); // for testing
-//require('/home/project/intuition/src/Intuition/ToolStart.php');
-require('common.php');
-
-// Localization using TsIntuition
-// https://github.com/Krinkle/TsIntuition/wiki/Documentation
-
-$I18N = new TsIntuition(array(
-	'domain' => 'croptool',
-));
-
-
 ?>
 <!doctype html>
 <html ng-app="croptool">
 <head>
-  <title><?php echo $I18N->msg('title'); ?></title>
+  <title translate>title</title>
   <meta http-equiv="Content-type" content="text/html;charset=UTF-8">
 
 <script>
@@ -45,6 +32,8 @@ $I18N = new TsIntuition(array(
   <script src="//tools-static.wmflabs.org/cdnjs/ajax/libs/angular-ui-bootstrap/0.14.0/ui-bootstrap-tpls.min.js"></script>
   <script src="//tools-static.wmflabs.org/cdnjs/ajax/libs/jquery-jcrop/0.9.12/js/jquery.Jcrop.min.js"></script>
   <script src="//tools-static.wmflabs.org/cdnjs/ajax/libs/angular-local-storage/0.2.2/angular-local-storage.min.js"></script>
+  <script src="//tools-static.wmflabs.org/cdnjs/ajax/libs/angular-translate/2.8.1/angular-translate.min.js"></script>
+  <script src="//tools-static.wmflabs.org/cdnjs/ajax/libs/angular-translate/2.8.1/angular-translate-loader-static-files/angular-translate-loader-static-files.min.js"></script>
   <script src="components/ladda/js/spin.js"></script>
   <script src="components/ladda/js/ladda.js"></script>
   <script src="components/angular-ladda/dist/angular-ladda.min.js"></script>
@@ -73,15 +62,16 @@ $I18N = new TsIntuition(array(
 
     <div ng-show="user" style="float:right; padding:.3em 0;" ng-controller="LoginCtrl">
         <div class="panel-body">
-            <?php echo $I18N->msg('logged-in', array('variables' => array('{{user.name}}'))); ?>.
-            <a href ng-click="logout()"><?php echo $I18N->msg('logout'); ?></a>
+            <span translate translate-value-user="{{user.name}}">logged-in</span>
+            <a href ng-click="logout()" translate>logout</a>
         </div>
     </div>
 
     <h1>
         <a href ng-click="imageUrlOrTitle = ''; openFile()">
             <i class="fa fa-crop"></i>
-            <?php echo $I18N->msg('title'); ?></a>
+            <span translate>title</span>
+        </a>
         <span ng-show="metadata">
         : {{title}}
         </span>
@@ -101,25 +91,19 @@ $I18N = new TsIntuition(array(
 
         <form class="form-inline panel panel-primary" role="form">
 
-            <div class="panel-heading">
-                <?php echo $I18N->msg( 'loginform-header' ); ?>
-            </div>
+            <div class="panel-heading" translate>loginform-header</div>
 
             <div class="panel-body">
 
-                <p>
-                    <?php echo $I18N->msg( 'loginform-blurb', array('variables' => array(
-						'//commons.wikimedia.org/wiki/Special:MyLanguage/Commons:CropTool'
-					))); ?>
+                <p translate translate-value-url="//commons.wikimedia.org/wiki/Special:MyLanguage/Commons:CropTool">
+                    loginform-blurb
                 </p>
 
-                <p>
-                    <?php echo $I18N->msg( 'loginform-help' ); ?>
-                </p>
+                <p translate>loginform-help</p>
 
                 <button type="submit" class="btn btn-primary" ng-click="oauthLogin()">
                     <i class="fa fa-lock"></i>
-                    <?php echo $I18N->msg( 'loginform-submit-button' ); ?>
+                    <span translate>loginform-submit-button</span>
                 </button>
 
             </div>
@@ -135,14 +119,10 @@ $I18N = new TsIntuition(array(
 
         <div class="panel panel-primary">
 
-            <div class="panel-heading">
-                <?php echo $I18N->msg('titleform-header'); ?>
-            </div>
+            <div class="panel-heading" translate>titleform-header</div>
             <div class="panel-body">
 
-                <p>
-                    <?php echo $I18N->msg('titleform-help'); ?>
-                </p>
+                <p translate>titleform-help</p>
 
                 <form role="form" ng-submit="openFile()">
 
@@ -150,21 +130,19 @@ $I18N = new TsIntuition(array(
 
                         <div class="form-group col-sm-8" ng-class="{ 'has-error': exists[site+':'+title] === false, 'has-success': exists[site+':'+title] === true }">
                             <label class="sr-only" for="imageUrlOrTitle">
-                                <?php echo $I18N->msg('titleform-file-label'); ?>
+                                <span translate>titleform-file-label</span>
                             </label>
-                            <input type="text" ng-model="imageUrlOrTitle" class="form-control" placeholder="<?php echo $I18N->msg('titleform-file-label'); ?>">
+                            <input type="text" ng-model="imageUrlOrTitle" class="form-control" placeholder="{{'titleform-file-label' | translate}}">
                             <span class="help-block" ng-show="exists[site+':'+title] === false">
-                                <?php echo $I18N->msg('titleform-file-not-found', array('variables' => array('{{title}}', '{{site}}'))); ?>
+                                <span translate translate-value-title="{{title}}" translate-value-site="{{site}}">titleform-file-not-found</span>
                             </span>
                             <span class="help-block" ng-show="exists[site+':'+title] === true">
-                                <?php echo $I18N->msg('titleform-file-found', array('variables' => array('{{title}}', '{{site}}'))); ?>
+                                <span translate translate-value-title="{{title}}" translate-value-site="{{site}}">titleform-file-found</span>
                             </span>
                         </div>
 
                         <div class="col-sm-4">
-                            <button type="submit" class="btn btn-primary">
-                                <?php echo $I18N->msg('titleform-submit-button'); ?>
-                            </button>
+                            <button type="submit" class="btn btn-primary" translate>titleform-submit-button</button>
                         </div>
 
                     </div>
@@ -178,8 +156,8 @@ $I18N = new TsIntuition(array(
 
             </div>
 
-            <div class="panel-footer">
-                <?php echo $I18N->msg('titleform-footer', array('variables' => array('//commons.wikimedia.org/wiki/Special:MyLanguage/Commons:CropTool'))); ?>
+            <div class="panel-footer" translate translate-value-url="//commons.wikimedia.org/wiki/Special:MyLanguage/Commons:CropTool">
+                titleform-footer
             </div>
 
         </div>
@@ -192,9 +170,7 @@ $I18N = new TsIntuition(array(
 
     <div ng-show="!metadata && busy">
 
-        <p>
-            <?php echo $I18N->msg('fetching-progress'); ?>
-        </p>
+        <p translate>fetching-progress</p>
 
         <div class="mainLoader" style="margin-top: 1em;"></div>
 
@@ -212,16 +188,14 @@ $I18N = new TsIntuition(array(
         <div>
             <p>
                 <a href="{{metadata.description}}">View at {{site}}</a>.
-                <?php echo $I18N->msg( 'original-dimensions', array('variables' => array(
-					'{{metadata.original.width}}', '{{metadata.original.height}}'
-				))); ?>
+                <span translate translate-value-width="{{metadata.original.width}}" translate-value-height="{{metadata.original.height}}">original-dimensions</span>
 
                 <span ng-show="crop_dim && !cropresults">
-                    Crop: {{crop_dim.w}} x {{crop_dim.h}} px.
+                    <span translate translate-value-width="{{crop_dim.w}}" translate-value-height="{{crop_dim.h}}">crop-dimensions</span>
                 </span>
 
                 <span ng-show="cropresults">
-                    Crop: {{cropresults.width}} x {{cropresults.height}} px.
+                    <span translate translate-value-width="{{cropresults.width}}" translate-value-height="{{cropresults.height}}">crop-dimensions</span>
                 </span>
             </p>
         </div>
@@ -280,36 +254,29 @@ $I18N = new TsIntuition(array(
                     <input type="hidden" name="title" ng-model="title" />
 
                     <p>
-                        <?php echo $I18N->msg( 'cropform-select-region', array('variables' => array(
-							'locateBorder();'
-						))); ?>
+                        <span translate translate-value-url="locateBorder()">cropform-select-region</span>
                         <img src="res/spinner1.gif" ng-show="borderLocatorBusy">
                     </p>
 
                     <p ng-show="crop_dim" style="font-size:90%; color: #666; margin-left: 1em;">
-                        <?php echo $I18N->msg( 'cropform-region', array('variables' => array(
-							'{{crop_dim.x}}',
-							'{{crop_dim.y}}',
-							'{{crop_dim.right}}',
-							'{{crop_dim.bottom}}',
-						))); ?>
+                        <span translate translate-value-left="{{crop_dim.x}}" translate translate-value-top="{{crop_dim.y}}" translate translate-value-right="{{crop_dim.right}}" translate translate-value-bottom="{{crop_dim.bottom}}">cropform-region</span>
                     </p>
 
                     <div style="margin-bottom:.8em;">
-                        <?php echo $I18N->msg('cropform-aspect-ratio'); ?>
+                        <span translate>cropform-aspect-ratio</span>
 
                         <div>
                             <label class="radio-inline">
                                 <input type="radio" name="aspectratio" value="free" ng-model="aspectratio" ng-change="aspectRatioChanged()">
-                                <?php echo $I18N->msg('cropform-aspect-ratio-free'); ?>
+                                <span translate>cropform-aspect-ratio-free</span>
                             </label>
                             <label class="radio-inline">
                                 <input type="radio" name="aspectratio" value="keep" ng-model="aspectratio" ng-change="aspectRatioChanged()">
-                                <?php echo $I18N->msg('cropform-aspect-ratio-keep'); ?>
+                                <span translate>cropform-aspect-ratio-keep</span>
                             </label>
                             <label class="radio-inline">
                                 <input type="radio" name="aspectratio" value="fixed" ng-model="aspectratio" ng-change="aspectRatioChanged()">
-                                <?php echo $I18N->msg('cropform-aspect-ratio-fixed'); ?>
+                                <span translate>cropform-aspect-ratio-fixed</span>
                             </label>
                             <div ng-show="aspectratio=='fixed'" style="border:1px solid #ccc; display:inline-block;">
                                 <input type="text" ng-model="aspectratio_cx" ng-change="aspectRatioChanged()" style="width:22px; text-align: right; border:none; outline: none;">:<input type="text" ng-model="aspectratio_cy" ng-change="aspectRatioChanged()" style="width:22px; border:none; outline: none;">
@@ -318,28 +285,28 @@ $I18N = new TsIntuition(array(
                     </div>
 
                     <div ng-show="metadata.mime == 'image/jpeg'" style="margin-bottom:.8em;">
-                        <?php echo $I18N->msg('cropform-method'); ?>
+                        <span translate>cropform-method</span>
 
                         <div class="form-group">
                             <label class="radio-inline"
-                                uib-popover="<?php echo $I18N->msg('cropform-method-precise-help'); ?>"
+                                uib-popover="{{'cropform-method-precise-help' | translate}}"
                                 popover-trigger="mouseenter"
                                 popover-animation="false"
                                 popover-placement="bottom"
                                 popover-popup-delay="0.5"
                             >
                                 <input type="radio" name="cropmethod" value="precise" ng-model="cropmethod" ng-change="cropMethodChanged()">
-                                <?php echo $I18N->msg('cropform-method-precise'); ?>
+                                <span translate>cropform-method-precise</span>
                             </label>
                             <label class="radio-inline"
-                                uib-popover="<?php echo $I18N->msg('cropform-method-lossless-help'); ?>"
+                                uib-popover="{{'cropform-method-lossless-help' | translate}}"
                                 popover-trigger="mouseenter"
                                 popover-animation="false"
                                 popover-placement="bottom"
                                 popover-popup-delay="0.5"
                             >
                                 <input type="radio" name="cropmethod" value="lossless" ng-model="cropmethod" ng-change="cropMethodChanged()">
-                                <?php echo $I18N->msg('cropform-method-lossless'); ?>
+                                <span translate>cropform-method-lossless</span>
                             </label>
                         </div>
                     </div>
@@ -352,7 +319,9 @@ $I18N = new TsIntuition(array(
                         class="btn btn-primary"
                         ng-disabled="!crop_dim"
                         ladda="busy"
-                        data-style="slide-up"><?php echo $I18N->msg('cropform-preview-btn'); ?></button>
+                        data-style="slide-up">
+                        <span translate>cropform-preview-btn</span>
+                    </button>
 
                 </form>
 
@@ -364,17 +333,13 @@ $I18N = new TsIntuition(array(
                 <div ng-show="cropresults && !uploadresults">
 
                     <p ng-show="cropresults.method=='precise'">
-                        <?php echo $I18N->msg( 'previewform-precise'); ?>
+                        <span translate>previewform-precise</span>
                     </p>
 
                     <p ng-show="cropresults.method=='lossless'">
-                        <?php echo $I18N->msg( 'previewform-lossless'); ?>
+                        <span translate>previewform-lossless</span>
                         <span ng-show="cropresults.width!=crop_dim.w || cropresults.height!=crop_dim.h">
-                            <?php echo $I18N->msg( 'previewform-lossless-explanation', array('variables' => array(
-								'{{cropresults.width - crop_dim.w}}',
-								'{{cropresults.height - crop_dim.h}}',
-								'//en.wikipedia.org/wiki/JPEG#Lossless_editing'
-							))); ?>
+                            <span translate translate-value-wider="{{cropresults.width - crop_dim.w}}" translate-value-higher="{{cropresults.height - crop_dim.h}}" translate-value-url="//en.wikipedia.org/wiki/JPEG#Lossless_editing">previewform-lossless-explanation</span>
                         </span>
                     </p>
 
@@ -383,48 +348,46 @@ $I18N = new TsIntuition(array(
                         <div class="form-group">
                             <label class="radio-inline">
                                 <input type="radio" name="overwrite" ng-model="overwrite" value="overwrite" ng-disabled="busy" ng-change="updateUploadComment()">
-                                <?php echo $I18N->msg( 'previewform-overwrite' ); ?>
+                                <span translate>previewform-overwrite</span>
                             </label>
                             <label class="radio-inline">
                                 <input type="radio" name="overwrite" ng-model="overwrite" value="rename" ng-disabled="busy" ng-change="updateUploadComment()">
-                                <?php echo $I18N->msg( 'previewform-create-new' ); ?>
+                                <span translate>previewform-create-new</span>
                             </label>
                         </div>
 
                         <p ng-show="site == 'commons.wikimedia.org' && overwrite=='overwrite'">
                             <i class="fa fa-warning"></i>
-                            <?php echo $I18N->msg( 'previewform-overwrite-policy', array('variables' => array(
-								'https://commons.wikimedia.org/wiki/Special:MyLanguage/Commons:Overwriting existing files'
-							))); ?>
+                            <span translate translate-value-url="https://commons.wikimedia.org/wiki/Special:MyLanguage/Commons:Overwriting existing files">previewform-overwrite-policy</span>
                         </p>
 
                         <div class="form-group" ng-show="overwrite=='rename'" ng-class="{ 'has-error': exists[site + ':' + newTitle] === true, 'has-success': exists[site + ':' + newTitle] === false }">
                             <label class="sr-only" for="newTitle">
-                                <?php echo $I18N->msg( 'previewform-new-title' ); ?>
+                                <span translate>previewform-new-title</span>
                             </label>
                             <input id="newTitle" type="text" class="form-control" ng-model="newTitle" ng-disabled="busy">
                             <span class="help-block" ng-show="exists[site + ':' + newTitle] === true">
-                                <?php echo $I18N->msg( 'previewform-new-title-exists', array('variables' => array('{{newTitle}}')) ); ?>
+                                <span translate translate-value-title="{{newTitle}}">previewform-new-title-exists</span>
                             </span>
                         </div>
 
                         <div class="form-group" ng-show="cropresults.page.elems.border !== undefined">
-                            <label title="<?php echo $I18N->msg( 'previewform-removed-border-help' ); ?>">
+                            <label title="{{'previewform-removed-border-help' | translate}}">
                                 <input type="checkbox" ng-model="cropresults.page.elems.border" ng-change="updateUploadComment()">
-                                <?php echo $I18N->msg( 'previewform-removed-border' ); ?>
+                                <span translate>previewform-removed-border</span>
                             </label>
                         </div>
 
                         <div class="form-group" ng-show="cropresults.page.elems.watermark !== undefined">
-                            <label title="<?php echo $I18N->msg( 'previewform-removed-watermark-help' ); ?>">
+                            <label title="{{'previewform-removed-watermark-help' | translate}}">
                                 <input type="checkbox" ng-model="cropresults.page.elems.watermark" ng-change="updateUploadComment()">
-                                <?php echo $I18N->msg( 'previewform-removed-watermark' ); ?>
+                                <span translate>previewform-removed-watermark</span>
                             </label>
                         </div>
 
                         <div class="form-group">
                             <label for="uploadComment">
-                                <?php echo $I18N->msg( 'previewform-upload-comment' ); ?>:
+                                <span translate>previewform-upload-comment</span>
                             </label>
                             <textarea rows="4" id="uploadComment" type="text" class="form-control" ng-model="uploadComment" ng-disabled="busy"></textarea>
                         </div>
@@ -441,13 +404,15 @@ $I18N = new TsIntuition(array(
                         </div>
 
                         <button type="button" class="btn btn-large" ng-click="back()" ng-disabled="busy">
-                            <?php echo $I18N->msg('previewform-back-btn'); ?>
+                            <span translate>previewform-back-btn</span>
                         </button>
 
                         <button type="submit"
                             class="btn btn-large btn-primary"
                             ladda="busy"
-                            data-style="slide-up"><?php echo $I18N->msg('previewform-upload-btn'); ?></button>
+                            data-style="slide-up">
+                            <span translate>previewform-upload-btn</span>
+                        </button>
 
                     </form>
 
@@ -463,19 +428,14 @@ $I18N = new TsIntuition(array(
                     </div>
 
                     <p ng-show="uploadresults.result == 'Success'" style="background: url(res/yes_check-24px.png) left no-repeat; padding: 5px 5px 5px 30px;">
-                        <?php echo $I18N->msg( 'results-success'); ?>
+                        <span translate>results-success</span>
                     </p>
                     <p ng-show="uploadresults.result == 'Success'">
-                        <?php echo $I18N->msg( 'results-success-details', array('variables' => array(
-							'{{uploadresults.imageinfo.descriptionurl}}?action=purge',
-							'{{uploadresults.filename}}'
-						))); ?>
+                        <span translate translate-value-url="{{uploadresults.imageinfo.descriptionurl}}?action=purge">results-success-details</span>
                     </p>
 
                     <p ng-show="uploadresults.error" style="background: url(res/x_mark-24px.png) left no-repeat; padding: 5px 5px 5px 30px;">
-                        <?php echo $I18N->msg( 'results-failure', array('variables' => array(
-							'{{uploadresults.error.info}}'
-						))); ?>
+                        <span translate translate-value-error="{{uploadresults.error.info}}">results-failure</span>
                     </p>
                 </div>
 
@@ -490,9 +450,6 @@ $I18N = new TsIntuition(array(
     <a href="https://commons.wikimedia.org/wiki/CropTool">Tutorial</a>
     •
     <a href="//github.com/danmichaelo/croptool">Source code and issue tracker</a>
-    
-    <!--•<?php echo $I18N->getFooterLine('croptool'); ?>-->
-
 </footer>
 
 </body>
