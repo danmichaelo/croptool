@@ -13,7 +13,7 @@
 
   <link rel="stylesheet" type="text/css" href="//tools-static.wmflabs.org/cdnjs/ajax/libs/twitter-bootstrap/3.3.7/css/bootstrap.min.css">
   <link rel="stylesheet" type="text/css" href="//tools-static.wmflabs.org/cdnjs/ajax/libs/font-awesome/4.6.3/css/font-awesome.min.css">
-  <link rel="stylesheet" type="text/css" href="//tools-static.wmflabs.org/cdnjs/ajax/libs/jquery-jcrop/0.9.12/css/jquery.Jcrop.min.css">
+  <link rel="stylesheet" type="text/css" href="//tools-static.wmflabs.org/cdnjs/ajax/libs/cropperjs/0.7.2/cropper.css">
   <!-- build:css css/vendor.css -->
   <link rel="stylesheet" type="text/css" href="node_modules/ladda/dist/ladda-themeless.min.css">
   <!-- endbuild -->
@@ -26,7 +26,7 @@
   <script src="//tools-static.wmflabs.org/cdnjs/ajax/libs/angular.js/1.4.9/angular.min.js"></script>
   <script src="//tools-static.wmflabs.org/cdnjs/ajax/libs/angular.js/1.4.9/angular-sanitize.min.js"></script>
   <script src="//tools-static.wmflabs.org/cdnjs/ajax/libs/angular-ui-bootstrap/2.0.1/ui-bootstrap-tpls.min.js"></script>
-  <script src="//tools-static.wmflabs.org/cdnjs/ajax/libs/jquery-jcrop/0.9.12/js/jquery.Jcrop.min.js"></script>
+  <script src="//tools-static.wmflabs.org/cdnjs/ajax/libs/cropperjs/0.7.2/cropper.min.js"></script>
   <script src="//tools-static.wmflabs.org/cdnjs/ajax/libs/angular-local-storage/0.2.7/angular-local-storage.min.js"></script>
   <script src="//tools-static.wmflabs.org/cdnjs/ajax/libs/angular-translate/2.9.2/angular-translate.min.js"></script>
   <script src="//tools-static.wmflabs.org/cdnjs/ajax/libs/angular-translate/2.9.2/angular-translate-loader-static-files/angular-translate-loader-static-files.min.js"></script>
@@ -232,8 +232,7 @@
                      **************************************************************************************************** -->
                 <div ng-show="!cropresults" class="inner" ng-style="{'width': (metadata.thumb ? metadata.thumb.width : metadata.original.width) + 'px', 'margin-left': 'auto', 'margin-right': 'auto'}">
 
-                    <!-- This is the image we're attaching Jcrop to -->
-                    <img id="cropbox" ng-class="{imageloading: busy}" ng-src="{{metadata.thumb ? metadata.thumb.name : metadata.original.name}}">
+                    <img id="cropbox" ng-class="{imageloading: busy}" ct-cropper aspect-ratio="{{aspectratio_cxy}}" on-crop="updateCoords($event.detail)" ng-src="{{metadata.thumb ? metadata.thumb.name : metadata.original.name}}">
 
                 </div>
 
