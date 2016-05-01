@@ -232,7 +232,7 @@
                      **************************************************************************************************** -->
                 <div ng-show="!cropresults" class="inner" ng-style="{'width': (metadata.thumb ? metadata.thumb.width : metadata.original.width) + 'px', 'margin-left': 'auto', 'margin-right': 'auto'}">
 
-                    <img id="cropbox" ng-class="{imageloading: busy}" ct-cropper aspect-ratio="{{aspectratio_cxy}}" on-crop="updateCoords($event.detail)" ng-src="{{metadata.thumb ? metadata.thumb.name : metadata.original.name}}">
+                    <img id="cropbox" ng-class="{imageloading: busy}" ct-cropper aspect-ratio="{{aspectratio_cxy}}" rotation="{{rotation}}" on-crop="updateCoords($event.detail)" ng-src="{{metadata.thumb ? metadata.thumb.name : metadata.original.name}}">
 
                 </div>
 
@@ -287,6 +287,13 @@
                         <label style="padding: 5px;">
                             {{ 'height' | translate }}:
                             <input type="number" ng-model="crop_dim.h" ng-change="onCropDimChange('h')">
+                        </label>
+                    </div>
+
+                    <div style="margin-bottom:.8em;">
+                        <label class="radio-inline">
+                            <span translate>cropform-rotation</span>
+                            <input type="number" ng-model="rotation">
                         </label>
                     </div>
 

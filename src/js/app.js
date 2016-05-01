@@ -167,6 +167,7 @@ controller('AppCtrl', ['$scope', '$http', '$timeout', '$q', '$window', '$httpPar
             h: new_size[1],
             right: $scope.metadata.original.width - new_offset[0] - new_size[0],
             bottom: $scope.metadata.original.height - new_offset[1] - new_size[1],
+            rotate: c.rotate
         };
     }
 
