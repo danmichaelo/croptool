@@ -258,9 +258,24 @@ if ($_SERVER['HTTP_X_FORWARDED_PROTO'] == 'http') {
                         <img src="res/spinner1.gif" ng-show="borderLocatorBusy">
                     </p>
 
-                    <p ng-show="crop_dim" style="font-size:90%; color: #666; margin-left: 1em;">
-                        <span translate translate-value-left="{{crop_dim.x}}" translate translate-value-top="{{crop_dim.y}}" translate translate-value-right="{{crop_dim.right}}" translate translate-value-bottom="{{crop_dim.bottom}}">cropform-region</span>
-                    </p>
+                    <div class="cropdim">
+                        <label style="padding: 5px;">
+                          {{ 'top' | translate }}:
+                          <input type="number" ng-model="crop_dim.y" ng-change="onCropDimChange('y')">
+                        </label>
+                        <label style="padding: 5px;">
+                            {{ 'left' | translate }}:
+                            <input type="number" ng-model="crop_dim.x" ng-change="onCropDimChange('x')">
+                        </label>
+                        <label style="padding: 5px;">
+                            {{ 'width' | translate }}:
+                            <input type="number" ng-model="crop_dim.w" ng-change="onCropDimChange('w')">
+                        </label>
+                        <label style="padding: 5px;">
+                            {{ 'height' | translate }}:
+                            <input type="number" ng-model="crop_dim.h" ng-change="onCropDimChange('h')">
+                        </label>
+                    </div>
 
                     <div style="margin-bottom:.8em;">
                         <span translate>cropform-aspect-ratio</span>

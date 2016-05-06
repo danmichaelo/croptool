@@ -86,8 +86,8 @@ controller('AppCtrl', ['$scope', '$http', '$timeout', '$q', '$window', 'LoginSer
 
     var jcrop_api,
         everPushedSomething = false,
-        pixelratio = [1,1];
-
+        pixelratio = [1,1],
+        setSelectCalled = false;
 
     $scope.site = '';     // Site-part of the URL
     $scope.title = '';    // Title-part of the URL
@@ -130,6 +130,30 @@ controller('AppCtrl', ['$scope', '$http', '$timeout', '$q', '$window', 'LoginSer
     $scope.back = function() {
         $scope.cropresults = undefined;
         $scope.error = '';
+    };
+
+    $scope.onCropDimChange = function(current_coord) {
+
+        var ratio = getAspectRatio();
+        if (ratio != 0) {
+            if (current_coord == 'w') {
+                $scope.crop_dim.h = Math.round($scope.crop_dim.w / ratio);
+            } else if (current_coord == 'h') {
+                $scope.crop_dim.w = Math.round($scope.crop_dim.h / ratio);
+            }
+        }
+
+        if ($scope.crop_dim.x === undefined || $scope.crop_dim.y === undefined || $scope.crop_dim.w === undefined || $scope.crop_dim.h === undefined) {
+            return;
+        }
+
+        setSelectCalled = true; // let onSelect know we did this
+        jcrop_api.setSelect([$scope.crop_dim.x / pixelratio[0],
+                             $scope.crop_dim.y / pixelratio[1],
+                             ($scope.crop_dim.x + $scope.crop_dim.w) / pixelratio[0],
+                             ($scope.crop_dim.y + $scope.crop_dim.h) / pixelratio[1]
+                             ]);
+
     };
 
     $scope.$on('loginStatusChanged', function() {
@@ -193,7 +217,12 @@ controller('AppCtrl', ['$scope', '$http', '$timeout', '$q', '$window', 'LoginSer
                         addClass: 'transparentBg',
                         aspectRatio: getAspectRatio(),
                         onSelect: function(c) {
-                            $scope.$apply(function() { updateCoords(c); });
+                            if (setSelectCalled) {
+                                // The change was triggered by a manual setSelect() call
+                                setSelectCalled = false;
+                            } else {
+                                $scope.$apply(function() { updateCoords(c); });
+                            }
                         },
                         onRelease: function() {
                             $scope.$apply(function() { $scope.crop_dim = undefined; });

@@ -93,8 +93,17 @@ form {
     padding-right: 10px;
 }
 
-
-
+.cropdim {
+    display: flex; flex-wrap: wrap; align-items: center;
+justify-content: space-between;
+}
+.cropdim label {
+  flex-basis: 110px;
+  text-align: right;
+}
+.cropdim input {
+  width: 50px;
+}
 
 .mainLoader {
   height: 6px;
