@@ -19,6 +19,7 @@ class CropTool {
         'tpl_watermark' => '/{{\s*(wmr|(remove |image)?water ?m(a|e)rk(ed)?)(\s*|\|[^\}]+)}}\s*/i',
         'cat_border' => '/\[\[category:images(?: |_)with(?: |_)borders\]\]\s*/i',
         'tpl_review' => '/{{\s*(license|flickr|panoramio|openstreetmap|openphoto)[ -]?review\s*(\|[^\}]+)?}}\s*/i',
+        'tpl_waiting_for_review' => '/{{\s*flickrreview\s*}}/i',
     );
 
     public function __construct(MwApiClient $apiClient = null, Curl $curl = null, Logger $logger = null)
@@ -364,6 +365,20 @@ class CropTool {
         $res['thumb'] = $image->thumb($this->publicPath . '/files/' . $sha1 . '_thumb' . $ext);
 
         $this->logger->addInfo('[main] ' . substr($sha1, 0, 7) . ' Got file "' . $title . '"');
+
+
+        $response = $this->api->request(array(
+            'action' => 'parse',
+            'prop' => 'wikitext',
+            'format' => 'json',
+            'page' => 'File:' . $title
+        ), false, false);
+        $wikitext = $response->parse->wikitext->{'*'};
+
+        $res['wikitext'] = $wikitext;
+        if (preg_match($this->elem_matches['tpl_waiting_for_review'], $wikitext)) {
+            $res['error'] = 'This file is currently waiting for Flickr license review. Please wait until the review has been completed before cropping the file, since cropped files cannot be auto-reviewed by the FlickreviewR bot.';
+        }
 
         return $res;
     }
