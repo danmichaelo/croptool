@@ -5,6 +5,9 @@ if ($_SERVER['HTTP_X_FORWARDED_PROTO'] == 'http') {
     header("Location: $redirect");
     exit;
 }
+
+require('common.php');
+
 ?>
 <!doctype html>
 <html ng-app="croptool">
