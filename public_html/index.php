@@ -73,7 +73,7 @@ require('common.php');
     <h1>
         <a href ng-click="imageUrlOrTitle = ''; openFile()">
             <i class="fa fa-crop"></i>
-            <span translate>title</span>
+            <span translate>CropTool</span>
         </a>
         <span ng-show="metadata">
         : {{title}}
