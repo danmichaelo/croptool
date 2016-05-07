@@ -9,7 +9,7 @@ if ($_SERVER['HTTP_X_FORWARDED_PROTO'] == 'http') {
 <!doctype html>
 <html ng-app="croptool">
 <head>
-  <title translate>title</title>
+  <title translate>CropTool</title>
   <meta http-equiv="Content-type" content="text/html;charset=UTF-8">
 
 <script>
