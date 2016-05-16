@@ -76,7 +76,7 @@ switch ($action) {
 
 		$info = $ct->fetchImage($title);
 		$bl = new BorderLocator($info['original']['name']);
-		$area = $bl->selection;
+		$area = $bl->getSelection();
 
 		echo json_encode(array(
 			'area' => $area
