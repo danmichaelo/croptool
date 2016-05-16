@@ -231,6 +231,10 @@ controller('AppCtrl', ['$scope', '$http', '$timeout', '$q', '$window', 'LoginSer
                         jcrop_api = this;
                     });
 
+                    if (getParameterByName('action') == 'magic') {
+                        $scope.locateBorder();
+                    }
+
                 }, 200);
             }
 
