@@ -257,7 +257,7 @@ require('common.php');
                     <input type="hidden" name="title" ng-model="title" />
 
                     <p>
-                        <span translate translate-value-url="locateBorder()">cropform-select-region</span>
+                        <span translate translate-compile translate-value-url="locateBorder()">cropform-select-region</span>
                         <img src="res/spinner1.gif" ng-show="borderLocatorBusy">
                     </p>
 
