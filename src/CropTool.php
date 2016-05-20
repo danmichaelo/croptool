@@ -79,6 +79,8 @@ class CropTool {
         $cropMethod = $input->cropmethod;
         if ($response->imageinfo[0]->mime == 'image/gif') {
             $cropMethod = 'gif';
+        } elseif ($response->imageinfo[0]->mime != 'image/jpeg') {
+            $cropMethod = 'precise';
         }
 
         $image = new Image($srcPath, $response->imageinfo[0]->mime);
