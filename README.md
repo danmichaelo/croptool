@@ -38,3 +38,4 @@ Download deps and configure croptool:
 2. `cp config.dist.ini config.ini` and insert OAuth info and the path to jpegtran.
 3. Check that the server can write to `data`, `logs` and `public_html/files`.
 4. `vendor/bin/phpunit`
+5. `crontab cron.tools` to setup cronjobs.
