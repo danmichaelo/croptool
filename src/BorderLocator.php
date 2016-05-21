@@ -66,7 +66,7 @@ class BorderLocator
 		 * Returns selection as used by jcrop_api.setSelect.
 		 * [x1, y1, x2, y2] where x2 and y2 are the first pixels *outside* the selection
 		 */
-		return array($this->selection[0], $this->selection[1], $this->selection[2] + 1, $this->selection[3] + 1)
+		return array($this->selection[0], $this->selection[1], $this->selection[2] + 1, $this->selection[3] + 1);
 	}
 
 	//scanLine(array(0,0), array(0,1));
