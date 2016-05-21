@@ -232,7 +232,7 @@ class CropTool {
 
         }
 
-        if ($input->ignorewarnings) {
+        if (isset($input->ignorewarnings) && $input->ignorewarnings) {
             $args['ignorewarnings'] = '1';
         }
 
