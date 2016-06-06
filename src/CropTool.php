@@ -18,7 +18,7 @@ class CropTool {
         'tpl_remove_border' => '/{{\s*(crop|remove ?borders?)(\s*|\|[^\}]+)}}\s*/i',
         'tpl_watermark' => '/{{\s*(wmr|(remove |image)?water ?m(a|e)rk(ed)?)(\s*|\|[^\}]+)}}\s*/i',
         'cat_border' => '/\[\[category:images(?: |_)with(?: |_)borders\]\]\s*/i',
-        'tpl_review' => '/{{\s*(license|flickr|panoramio|openstreetmap|openphoto)[ -]?review\s*(\|[^\}]+)?}}\s*/i',
+        'not_to_be_copied' => '/{{\s*(featured picture|quality image|picture of the day|assessments|(license|flickr|panoramio|openstreetmap|openphoto)[ -]?review)\s*(\|[^\}]+)?}}\s*/i',
         'tpl_waiting_for_review' => '/{{\s*flickrreview\s*}}/i',
     );
 
@@ -163,12 +163,13 @@ class CropTool {
     }
 
     /**
-     * License review templates should not be copied into new files.
-     * See <https://github.com/danmichaelo/croptool/issues/41>
+     * Some templates should not be copied to new files.
+     *  - License review templates per <https://github.com/danmichaelo/croptool/issues/41>
+     *  - Assessment templates per <https://github.com/danmichaelo/croptool/issues/69>
      */
-    public function removeReviewTemplates($text)
+    public function removeCertainTemplates($text)
     {
-        return preg_replace($this->elem_matches['tpl_review'], '', $text);
+        return preg_replace($this->elem_matches['not_to_be_copied'], '', $text);
     }
 
     public function upload($input) {
@@ -227,7 +228,7 @@ class CropTool {
             }
 
             list($removed, $wikitext) = $this->removeBorderTemplateAndCat($wikitext, $input->elems);
-            $wikitext = $this->removeReviewTemplates($wikitext);
+            $wikitext = $this->removeCertainTemplates($wikitext);
             $args['text'] = $wikitext;
 
         }
