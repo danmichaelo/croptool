@@ -27,7 +27,7 @@ service('LoginService', ['$http', '$rootScope', function($http, $rootScope) {
         $rootScope.$broadcast('loginStatusChanged', response);
     };
 
-    $http.get('backend.php?checkLogin')
+    $http.get('backend.php?action=checkLogin')
       .success(this.checkLogin)
       .error(function(err, code) {
         that.loginResponse = { error: { code: code, info: err }};
@@ -58,7 +58,7 @@ controller('LoginCtrl', ['$scope', '$http', 'LoginService', function($scope, $ht
     };
 
     $scope.logout = function() {
-        $http.post('backend.php?action=logout').
+        $http.get('backend.php?action=logout').
         success(function(response) {
             console.log('LOGOUT');
             LoginService.checkLogin(response);
@@ -306,7 +306,7 @@ controller('AppCtrl', ['$scope', '$http', '$timeout', '$q', '$window', 'LoginSer
 
     function parseImageUrlOrTitle( imageUrlOrTitle ) {
 
-        var matches = imageUrlOrTitle.match(/\/\/([a-z]+)\.(wikimedia.org|wikipedia.org)\/wiki\/(.*)$/),
+        var matches = imageUrlOrTitle.match(/\/\/([a-z0-9.]+)\.(wikimedia.org|wikipedia.org|wmflabs.org)\/wiki\/(.*)$/),
             site = 'commons.wikimedia.org',
             title = '';
 

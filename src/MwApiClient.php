@@ -133,14 +133,18 @@ class MwApiClient
         curl_setopt( $ch, CURLOPT_USERAGENT, $this->user_agent );
         curl_setopt( $ch, CURLOPT_HEADER, 0 );
         curl_setopt( $ch, CURLOPT_RETURNTRANSFER, 1 );
+
+//        curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, false);
+//        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+
         $data = curl_exec( $ch );
 
-        curl_close($ch);
         if ( !$data ) {
             header( "HTTP/1.1 500 Internal Server Error" );
-            echo 'Curl error: ' . htmlspecialchars( curl_error( $ch ) );
-            exit(0);
+            throw new \RunTimeException('Curl error: ' . htmlspecialchars( curl_error( $ch ) ));
         }
+
+        curl_close($ch);
 
         $data = json_decode( $data );
         if (isset($data->error)) {
@@ -150,10 +154,14 @@ class MwApiClient
         return $data;
     }
 
+    /**
+     * @param string $title
+     * @return ImageInfo|null
+     */
     public function getImageInfo($title)
     {
         if (!$this->authorized()) {
-            return array('error' => 'not_logged_in');
+            return null;
         }
 
         $response = $this->request(array(
@@ -167,9 +175,9 @@ class MwApiClient
 
         foreach ($response->query->pages as $pageid => $page) {
             if ($pageid == '-1') {
-                return false;
+                return null;
             }
-            return $page;
+            return new ImageInfo($page);
         }
     }
 
@@ -177,26 +185,15 @@ class MwApiClient
      * Request an edit token
      * Returns the edit token, or FALSE on failure
      */
-    public function getEditToken($title)
+    public function getEditToken()
     {
-
-        if (!$this->authorized()) {
-            return array('error' => 'not_logged_in');
-        }
-
         $response = $this->request(array(
             'action' => 'query',
-            'prop' => 'info',
-            'intoken' => 'edit',
-            'titles' => 'File:' . $title
+            'meta' => 'tokens',
+            'type' => 'csrf'
         ));
 
-        foreach ($response->query->pages as $pageid => $page) {
-            if ($pageid == '-1') {
-                return false;
-            }
-            return $page->edittoken;
-        }
+        return $response->query->tokens->csrftoken;
     }
 
     /**

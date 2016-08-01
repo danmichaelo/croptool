@@ -18,11 +18,6 @@ class OAuthConsumer {
      */
     protected $mwOAuthIW = 'mw';
 
-    /**
-     * Set this to Special:MyTalk on the above wiki
-     */
-    protected $mytalkUrl = 'https://commons.wikimedia.org/wiki/Special:MyTalk#Hello.2C_world';
-
     private $gUserAgent;
     private $gConsumerKey = '';
     private $gConsumerSecret = '';
@@ -70,7 +65,7 @@ class OAuthConsumer {
         $this->gConsumerKey = $config['consumerKey'];
         $this->gConsumerSecret = $config['consumerSecret'];
         $this->cookieKey = base64_decode($config['localPassphrase']);
-        $this->logger = $logger ?: new Logger;
+        $this->logger = $logger ?: new Logger('croptool');
 
         $this->cipher = new Cryptastic;
 
@@ -91,18 +86,6 @@ class OAuthConsumer {
             $this->gTokenSecret = $this->cipher->decrypt($_COOKIE['mwSecret'], $this->cookieKey, true);
         }
 
-        // Fetch the access token if this is the callback from requesting authorization
-        if ( isset( $_GET['oauth_verifier'] ) && $_GET['oauth_verifier'] ) {
-            $this->logger->addInfo('[oauth] ' . substr(sha1($this->gTokenKey), 0, 7) . ': Successful authorization');
-            $this->fetchAccessToken($_GET['oauth_verifier']);
-            if (isset($_SESSION['title'])) {
-                header('Location: ./?title=' . urlencode(str_replace(' ', '_', $_SESSION['title'])));
-            } else {
-                header('Location: ./');
-            }
-            exit;
-        }
-
         // Take any requested action
         switch ( isset( $_GET['action'] ) ? $_GET['action'] : '' ) {
 
@@ -112,6 +95,19 @@ class OAuthConsumer {
 
         }
 
+    }
+
+    public function handleCallbackRequest($verifier)
+    {
+        // Fetch the access token if this is the callback from requesting authorization
+        $this->logger->addInfo('[oauth] ' . substr(sha1($this->gTokenKey), 0, 7) . ': Successful authorization');
+        $this->fetchAccessToken($verifier);
+        if (isset($_SESSION['title'])) {
+            header('Location: ./?title=' . urlencode(str_replace(' ', '_', $_SESSION['title'])));
+        } else {
+            header('Location: ./');
+        }
+        exit;
     }
 
     public function getUserAgent()
@@ -126,9 +122,13 @@ class OAuthConsumer {
 
     /**
      * Handle a callback to fetch the access token
-     * @return void
+     * @param $oauth_verifier
      */
-    private function fetchAccessToken($oauth_verifier) {
+    private function fetchAccessToken($oauth_verifier)
+    {
+        if (empty($this->gTokenKey)) {
+            throw new \RuntimeException('Cannot fetch access token when no token key set.');
+        }
 
         $url = $this->mwOAuthUrl . '/token';
         $url .= strpos( $url, '?' ) ? '&' : '?';
@@ -160,8 +160,7 @@ class OAuthConsumer {
         if ( !$data ) {
             header( "HTTP/1.1 500 Internal Server Error" );
             $this->logger->addError('[oauth] ' . substr(sha1($this->gTokenKey), 0, 7) . ': Failed to fetch permanent token, got curl error: ' .  curl_error( $ch ));
-            echo 'Curl error: ' . htmlspecialchars( curl_error( $ch ) );
-            exit(0);
+            throw new \RuntimeException('Curl error: ' . htmlspecialchars( curl_error( $ch ) ));
         }
         curl_close( $ch );
         $token = json_decode( $data );
@@ -169,14 +168,12 @@ class OAuthConsumer {
         if ( is_object( $token ) && isset( $token->error ) ) {
             header( "HTTP/1.1 500 Internal Server Error" );
             $this->logger->addError('[oauth] ' . substr(sha1($this->gTokenKey), 0, 7) . ': Failed to fetch permanent token: ' . htmlspecialchars( $token->error ) );
-            echo 'Error retrieving token: ' . htmlspecialchars( $token->error );
-            exit(0);
+            throw new \RuntimeException('Error retrieving token: ' . htmlspecialchars( $token->error ));
         }
         if ( !is_object( $token ) || !isset( $token->key ) || !isset( $token->secret ) ) {
             header( "HTTP/1.1 500 Internal Server Error" );
             $this->logger->addError('[oauth] ' . substr(sha1($this->gTokenKey), 0, 7) . ': Failed to fetch permanent token, got invalid response.');
-            echo 'Invalid response from token request';
-            exit(0);
+            throw new \RuntimeException('Invalid response from token request');
         }
 
         // Save the access token
@@ -194,8 +191,7 @@ class OAuthConsumer {
         )) {
             header( "HTTP/1.1 500 Internal Server Error" );
             $this->logger->addError('[oauth] Failed to store permanent token');
-            echo 'Failed to store key';
-            exit(0);
+            throw new \RuntimeException('Failed to store key');
         }
 
         $this->gTokenSecret = $token->secret; // 40 bytes
@@ -209,8 +205,7 @@ class OAuthConsumer {
         )) {
             header( "HTTP/1.1 500 Internal Server Error" );
             $this->logger->addError('[oauth] Failed to store permanent token');
-            echo 'Failed to store secret. Length: ' . strlen($this->cipher->encrypt($this->gTokenSecret, $this->cookieKey, true));
-            exit(0);
+            throw new \RuntimeException('Failed to store secret. Length: ' . strlen($this->cipher->encrypt($this->gTokenSecret, $this->cookieKey, true)));
         }
 
     }
@@ -226,6 +221,7 @@ class OAuthConsumer {
      * @param array $params Extra parameters for the Authorization header or post
      *  data (if application/x-www-form-urlencoded).
      * @return string Signature
+     * @throws Exception
      */
     function signRequest( $method, $url, $params = array()) {
 
@@ -394,10 +390,9 @@ class OAuthConsumer {
 
     /**
      * Sign request and return OAuth header for use with an API request
-     * @param string $method  HTTP method
-     * @param string $url  API URL
-     * @param array $post Post data
-     *
+     * @param string $method HTTP method
+     * @param string $url API URL
+     * @param array $data Post data
      * @return string
      */
     public function signRequestAndReturnHeader($method, $url, $data = array())

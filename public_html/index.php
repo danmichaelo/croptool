@@ -1,13 +1,24 @@
 <?php
 
-if ($_SERVER['HTTP_X_FORWARDED_PROTO'] == 'http') {
-    $redirect = "https://".$_SERVER['HTTP_HOST'].$_SERVER['REQUEST_URI'];
-    header("Location: $redirect");
-    exit;
+error_reporting(E_ALL);
+ini_set('display_errors', '1');
+ini_set('memory_limit', '512M');
+
+require('../vendor/autoload.php');
+
+use Monolog\Logger;
+
+session_name('croptool');
+session_set_cookie_params(0, 'croptool', 'tools.wmflabs.org');
+session_start();
+
+// Fetch the access token if this is the callback from requesting authorization
+if ( isset( $_GET['oauth_verifier'] ) && $_GET['oauth_verifier'] ) {
+    $config = parse_ini_file('../config.ini');
+    $log = new Logger('croptool');
+    $oauth = new OAuthConsumer('tools.wmflabs.org', 'croptool', false, $config, $log);
+    $oauth->handleCallbackRequest($_GET['oauth_verifier']);
 }
-
-require('common.php');
-
 ?>
 <!doctype html>
 <html ng-app="croptool">
@@ -46,8 +57,6 @@ require('common.php');
 <body ng-controller="AppCtrl">
 
 <div class="container2">
-
-    <?php echo $testingEnv ? '<p style="position:absolute; right:0; top: 0; font-size: 80%; background: yellow;"><strong>NOTE:</strong> We are in a testing environment</p>' : ''; ?>
 
     <!-- ********************************************************************************************************
         Notice

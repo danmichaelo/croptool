@@ -314,7 +314,6 @@ class Image
         chmod($thumb_path, 0664);
 
         return array(
-            'cached' => true,
             'name' => Image::$filesFolder . basename($thumb_path) . '?ts=' . time(),
             'width' => $dim[0],
             'height' => $dim[1],
