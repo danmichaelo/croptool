@@ -89,6 +89,10 @@ if (!is_null(array_get($_GET, 'oauth_verifier'))) {
             <span ng-bind-html="oauthError"></span>
         </div>
 
+        <div ng-repeat="warning in oauthWarnings" class="alert alert-warning" role="alert">
+            <span class="fa fa-info-circle"></span>
+            <span>{{ warning | translate }}</span>
+        </div>
 
         <form class="form-inline panel panel-primary" role="form">
 

@@ -57,6 +57,15 @@ class MwApiClient
         return !is_null($this->username);
     }
 
+    public function getAuthorizationWarnings()
+    {
+        $w = $this->oauth->warnings;
+        if (isset($this->authError) && $this->authError->code == 'mwoauth-invalid-authorization') {
+            $w[] = OAuthConsumer::INVALID_COOKIE;
+        }
+        return $w;
+    }
+
     public function authorize()
     {
         $this->oauth->doAuthorizationRedirect();

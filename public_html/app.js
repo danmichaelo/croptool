@@ -72,9 +72,10 @@ controller('LoginCtrl', ['$scope', '$http', 'LoginService', function($scope, $ht
         $scope.ready = true;
         if (LoginService.loginResponse.error) {
             var err = LoginService.loginResponse.error ? LoginService.loginResponse.error.code + ' : ' + LoginService.loginResponse.error.info : null;
-            console.log('SET ERR: ' + err);
             $scope.oauthError = err;
         }
+
+        $scope.oauthWarnings = LoginService.loginResponse.warnings;
 
     });
 

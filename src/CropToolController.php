@@ -43,7 +43,7 @@ class CropToolController {
     protected function getUser() {
         $user = $this->user();
         if (is_null($user)) {
-            return array();
+            return array('warnings' => $this->api->getAuthorizationWarnings());
         }
         return array('user' => $user);
     }
