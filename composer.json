@@ -16,7 +16,7 @@
         "phpunit/phpunit": "4.8.*"
     },
     "autoload": {
-        "psr-0": { "": "src/" }
+        "psr-0": { "": "src/php/" }
     },
     "license": "MIT",
     "authors": [

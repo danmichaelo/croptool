@@ -1,0 +1,45 @@
+{
+  "name": "croptool",
+  "version": "1.0.0",
+  "description": "Tool for cropping images at Wikimedia Commons and other Wikimedia wikis.",
+  "main": "public_html/app.js",
+  "directories": {
+    "test": "tests"
+  },
+  "dependencies": {
+    "angular-ladda": "^0.4.2"
+  },
+  "devDependencies": {
+    "csso": "^2.2.1",
+    "gulp": "^3.9.1",
+    "gulp-clean-css": "^2.0.12",
+    "gulp-concat": "^2.6.0",
+    "gulp-csso": "^2.0.0",
+    "gulp-filter": "^4.0.0",
+    "gulp-help": "^1.6.1",
+    "gulp-jshint": "^2.0.1",
+    "gulp-minify-html": "^1.0.6",
+    "gulp-rename": "^1.2.2",
+    "gulp-rev": "^7.1.0",
+    "gulp-rev-replace": "^0.4.3",
+    "gulp-sourcemaps": "^1.6.0",
+    "gulp-uglify": "^2.0.0",
+    "gulp-useref": "^3.1.0",
+    "jshint": "^2.9.2",
+    "jshint-stylish": "^2.2.0",
+    "uglify": "^0.1.5"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/danmichaelo/croptool.git"
+  },
+  "author": "Dan Michael O. Heggø",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/danmichaelo/croptool/issues"
+  },
+  "homepage": "https://github.com/danmichaelo/croptool#readme"
+}

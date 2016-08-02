@@ -11,3 +11,7 @@ connections.csv
 ENV
 public_html/components
 croptool-secret-key.txt
+node_modules
+public_html/index.html
+public_html/js
+public_html/css

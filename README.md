@@ -39,3 +39,5 @@ Download deps and configure croptool:
 3. Check that the server can write to `data`, `logs` and `public_html/files`.
 4. `vendor/bin/phpunit`
 5. `crontab cron.tools` to setup cronjobs.
+6. `npm install`
+7. `gulp build`

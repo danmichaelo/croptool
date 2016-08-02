@@ -49,7 +49,7 @@ label {
     font-weight: normal;
 }
 .transparentBg {
-    background-image: url("res/transparent.png?1");
+    background-image: url("../res/transparent.png");
 }
 
 .row2 {
