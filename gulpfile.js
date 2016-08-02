@@ -50,3 +50,7 @@ gulp.task('build', 'Builds the app', [], function() {
     .pipe(gulp.dest(paths.build))
     ;
 });
+
+gulp.task('watch', 'Re-builds the app on changes', ['build'], function () {
+  gulp.watch(['src/js/**/*.js', 'src/js/**/*.css', 'src/index.html'], ['build']);
+});
