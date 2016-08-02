@@ -1,6 +1,8 @@
 <?php
 
-use Monolog\Logger;
+use Defuse\Crypto\Crypto;
+use Defuse\Crypto\Exception\WrongKeyOrModifiedCiphertextException;
+use Defuse\Crypto\Key;
 
 // See also: http://oauth.googlecode.com/svn/code/php/OAuth.php
 
@@ -36,11 +38,6 @@ class OAuthConsumer {
     protected $rsaPublicKeyFile = '../mykey.public';
 
     /**
-     * Object carrying out encryption and decryption
-     */
-    protected $cipher;
-
-    /**
      * The hostname, most likely 'tools.wmflabs.org'
      */
     protected $hostname;
@@ -56,7 +53,13 @@ class OAuthConsumer {
      */
     protected $testingEnv = false;
 
-    public function __construct($hostname = 'localhost', $basepath = '/', $testingEnv = false, $config = array(), $logger = null)
+    function loadEncryptionKeyFromConfig($keyFile)
+    {
+        $keyAscii = file_get_contents($keyFile);
+        return Key::loadFromAsciiSafeString($keyAscii);
+    }
+
+    public function __construct($hostname, $basepath, $testingEnv, $config, $keyFile, $logger)
     {
         $this->hostname = $hostname;
         $this->basepath = $basepath;
@@ -64,10 +67,8 @@ class OAuthConsumer {
         $this->gUserAgent = $config['userAgent'];
         $this->gConsumerKey = $config['consumerKey'];
         $this->gConsumerSecret = $config['consumerSecret'];
-        $this->cookieKey = base64_decode($config['localPassphrase']);
-        $this->logger = $logger ?: new Logger('croptool');
-
-        $this->cipher = new Cryptastic;
+        $this->logger = $logger;
+        $this->cookieKey = $this->loadEncryptionKeyFromConfig($keyFile);
 
         // Load the user token (request or access) from the session
         $this->gTokenKey = '';
@@ -82,8 +83,16 @@ class OAuthConsumer {
 
         // or grab permanent token from COOKIE
         } else if ( isset( $_COOKIE['mwKey'] ) && isset( $_COOKIE['mwSecret'] ) ) {
-            $this->gTokenKey = $this->cipher->decrypt($_COOKIE['mwKey'], $this->cookieKey, true);
-            $this->gTokenSecret = $this->cipher->decrypt($_COOKIE['mwSecret'], $this->cookieKey, true);
+            try {
+                $this->gTokenKey = Crypto::decrypt($_COOKIE['mwKey'], $this->cookieKey);
+                $this->gTokenSecret = Crypto::decrypt($_COOKIE['mwSecret'], $this->cookieKey);
+            } catch (WrongKeyOrModifiedCiphertextException $ex) {
+                // An attack! Either the wrong key was loaded, or the ciphertext has
+                // changed since it was created -- either corrupted in the database or
+                // intentionally modified by Eve trying to carry out an attack.
+
+                // ... handle this case in a way that's suitable to your application ...
+            }
         }
 
         // Take any requested action
@@ -182,7 +191,7 @@ class OAuthConsumer {
 
         $this->gTokenKey = $token->key;
         if (!setcookie('mwKey',
-            $this->cipher->encrypt($this->gTokenKey, $this->cookieKey, true),
+            Crypto::encrypt($this->gTokenKey, $this->cookieKey),
             $twoYears,
             $this->basepath,
             $this->hostname,
@@ -196,7 +205,7 @@ class OAuthConsumer {
 
         $this->gTokenSecret = $token->secret; // 40 bytes
         if (!setcookie('mwSecret',
-            $this->cipher->encrypt($this->gTokenSecret, $this->cookieKey, true), // ~ 150 bytes
+            Crypto::encrypt($this->gTokenSecret, $this->cookieKey), // ~ 150 bytes
             $twoYears,
             $this->basepath,
             $this->hostname,
@@ -205,7 +214,7 @@ class OAuthConsumer {
         )) {
             header( "HTTP/1.1 500 Internal Server Error" );
             $this->logger->addError('[oauth] Failed to store permanent token');
-            throw new \RuntimeException('Failed to store secret. Length: ' . strlen($this->cipher->encrypt($this->gTokenSecret, $this->cookieKey, true)));
+            throw new \RuntimeException('Failed to store secret.');
         }
 
     }

@@ -10,3 +10,4 @@ composer.phar
 connections.csv
 ENV
 public_html/components
+croptool-secret-key.txt

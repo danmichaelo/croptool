@@ -30,13 +30,13 @@ function array_get($data, $key, $default = null) {
  * A file containing the following keys:
  * - consumerKey: The "consumer token" given to you when registering your app
  * - consumerSecret: The "secret token" given to you when registering your app
- * - localPassphrase: The (base64 encoded) key used for encrypting cookie content
  * - jpegtranPath: Path to jpegtran
  * - rollbarToken: Token for the Rollbar service
  * - rollbarEnv: Rollbar environment
  */
-$configFile = '../config.ini';
+$configFile = dirname(dirname(__FILE__)) . '/config.ini';
 $config = parse_ini_file($configFile);
+$keyFile = dirname(dirname(__FILE__)) . '/croptool-secret-key.txt';
 
 if ( $config === false ) {
     header( "HTTP/1.1 500 Internal Server Error" );
@@ -121,7 +121,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST')
         : 'en.wikipedia.org'; // use enwp as default to force re-authorization for 1.1 users
 }
 
-$oauth = new OAuthConsumer($hostnameProd, $basepath, $testingEnv, $config, $log);
+$oauth = new OAuthConsumer($hostnameProd, $basepath, $testingEnv, $config, $keyFile, $log);
 $apiClient = new MwApiClient($site, $oauth, null, $log, $config);
 $controller = new CropToolController($apiClient, $log);
 
