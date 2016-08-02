@@ -11,8 +11,8 @@
 
 </script>
 
-  <link rel="stylesheet" type="text/css" href="//tools-static.wmflabs.org/cdnjs/ajax/libs/twitter-bootstrap/3.3.4/css/bootstrap.min.css">
-  <link rel="stylesheet" type="text/css" href="//tools-static.wmflabs.org/cdnjs/ajax/libs/font-awesome/4.3.0/css/font-awesome.min.css">
+  <link rel="stylesheet" type="text/css" href="//tools-static.wmflabs.org/cdnjs/ajax/libs/twitter-bootstrap/3.3.7/css/bootstrap.min.css">
+  <link rel="stylesheet" type="text/css" href="//tools-static.wmflabs.org/cdnjs/ajax/libs/font-awesome/4.6.3/css/font-awesome.min.css">
   <link rel="stylesheet" type="text/css" href="//tools-static.wmflabs.org/cdnjs/ajax/libs/jquery-jcrop/0.9.12/css/jquery.Jcrop.min.css">
   <!-- build:css css/vendor.css -->
   <link rel="stylesheet" type="text/css" href="node_modules/ladda/dist/ladda-themeless.min.css">
@@ -21,15 +21,15 @@
   <link rel="stylesheet" type="text/css" href="src/css/app.css">
   <!-- endbuild -->
 
-  <script src="//tools-static.wmflabs.org/cdnjs/ajax/libs/jquery/2.1.4/jquery.min.js"></script>
-  <script src="//tools-static.wmflabs.org/cdnjs/ajax/libs/twitter-bootstrap/3.3.4/js/bootstrap.min.js"></script>
-  <script src="//tools-static.wmflabs.org/cdnjs/ajax/libs/angular.js/1.4.7/angular.min.js"></script>
-  <script src="//tools-static.wmflabs.org/cdnjs/ajax/libs/angular.js/1.4.7/angular-sanitize.min.js"></script>
-  <script src="//tools-static.wmflabs.org/cdnjs/ajax/libs/angular-ui-bootstrap/0.14.0/ui-bootstrap-tpls.min.js"></script>
+  <script src="//tools-static.wmflabs.org/cdnjs/ajax/libs/jquery/2.2.4/jquery.min.js"></script>
+  <script src="//tools-static.wmflabs.org/cdnjs/ajax/libs/twitter-bootstrap/3.3.7/js/bootstrap.min.js"></script>
+  <script src="//tools-static.wmflabs.org/cdnjs/ajax/libs/angular.js/1.4.9/angular.min.js"></script>
+  <script src="//tools-static.wmflabs.org/cdnjs/ajax/libs/angular.js/1.4.9/angular-sanitize.min.js"></script>
+  <script src="//tools-static.wmflabs.org/cdnjs/ajax/libs/angular-ui-bootstrap/2.0.1/ui-bootstrap-tpls.min.js"></script>
   <script src="//tools-static.wmflabs.org/cdnjs/ajax/libs/jquery-jcrop/0.9.12/js/jquery.Jcrop.min.js"></script>
-  <script src="//tools-static.wmflabs.org/cdnjs/ajax/libs/angular-local-storage/0.2.2/angular-local-storage.min.js"></script>
-  <script src="//tools-static.wmflabs.org/cdnjs/ajax/libs/angular-translate/2.8.1/angular-translate.min.js"></script>
-  <script src="//tools-static.wmflabs.org/cdnjs/ajax/libs/angular-translate/2.8.1/angular-translate-loader-static-files/angular-translate-loader-static-files.min.js"></script>
+  <script src="//tools-static.wmflabs.org/cdnjs/ajax/libs/angular-local-storage/0.2.7/angular-local-storage.min.js"></script>
+  <script src="//tools-static.wmflabs.org/cdnjs/ajax/libs/angular-translate/2.9.2/angular-translate.min.js"></script>
+  <script src="//tools-static.wmflabs.org/cdnjs/ajax/libs/angular-translate/2.9.2/angular-translate-loader-static-files/angular-translate-loader-static-files.min.js"></script>
   <!-- build:js js/vendor.js-->
   <script src="node_modules/ladda/js/spin.js"></script>
   <script src="node_modules/ladda/js/ladda.js"></script>
@@ -307,7 +307,7 @@
                         <div class="form-group">
                             <label class="radio-inline"
                                 uib-popover="{{'cropform-method-precise-help' | translate}}"
-                                popover-trigger="mouseenter"
+                                popover-trigger="'mouseenter'"
                                 popover-animation="false"
                                 popover-placement="bottom"
                                 popover-popup-delay="0.5"
@@ -317,7 +317,7 @@
                             </label>
                             <label class="radio-inline"
                                 uib-popover="{{'cropform-method-lossless-help' | translate}}"
-                                popover-trigger="mouseenter"
+                                popover-trigger="'mouseenter'"
                                 popover-animation="false"
                                 popover-placement="bottom"
                                 popover-popup-delay="0.5"
