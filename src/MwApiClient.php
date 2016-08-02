@@ -57,6 +57,11 @@ class MwApiClient
         return !is_null($this->username);
     }
 
+    public function authorize()
+    {
+        $this->oauth->doAuthorizationRedirect();
+    }
+
     private function checkAuthorization()
     {
         $this->username = null;

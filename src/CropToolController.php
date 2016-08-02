@@ -258,6 +258,10 @@ class CropToolController {
 
             case 'exists':
                 return $this->getExists($page);
+
+            case 'authorize':
+                return $this->api->authorize();
+
         }
 
         // Require authorization for routes below

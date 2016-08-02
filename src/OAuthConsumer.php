@@ -94,16 +94,6 @@ class OAuthConsumer {
                 // ... handle this case in a way that's suitable to your application ...
             }
         }
-
-        // Take any requested action
-        switch ( isset( $_GET['action'] ) ? $_GET['action'] : '' ) {
-
-            case 'authorize':
-                $this->doAuthorizationRedirect();
-                return;
-
-        }
-
     }
 
     public function handleCallbackRequest($verifier)
