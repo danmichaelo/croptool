@@ -1,24 +1,13 @@
 <?php
 
-error_reporting(E_ALL);
-ini_set('display_errors', '1');
-ini_set('memory_limit', '512M');
-
-require('../vendor/autoload.php');
-
-use Monolog\Logger;
-
-session_name('croptool');
-session_set_cookie_params(0, 'croptool', 'tools.wmflabs.org');
-session_start();
+require_once('../bootstrap.php');
 
 // Fetch the access token if this is the callback from requesting authorization
-if ( isset( $_GET['oauth_verifier'] ) && $_GET['oauth_verifier'] ) {
-    $config = parse_ini_file('../config.ini');
-    $log = new Logger('croptool');
-    $oauth = new OAuthConsumer('tools.wmflabs.org', 'croptool', false, $config, $log);
+if (!is_null(array_get($_GET, 'oauth_verifier'))) {
     $oauth->handleCallbackRequest($_GET['oauth_verifier']);
+    exit;
 }
+
 ?>
 <!doctype html>
 <html ng-app="croptool">
