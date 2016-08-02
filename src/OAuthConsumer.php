@@ -325,7 +325,7 @@ class OAuthConsumer {
             'format' => 'json',
 
             // OAuth information
-            'oauth_callback' => 'oob', // Must be "oob" for MWOAuth
+            'oauth_callback' => 'https://tools.wmflabs.org/croptool/backend.php',
             'oauth_consumer_key' => $this->gConsumerKey,
             'oauth_version' => '1.0',
             'oauth_nonce' => md5( microtime() . mt_rand() ),

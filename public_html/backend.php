@@ -8,6 +8,12 @@ if (isset($_GET['title'])) {
     $_SESSION['title'] = $_GET['title'];
 }
 
+// Fetch the access token if this is the callback from requesting authorization
+if (!is_null(array_get($_GET, 'oauth_verifier'))) {
+    $oauth->handleCallbackRequest($_GET['oauth_verifier']);
+    exit;
+}
+
 if ($_SERVER['REQUEST_METHOD'] == 'POST')
 {
     $input = json_decode(file_get_contents("php://input"));

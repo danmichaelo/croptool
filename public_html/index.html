@@ -1,14 +1,3 @@
-<?php
-
-require_once('../bootstrap.php');
-
-// Fetch the access token if this is the callback from requesting authorization
-if (!is_null(array_get($_GET, 'oauth_verifier'))) {
-    $oauth->handleCallbackRequest($_GET['oauth_verifier']);
-    exit;
-}
-
-?>
 <!doctype html>
 <html ng-app="croptool">
 <head>
