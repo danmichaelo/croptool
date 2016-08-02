@@ -2,6 +2,8 @@
 
 require('../vendor/autoload.php');
 
+define('ROOT_PATH', dirname(__FILE__));
+
 use Monolog\Logger;
 use Monolog\Handler\StreamHandler;
 
@@ -70,7 +72,7 @@ session_start();
  * - rollbarEnv: Rollbar environment
  */
 
-$config = parse_ini_file(dirname(__FILE__) . '/config.ini');
+$config = parse_ini_file(ROOT_PATH . '/config.ini');
 if ( $config === false ) {
     header( "HTTP/1.1 500 Internal Server Error" );
     echo 'The config.ini file could not be read';
@@ -99,7 +101,7 @@ if (isset($config['rollbarToken'])) {
  * Setup logging
  */
 
-$logfile = dirname(__FILE__) . '/logs/croptool.log';
+$logfile = ROOT_PATH . '/logs/croptool.log';
 if (!file_exists($logfile)) {
     @touch($logfile);
 }
@@ -114,5 +116,5 @@ $log->pushHandler(new StreamHandler($logfile, Logger::INFO));
  * Create our OAuthConsumer
  */
 
-$keyFile = dirname(__FILE__) . '/croptool-secret-key.txt';
+$keyFile = ROOT_PATH . '/croptool-secret-key.txt';
 $oauth = new OAuthConsumer('tools.wmflabs.org', 'croptool', false, $config, $keyFile, $log);

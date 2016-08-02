@@ -22,8 +22,7 @@ class LocalFile
 
     public function __construct(ImageInfo $imageInfo)
     {
-    	// @TODO: Something more intelligent!
-        $this->publicPath = dirname(dirname(__FILE__)) . '/public_html/';
+        $this->publicPath = ROOT_PATH . '/public_html/';
 
         $this->imageInfo = $imageInfo;
         $this->sha1 = $imageInfo->sha1;
