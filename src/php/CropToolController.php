@@ -212,6 +212,9 @@ class CropToolController {
             }
 
             $this->logger->addInfo('[main] ' . $shortSha1 . ' Uploaded file as "' . $input->filename . '"');
+            if ($page->addDerivativeVersion($input->filename)) {
+                $this->logger->addInfo('[main] ' . $shortSha1 . ' Added/updated {{Derivative versions}} in "' . $input->title . '"');
+            }
         }
 
         $line = $page->pagename . "\t" . $user . "\n";

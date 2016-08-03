@@ -8,6 +8,9 @@ class CommonsPage {
     // Sites that are known to have the {{Extracted from}} template (feel free to add more):
     protected $sitesHavingExtractedFromTemplate = ['commons.wikimedia.org'];
 
+    // Sites that are known to have the {{Derivative versions}} template (feel free to add more):
+    protected $sitesHavingDerivativeVersionsTemplate = ['commons.wikimedia.org'];
+
     /**
      * CommonsPage constructor.
      * @param MwApiClient $apiClient
@@ -214,6 +217,25 @@ class CommonsPage {
         }
 
         return false;
+    }
+
+    /**
+     * Adds a link to a derivative version using the {{Derivative versions}}.
+     *
+     * @param string $name  Filename of the derivative
+     * @return bool
+     */
+    public function addDerivativeVersion($name)
+    {
+        if (!in_array($this->api->getSite(), $this->sitesHavingDerivativeVersionsTemplate)) {
+            return false;
+        }
+
+        $wikitext = $this->getWikiText();
+        $wikitext->appendDerivativeVersionsTemplate($name);
+        $this->update(strval($wikitext), 'Added/updated {{Derivative versions}} using [[Commons:CropTool|CropTool]]');
+
+        return true;
     }
 
 }

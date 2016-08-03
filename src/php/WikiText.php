@@ -143,4 +143,43 @@ class WikiText {
         $this->text .= $tpl;
     }
 
+    /**
+     * Appends the {{Derivative versions}} template.
+     *
+     * @param string $name  Name of the new file
+     */
+    public function appendDerivativeVersionsTemplate($name)
+    {
+        // If the page already contains a {{DerivativeVersions}} template, append the file to it
+        list($start, $length) = $this->search('{{\s*derivative ?(versions|works?)(\s*|\|[^\}]+)}}');
+        if (!is_null($start)) {
+            // Apend |$name before the }} of the template
+            $this->text = mb_substr($this->text, 0, $start + $length - 2) . "|" . $name . mb_substr($this->text, $start + $length - 2);
+            return;
+        }
+
+        // Otherwise, try adding the template
+        $tpl = '{{Derivative versions|display=150|' . $name . '}}';
+
+        // If the 'other_versions' field is present, try adding it there:
+        list($start, $length) = $this->search('other[ _]versions=');
+        if (!is_null($start)) {
+            $this->text = mb_substr($this->text, 0, $start + $length) . $tpl . mb_substr($this->text, $start + $length);
+            return;
+        }
+
+        // Try to add before the license header
+        if ($this->addBefore($tpl, '==\s*\{\{\s*int:license-header\s*\}\}\s*==')) {
+            return;
+        }
+
+        // Try to add before the first category
+        if ($this->addBefore($tpl, '\[\[\s*category:')) {
+            return;
+        }
+
+        // Last option: just append it at the end
+        $this->text .= $tpl;
+    }
+
 }

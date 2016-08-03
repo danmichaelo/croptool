@@ -121,4 +121,82 @@ class WikiTextTest extends PHPUnit_Framework_TestCase
         $this->assertEquals($newText, $wikitext);
     }
 
+    public function testAddDerivativeVersionsTemplateToOtherVersions()
+    {
+        $oldText = '
+{{Location|34|36|52|N|135|44|20|E|type:landmark_region:JP-29_scale:2000}}
+{{Information
+|other_versions=
+
+|Description={{en|Yumedono (Hall of Dreams) at [[Horyu-ji]] [[Buddhism|Buddhist]] [[temple]], [[Nara Prefecture]], [[Japan]]}}
+|Author=[[User:Fg2|Fg2]] (Frank J. Gualtieri Jr.)
+|Date={{date|2004}}?
+|Source={{self-photographed}}
+|Permission=public domain
+}}
+
+{{PD-self}}
+
+[[Category:Yumedono, Horyu-ji]]';
+
+        $newText = '
+{{Location|34|36|52|N|135|44|20|E|type:landmark_region:JP-29_scale:2000}}
+{{Information
+|other_versions={{Derivative versions|display=150|My new file.jpg}}
+
+|Description={{en|Yumedono (Hall of Dreams) at [[Horyu-ji]] [[Buddhism|Buddhist]] [[temple]], [[Nara Prefecture]], [[Japan]]}}
+|Author=[[User:Fg2|Fg2]] (Frank J. Gualtieri Jr.)
+|Date={{date|2004}}?
+|Source={{self-photographed}}
+|Permission=public domain
+}}
+
+{{PD-self}}
+
+[[Category:Yumedono, Horyu-ji]]';
+
+        $wikitext = new WikiText($oldText);
+        $wikitext->appendDerivativeVersionsTemplate('My new file.jpg');
+        $this->assertEquals($newText, $wikitext);
+    }
+
+    public function testAppendFileToExistingDerivativeVersionsTemplate()
+    {
+        $oldText = '
+{{Location|34|36|52|N|135|44|20|E|type:landmark_region:JP-29_scale:2000}}
+{{Information
+|other_versions={{DerivativeVersions|HoryujiYumedono0363 edit1.jpg}}
+
+|Description={{en|Yumedono (Hall of Dreams) at [[Horyu-ji]] [[Buddhism|Buddhist]] [[temple]], [[Nara Prefecture]], [[Japan]]}}
+|Author=[[User:Fg2|Fg2]] (Frank J. Gualtieri Jr.)
+|Date={{date|2004}}?
+|Source={{self-photographed}}
+|Permission=public domain
+}}
+
+{{PD-self}}
+
+[[Category:Yumedono, Horyu-ji]]';
+
+        $newText = '
+{{Location|34|36|52|N|135|44|20|E|type:landmark_region:JP-29_scale:2000}}
+{{Information
+|other_versions={{DerivativeVersions|HoryujiYumedono0363 edit1.jpg|My new file.jpg}}
+
+|Description={{en|Yumedono (Hall of Dreams) at [[Horyu-ji]] [[Buddhism|Buddhist]] [[temple]], [[Nara Prefecture]], [[Japan]]}}
+|Author=[[User:Fg2|Fg2]] (Frank J. Gualtieri Jr.)
+|Date={{date|2004}}?
+|Source={{self-photographed}}
+|Permission=public domain
+}}
+
+{{PD-self}}
+
+[[Category:Yumedono, Horyu-ji]]';
+
+        $wikitext = new WikiText($oldText);
+        $wikitext->appendDerivativeVersionsTemplate('My new file.jpg');
+        $this->assertEquals($newText, $wikitext);
+    }
+
 }
