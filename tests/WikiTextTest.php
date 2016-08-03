@@ -57,4 +57,68 @@ class WikiTextTest extends PHPUnit_Framework_TestCase
         $this->assertEquals('abc def', $wikitext);
     }
 
+    public function testAddExtractedFromTemplateBeforeLicenseHeader()
+    {
+        $oldText = '
+{{Information
+|description={{en|At right, two of the Solomonic columns brought to Rome by Constantine in their present day location on a pier in St. Peter\'s Basilica. In the foreground at left is part of Bernini\'s Baldacchino, inspired by the original columns.}}
+}}
+{{Location dec|41.902029|12.453861}}
+
+=={{int:license-header}}==
+{{self|cc-zero}}
+
+[[Category:Versus populum altars]]
+[[Category:Altar of Saint Peter\'s Basilica]]';
+
+        $newText = '
+{{Information
+|description={{en|At right, two of the Solomonic columns brought to Rome by Constantine in their present day location on a pier in St. Peter\'s Basilica. In the foreground at left is part of Bernini\'s Baldacchino, inspired by the original columns.}}
+}}
+{{Location dec|41.902029|12.453861}}
+{{Extracted from|My new file.jpg}}
+
+=={{int:license-header}}==
+{{self|cc-zero}}
+
+[[Category:Versus populum altars]]
+[[Category:Altar of Saint Peter\'s Basilica]]';
+
+        $wikitext = new WikiText($oldText);
+        $wikitext->appendExtractedFromTemplate('My new file.jpg');
+        $this->assertEquals($newText, $wikitext);
+    }
+
+    public function testAddExtractedFromTemplateBeforeCategories()
+    {
+        $oldText = '
+{{Information
+|description={{en|At right, two of the Solomonic columns brought to Rome by Constantine in their present day location on a pier in St. Peter\'s Basilica. In the foreground at left is part of Bernini\'s Baldacchino, inspired by the original columns.}}
+}}
+{{Location dec|41.902029|12.453861}}
+
+==License==
+{{self|cc-zero}}
+
+[[Category:Versus populum altars]]
+[[Category:Altar of Saint Peter\'s Basilica]]';
+
+        $newText = '
+{{Information
+|description={{en|At right, two of the Solomonic columns brought to Rome by Constantine in their present day location on a pier in St. Peter\'s Basilica. In the foreground at left is part of Bernini\'s Baldacchino, inspired by the original columns.}}
+}}
+{{Location dec|41.902029|12.453861}}
+
+==License==
+{{self|cc-zero}}
+{{Extracted from|My old file.jpg}}
+
+[[Category:Versus populum altars]]
+[[Category:Altar of Saint Peter\'s Basilica]]';
+
+        $wikitext = new WikiText($oldText);
+        $wikitext->appendExtractedFromTemplate('My old file.jpg');
+        $this->assertEquals($newText, $wikitext);
+    }
+
 }

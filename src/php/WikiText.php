@@ -90,21 +90,57 @@ class WikiText {
     }
 
     /**
+     * Get position and length of first instance of $searchText
+     * @param string $searchText
+     * @return array|bool
+     */
+    public function search($searchText)
+    {
+        // 'pz' specifies: multiline, case-insensitive perl-mode (http://docs.php.net/mb_regex_set_options)
+        mb_ereg_search_init($this->text, 'pzi');
+        return mb_ereg_search_pos($searchText, 'pzi');
+    }
+
+    /**
+     * Adds $newText before $searchText if $searchText is found.
+     * Otherwise do nothing.
+     * @param string $newText
+     * @param string $searchText
+     * @return bool
+     */
+    public function addBefore($newText, $searchText)
+    {
+        // 'pz' specifies: multiline perl-mode (http://docs.php.net/mb_regex_set_options)
+        $res = $this->search($searchText);
+        if ($res === false) {
+            return false;
+        }
+        $start = $res[0];
+        $this->text = rtrim(mb_substr($this->text, 0, $start)) . "\n" . $newText . "\n\n" . ltrim(mb_substr($this->text, $start));
+        return true;
+    }
+
+    /**
      * Appends the {{Extracted from}} template.
      *
-     * @param string $extractedFrom  Name of the original file
+     * @param string $name  Name of the original file
      */
-    public function appendExtractedFromTemplate($extractedFrom)
+    public function appendExtractedFromTemplate($name)
     {
-        $tpl = "\n{{Extracted from|" . $extractedFrom . "}}\n";
+        $tpl = "{{Extracted from|" . $name . "}}";
 
-        // Add template before the first category if possible, otherwise just append it at the end
-        $x = mb_stripos($this->text, "\s*[[category:");
-        if ($x !== false) {
-            $this->text = mb_substr($this->text, 0, $x) . $tpl . mb_substr($this->text, $x);
-        } else {
-            $this->text .= $tpl;
+        // Try to add before the license header
+        if ($this->addBefore($tpl, '==\s*\{\{\s*int:license-header\s*\}\}\s*==')) {
+            return;
         }
+
+        // Try to add before the first category
+        if ($this->addBefore($tpl, '\[\[\s*category:')) {
+            return;
+        }
+
+        // Last option: just append it at the end
+        $this->text .= $tpl;
     }
 
 }
