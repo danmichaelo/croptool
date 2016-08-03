@@ -77,9 +77,10 @@ class CropToolController {
             return array('error' => 'Sorry, the file type is not supported: ' . $imageInfo->mime);
         }
 
-        $image = $localFile->getImage();
-        if (isset($image->error)) {
-            return array('error' => $image->error);
+        try {
+            $image = $localFile->getImage();
+        } catch (\RuntimeException $ex) {
+            return array('error' => $ex->getMessage());
         }
 
         $thumb = $image->thumb($localFile->getAbsolutePath('_thumb'));
@@ -265,7 +266,7 @@ class CropToolController {
 
         // Require page existence for routes below
         if (!is_null($page) && !$page->exists()) {
-            return array('error' => 'File was not found');
+            return array('error' => 'File not found: ' . $page->pagename . ' on ' . $this->api->getSite());
         }
 
         switch ($action) {

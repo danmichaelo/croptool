@@ -61,8 +61,7 @@ class Image
                     break;
 
                 default:
-                    $this->error = 'Unsupported EXIF orientation "' . $this->orientation . '"';
-                    return false;
+                    throw new \RuntimeException('Unsupported EXIF orientation "' . $this->orientation . '"');
             }
 
             $image->destroy();
@@ -70,11 +69,8 @@ class Image
 
         if (!$this->width || !$this->height) {
             unlink($this->path);
-            $this->error = 'Invalid image file. Refreshing the page might help in some cases.';
-            return false;
+            throw new \RuntimeException('Invalid image file ' . $this->path . '. Refreshing the page might help in some cases.');
         }
-
-        return true;
     }
 
     public function getCropCoordinates($x, $y, $width, $height)
