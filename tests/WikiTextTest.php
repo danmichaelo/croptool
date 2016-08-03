@@ -60,29 +60,43 @@ class WikiTextTest extends PHPUnit_Framework_TestCase
     public function testAddExtractedFromTemplateBeforeLicenseHeader()
     {
         $oldText = '
+=={{int:filedesc}}==
 {{Information
-|description={{en|At right, two of the Solomonic columns brought to Rome by Constantine in their present day location on a pier in St. Peter\'s Basilica. In the foreground at left is part of Bernini\'s Baldacchino, inspired by the original columns.}}
+|description={{ru|1=Домовый Троицкий храм}}
+|date=1905
+|source=http://forum.vgd.ru/1410/46846/20.htm?a=stdforum_view&o=
+|author=Шерер и Набгольц
+|permission=
+|other versions=
 }}
-{{Location dec|41.902029|12.453861}}
 
 =={{int:license-header}}==
-{{self|cc-zero}}
+{{PD-old-70-1923}}
 
-[[Category:Versus populum altars]]
-[[Category:Altar of Saint Peter\'s Basilica]]';
+
+[[Category:Uploaded with UploadWizard]]
+[[Category:Churches in Moscow]]
+';
 
         $newText = '
+=={{int:filedesc}}==
 {{Information
-|description={{en|At right, two of the Solomonic columns brought to Rome by Constantine in their present day location on a pier in St. Peter\'s Basilica. In the foreground at left is part of Bernini\'s Baldacchino, inspired by the original columns.}}
+|description={{ru|1=Домовый Троицкий храм}}
+|date=1905
+|source=http://forum.vgd.ru/1410/46846/20.htm?a=stdforum_view&o=
+|author=Шерер и Набгольц
+|permission=
+|other versions=
 }}
-{{Location dec|41.902029|12.453861}}
 {{Extracted from|My new file.jpg}}
 
 =={{int:license-header}}==
-{{self|cc-zero}}
+{{PD-old-70-1923}}
 
-[[Category:Versus populum altars]]
-[[Category:Altar of Saint Peter\'s Basilica]]';
+
+[[Category:Uploaded with UploadWizard]]
+[[Category:Churches in Moscow]]
+';
 
         $wikitext = new WikiText($oldText);
         $wikitext->appendExtractedFromTemplate('My new file.jpg');
@@ -121,39 +135,50 @@ class WikiTextTest extends PHPUnit_Framework_TestCase
         $this->assertEquals($newText, $wikitext);
     }
 
+    /**
+     * This test also test that multibyte wikitext is handled correctly
+     */
     public function testAddDerivativeVersionsTemplateToOtherVersions()
     {
         $oldText = '
-{{Location|34|36|52|N|135|44|20|E|type:landmark_region:JP-29_scale:2000}}
+=={{int:filedesc}}==
 {{Information
-|other_versions=
-
-|Description={{en|Yumedono (Hall of Dreams) at [[Horyu-ji]] [[Buddhism|Buddhist]] [[temple]], [[Nara Prefecture]], [[Japan]]}}
-|Author=[[User:Fg2|Fg2]] (Frank J. Gualtieri Jr.)
-|Date={{date|2004}}?
-|Source={{self-photographed}}
-|Permission=public domain
+|description={{zh|1=北师大启功像1。}}
+|date=2016-05-24 12:54:22
+|source={{own}}
+|author=[[User:三猎|三猎]]
+|permission=
+|other versions=
 }}
 
-{{PD-self}}
+=={{int:license-header}}==
+{{self|cc-by-sa-4.0}}
 
-[[Category:Yumedono, Horyu-ji]]';
+[[Category:Beijing Normal University]]
+[[Category:Qi Gong artist]]
+[[Category:Busts in Beijing]]
+[[Category:Bronze busts]]
+[[Category:Uploaded with UploadWizard]]';
 
         $newText = '
-{{Location|34|36|52|N|135|44|20|E|type:landmark_region:JP-29_scale:2000}}
+=={{int:filedesc}}==
 {{Information
-|other_versions={{Derivative versions|display=150|My new file.jpg}}
-
-|Description={{en|Yumedono (Hall of Dreams) at [[Horyu-ji]] [[Buddhism|Buddhist]] [[temple]], [[Nara Prefecture]], [[Japan]]}}
-|Author=[[User:Fg2|Fg2]] (Frank J. Gualtieri Jr.)
-|Date={{date|2004}}?
-|Source={{self-photographed}}
-|Permission=public domain
+|description={{zh|1=北师大启功像1。}}
+|date=2016-05-24 12:54:22
+|source={{own}}
+|author=[[User:三猎|三猎]]
+|permission=
+|other versions={{Derivative versions|display=150|My new file.jpg}}
 }}
 
-{{PD-self}}
+=={{int:license-header}}==
+{{self|cc-by-sa-4.0}}
 
-[[Category:Yumedono, Horyu-ji]]';
+[[Category:Beijing Normal University]]
+[[Category:Qi Gong artist]]
+[[Category:Busts in Beijing]]
+[[Category:Bronze busts]]
+[[Category:Uploaded with UploadWizard]]';
 
         $wikitext = new WikiText($oldText);
         $wikitext->appendDerivativeVersionsTemplate('My new file.jpg');
@@ -163,40 +188,94 @@ class WikiTextTest extends PHPUnit_Framework_TestCase
     public function testAppendFileToExistingDerivativeVersionsTemplate()
     {
         $oldText = '
-{{Location|34|36|52|N|135|44|20|E|type:landmark_region:JP-29_scale:2000}}
 {{Information
+|description={{zh|1=北师大启功像1。}}
+|date=2016-05-24 12:54:22
+|source={{own}}
+|author=[[User:三猎|三猎]]
 |other_versions={{DerivativeVersions|HoryujiYumedono0363 edit1.jpg}}
-
-|Description={{en|Yumedono (Hall of Dreams) at [[Horyu-ji]] [[Buddhism|Buddhist]] [[temple]], [[Nara Prefecture]], [[Japan]]}}
-|Author=[[User:Fg2|Fg2]] (Frank J. Gualtieri Jr.)
-|Date={{date|2004}}?
-|Source={{self-photographed}}
-|Permission=public domain
+|permission=public domain
 }}
 
 {{PD-self}}
-
-[[Category:Yumedono, Horyu-ji]]';
+';
 
         $newText = '
-{{Location|34|36|52|N|135|44|20|E|type:landmark_region:JP-29_scale:2000}}
 {{Information
+|description={{zh|1=北师大启功像1。}}
+|date=2016-05-24 12:54:22
+|source={{own}}
+|author=[[User:三猎|三猎]]
 |other_versions={{DerivativeVersions|HoryujiYumedono0363 edit1.jpg|My new file.jpg}}
-
-|Description={{en|Yumedono (Hall of Dreams) at [[Horyu-ji]] [[Buddhism|Buddhist]] [[temple]], [[Nara Prefecture]], [[Japan]]}}
-|Author=[[User:Fg2|Fg2]] (Frank J. Gualtieri Jr.)
-|Date={{date|2004}}?
-|Source={{self-photographed}}
-|Permission=public domain
+|permission=public domain
 }}
 
 {{PD-self}}
-
-[[Category:Yumedono, Horyu-ji]]';
+';
 
         $wikitext = new WikiText($oldText);
         $wikitext->appendDerivativeVersionsTemplate('My new file.jpg');
         $this->assertEquals($newText, $wikitext);
     }
+
+    public function testAddDerivativeVersionsTemplateToOtherVersions2()
+    {
+        $oldText = "
+== {{int:filedesc}} ==
+
+{{Information
+ |description = '''English:'''<br>
+Algoma Steel<br>
+photo taken from Wallace Terrace<br>
+[[Sault Ste. Marie, Ontario|Sault Ste. Marie]], [[Ontario]], [[Canada]]<br>
+30 June, 2006.
+'''Français:'''<br>
+l'Aciérie d'Algoma<br>
+photographié à terrasse Wallace ÆØÅ<br>
+Sault-S<sup>te</sup>-Marie, Ontario, Canada<br>
+30 juin, 2006
+ |date = {{According to EXIF data|2006-07-30}}
+ |source = {{own assumed}}
+ |author = {{Author assumed|[[User:Fungus Guy|Fungus Guy]]}}
+ |permission = 
+ |other_versions = 
+}}
+
+== {{int:license-header}} ==
+{{Self|PD-self|author=Fungus Guy}}
+
+[[Category:Essar Steel Algoma]]";
+
+        $newText = "
+== {{int:filedesc}} ==
+
+{{Information
+ |description = '''English:'''<br>
+Algoma Steel<br>
+photo taken from Wallace Terrace<br>
+[[Sault Ste. Marie, Ontario|Sault Ste. Marie]], [[Ontario]], [[Canada]]<br>
+30 June, 2006.
+'''Français:'''<br>
+l'Aciérie d'Algoma<br>
+photographié à terrasse Wallace ÆØÅ<br>
+Sault-S<sup>te</sup>-Marie, Ontario, Canada<br>
+30 juin, 2006
+ |date = {{According to EXIF data|2006-07-30}}
+ |source = {{own assumed}}
+ |author = {{Author assumed|[[User:Fungus Guy|Fungus Guy]]}}
+ |permission = 
+ |other_versions = {{Derivative versions|display=150|My new file.jpg}}
+}}
+
+== {{int:license-header}} ==
+{{Self|PD-self|author=Fungus Guy}}
+
+[[Category:Essar Steel Algoma]]";
+
+        $wikitext = new WikiText($oldText);
+        $wikitext->appendDerivativeVersionsTemplate('My new file.jpg');
+        $this->assertEquals($newText, $wikitext);
+    }
+
 
 }

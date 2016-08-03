@@ -96,9 +96,10 @@ class WikiText {
      */
     public function search($searchText)
     {
-        // 'pz' specifies: multiline, case-insensitive perl-mode (http://docs.php.net/mb_regex_set_options)
-        mb_ereg_search_init($this->text, 'pzi');
-        return mb_ereg_search_pos($searchText, 'pzi');
+        // 'pz' specifies: multiline, case-insensitive (http://docs.php.net/mb_regex_set_options)
+        mb_ereg_search_init($this->text, 'zi');
+        return mb_ereg_search_pos($searchText, 'zi');
+        // Note to self: mb_ereg_search_pos does NOT return multibyte positions, so we need to use substr, not mb_substr
     }
 
     /**
@@ -116,7 +117,7 @@ class WikiText {
             return false;
         }
         $start = $res[0];
-        $this->text = rtrim(mb_substr($this->text, 0, $start)) . "\n" . $newText . "\n\n" . ltrim(mb_substr($this->text, $start));
+        $this->text = rtrim(substr($this->text, 0, $start)) . "\n" . $newText . "\n\n" . ltrim(substr($this->text, $start));
         return true;
     }
 
@@ -145,6 +146,7 @@ class WikiText {
 
     /**
      * Appends the {{Derivative versions}} template.
+     * Note to self: Use substr, not mb_substr
      *
      * @param string $name  Name of the new file
      */
@@ -153,8 +155,8 @@ class WikiText {
         // If the page already contains a {{DerivativeVersions}} template, append the file to it
         list($start, $length) = $this->search('{{\s*derivative ?(versions|works?)(\s*|\|[^\}]+)}}');
         if (!is_null($start)) {
-            // Apend |$name before the }} of the template
-            $this->text = mb_substr($this->text, 0, $start + $length - 2) . "|" . $name . mb_substr($this->text, $start + $length - 2);
+            // Append |$name before the }} of the template
+            $this->text = substr($this->text, 0, $start + $length - 2) . "|" . $name . substr($this->text, $start + $length - 2);
             return;
         }
 
@@ -162,9 +164,9 @@ class WikiText {
         $tpl = '{{Derivative versions|display=150|' . $name . '}}';
 
         // If the 'other_versions' field is present, try adding it there:
-        list($start, $length) = $this->search('other[ _]versions=');
+        list($start, $length) = $this->search('other[ _]versions\s*\= ?');
         if (!is_null($start)) {
-            $this->text = mb_substr($this->text, 0, $start + $length) . $tpl . mb_substr($this->text, $start + $length);
+            $this->text = substr($this->text, 0, $start + $length) . $tpl . substr($this->text, $start + $length);
             return;
         }
 
