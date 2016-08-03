@@ -3,7 +3,7 @@
 class CommonsPage {
 
     public $pagename;
-    protected $imageInfo;
+    protected $cache = [];
 
     /**
      * CommonsPage constructor.
@@ -19,21 +19,6 @@ class CommonsPage {
     }
 
     /**
-     * @return ImageInfo|null
-     */
-    public function getImageInfo()
-    {
-        if (is_null($this->imageInfo)) {
-            if (!is_null($this->derivedFrom)) {
-                $this->imageInfo = $this->api->getImageInfo($this->derivedFrom->pagename);
-            } else {
-                $this->imageInfo = $this->api->getImageInfo($this->pagename);
-            }
-        }
-        return $this->imageInfo;
-    }
-
-    /**
      * @return LocalFile
      */
     public function getLocalFile()
@@ -42,18 +27,41 @@ class CommonsPage {
     }
 
     /**
+     * @return ImageInfo|null
+     */
+    public function getImageInfo()
+    {
+        if (!isset($this->cache['imageinfo'])) {
+            if (!is_null($this->derivedFrom)) {
+                $this->cache['imageinfo'] = $this->api->getImageInfo($this->derivedFrom->pagename);
+            } else {
+                $this->cache['imageinfo'] = $this->api->getImageInfo($this->pagename);
+            }
+        }
+        return $this->cache['imageinfo'];
+    }
+
+    /**
      * @return WikiText
      */
-    protected function getWikiText()
+    public function getWikiText()
     {
-        $response = $this->api->request(array(
-            'action' => 'parse',
-            'prop' => 'wikitext',
-            'format' => 'json',
-            'page' => 'File:' . $this->pagename
-        ), false, false);
+        if (!isset($this->cache['wikitext'])) {
+            $response = $this->api->request(array(
+                'action' => 'parse',
+                'prop' => 'wikitext',
+                'format' => 'json',
+                'page' => 'File:' . $this->pagename
+            ), false, false);
 
-        return new WikiText($response->parse->wikitext->{'*'});
+            $this->cache['wikitext'] = new WikiText($response->parse->wikitext->{'*'});
+        }
+        return $this->cache['wikitext'];
+    }
+
+    public function setWikiText(WikiText $wikitext)
+    {
+        $this->cache['wikitext'] = $wikitext;
     }
 
     /**
@@ -97,7 +105,20 @@ class CommonsPage {
         {
             die('New pagename cannot be the same as the current pagename');
         }
-        return new CommonsPage($this->api, $pagename, $this);
+        $newPage = new CommonsPage($this->api, $pagename, $this);
+
+        // Clone original wikitext
+        $wikitext = new WikiText($this->getWikiText());
+
+        // Append the {{Extracted from}} template
+        $wikitext->appendExtractedFromTemplate($this->pagename);
+
+        // Remove templates that should not be copied, like license review templates
+        $wikitext->removeTemplatesNotToBeCopied();
+
+        $newPage->setWikiText($wikitext);
+
+        return $newPage;
     }
 
     /**
@@ -150,16 +171,7 @@ class CommonsPage {
                 $args['ignorewarnings'] = '1';
             }
 
-            // Get wikitext from the original file
-            $wikitext = $this->derivedFrom->getWikiText();
-
-            // Append the {{Extracted from}} template
-            $wikitext->appendExtractedFromTemplate($this->derivedFrom->pagename);
-
-            // Remove templates that should not be copied, like license review templates
-            $wikitext->removeTemplatesNotToBeCopied();
-
-            $args['text'] = strval($wikitext);
+            $args['text'] = strval($this->getWikiText());
         }
 
         return $this->api->request($args, true);

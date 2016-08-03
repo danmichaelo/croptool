@@ -15,11 +15,11 @@ class WikiText {
 
     /**
      * WikiText constructor.
-     * @param string $text
+     * @param string|WikiText $text
      */
     public function __construct($text)
     {
-        $this->text = $text;
+        $this->text = strval($text);
     }
 
     /**
