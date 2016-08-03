@@ -25,11 +25,12 @@ class CropToolController {
 
     /**
      * @param string $pagename
+     * @param int $pagenumber
      * @return CommonsPage
      */
-    protected function page($pagename)
+    protected function page($pagename, $pagenumber)
     {
-        return new CommonsPage($this->api, $pagename);
+        return new CommonsPage($this->api, $pagename, $pagenumber);
     }
 
     protected function user()
@@ -71,6 +72,10 @@ class CropToolController {
             return array('error' => 'Sorry, the file is too large (' . round($megaPixels) . ' megapixels). CropTool supports files up to ' . $this->maxMegaPixels . ' megapixels.');
         }
 
+        if (in_array($imageInfo->mime, ['image/vnd.djvu', 'application/pdf']) && !$page->pagenumber) {
+            return array('error' => 'A "page" parameter must be specified when cropping a djvu or pdf file.');
+        }
+
         try {
             $localFile = $page->getLocalFile();
         } catch (InvalidMimeTypeException $ex) {
@@ -89,8 +94,8 @@ class CropToolController {
         return array(
             'original' => array(
                 'name' => $localFile->getRelativePath(),
-                'width' => $imageInfo->width,
-                'height' => $imageInfo->height,
+                'width' => $image->width,
+                'height' => $image->height,
             ),
             'thumb' => $thumb,
             'mime' => $imageInfo->mime,
@@ -119,7 +124,7 @@ class CropToolController {
     }
 
     protected function postCrop($input) {
-        $page = $this->page($input->title);
+        $page = $this->page($input->title, intval($input->page));
         if (!$page->exists()) {
             die('File was not found');
         }
@@ -180,7 +185,7 @@ class CropToolController {
         $user = $this->user();
 
         // Get page
-        $page = $this->page($input->title);
+        $page = $this->page($input->title, intval($input->page));
         if (!$page->exists()) {
             die('File was not found');
         }
@@ -228,6 +233,10 @@ class CropToolController {
         return $response->upload;
     }
 
+    /**
+     * @param $input
+     * @return array
+     */
     protected function handlePostRequest($input)
     {
         if (!$this->api->authorized()) {
@@ -239,13 +248,19 @@ class CropToolController {
         return $this->postCrop($input);
     }
 
-    protected function handleGetRequest($action, $title)
+    /**
+     * @param string $action
+     * @param string $title
+     * @param int $page
+     * @return array
+     */
+    protected function handleGetRequest($action, $title, $page)
     {
         if (is_null($action)) {
             return array('error' => 'Invalid request');
         }
 
-        $page = is_null($title) ? null : $this->page($title);
+        $page = is_null($title) ? null : $this->page($title, $page);
 
         switch ($action) {
             case 'checkLogin':
@@ -255,7 +270,7 @@ class CropToolController {
                 return $this->getExists($page);
 
             case 'authorize':
-                return $this->api->authorize();
+                $this->api->authorize();
 
         }
 
@@ -287,12 +302,18 @@ class CropToolController {
         }
     }
 
+    /**
+     * @param string $method
+     * @param array $data
+     */
     public function handleRequest($method, $data)
     {
         if ($method == 'POST') {
             $response = $this->handlePostRequest($data);
         } else {
-            $response = $this->handleGetRequest(array_get($data, 'action'), array_get($data, 'title'));
+            $response = $this->handleGetRequest(array_get($data, 'action'),
+                                                array_get($data, 'title'),
+                                                intval(array_get($data, 'page')));
         }
 
         header('Content-type: application/json');

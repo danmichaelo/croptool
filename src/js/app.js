@@ -93,10 +93,10 @@ controller('AppCtrl', ['$scope', '$http', '$timeout', '$q', '$window', 'LoginSer
     $scope.site = '';     // Site-part of the URL
     $scope.title = '';    // Title-part of the URL
 
-    function getParameterByName(name) {
+    function getParameterByName(name, source) {
         name = name.replace(/[\[]/, "\\\[").replace(/[\]]/, "\\\]");
         var regex = new RegExp("[\\?&]" + name + "=([^&#]*)"),
-            results = regex.exec(location.search);
+            results = regex.exec(source ? source : location.search);
         return results == null ? "" : decodeURIComponent(results[1].replace(/\+/g, " "));
     }
 
@@ -170,7 +170,7 @@ controller('AppCtrl', ['$scope', '$http', '$timeout', '$q', '$window', 'LoginSer
 
     function fetchImage() {
 
-        console.log('[fetchImage] Site: ' + $scope.site + ', title: ' + $scope.title);
+        console.log('[fetchImage] Site: ' + $scope.site + ', title: ' + $scope.title + ', page: ' + $scope.page);
 
         if (!$scope.title) {
             console.log('[fetchImage] No title given, nothing to fetch');
@@ -181,7 +181,7 @@ controller('AppCtrl', ['$scope', '$http', '$timeout', '$q', '$window', 'LoginSer
         $scope.busy = true;
         $scope.crop_dim = undefined;
 
-        $http.get('backend.php?action=metadata&title=' + encodeURIComponent($scope.title) + '&site=' + encodeURIComponent($scope.site)).
+        $http.get('backend.php?action=metadata&title=' + encodeURIComponent($scope.title) + '&site=' + encodeURIComponent($scope.site) + '&page=' + encodeURIComponent($scope.page)).
         error(function(response, status, headers) {
             $scope.error = 'An error occured: ' + status + ' ' + response;
             $scope.busy = false;
@@ -208,7 +208,11 @@ controller('AppCtrl', ['$scope', '$http', '$timeout', '$q', '$window', 'LoginSer
             if (!response.error) {
 
                 var p = $scope.title.lastIndexOf('.');
-                $scope.newTitle = $scope.title.substr(0, p) + ' (cropped)' + $scope.title.substr(p);
+                if ($scope.page) {
+                    $scope.newTitle = $scope.title.substr(0, p) + ' (page ' + $scope.page + ' crop).jpg';
+                } else {
+                    $scope.newTitle = $scope.title.substr(0, p) + ' (cropped)' + $scope.title.substr(p);
+                }
 
                 $timeout(function() {
                     console.log('Enabling Jcrop');
@@ -246,7 +250,7 @@ controller('AppCtrl', ['$scope', '$http', '$timeout', '$q', '$window', 'LoginSer
         if ($scope.borderLocatorBusy) return;
 
         $scope.borderLocatorBusy = true;
-        $http.get('backend.php?action=locateBorder&title=' + encodeURIComponent($scope.title) + '&site=' + encodeURIComponent($scope.site))
+        $http.get('backend.php?action=locateBorder&title=' + encodeURIComponent($scope.title) + '&site=' + encodeURIComponent($scope.site) + '&page=' + encodeURIComponent($scope.page))
             .success(function(response) {
                 $scope.borderLocatorBusy = false;
                 console.log(response);
@@ -307,28 +311,37 @@ controller('AppCtrl', ['$scope', '$http', '$timeout', '$q', '$window', 'LoginSer
 
     function parseImageUrlOrTitle( imageUrlOrTitle ) {
 
-        var matches = imageUrlOrTitle.match(/\/\/([a-z0-9.]+)\.(wikimedia.org|wikipedia.org|wmflabs.org)\/wiki\/(.*)$/),
-            site = 'commons.wikimedia.org',
-            title = '';
+        var pattern1 = /([a-z0-9.]+)\.(wikimedia.org|wikipedia.org|wmflabs.org)\/wiki\/([^?]+)/,
+            pattern2 = /([a-z0-9.]+)\.(wikimedia.org|wikipedia.org|wmflabs.org)\/w\/index.php/,
+            matches1 = imageUrlOrTitle.match(pattern1),
+            matches2 = imageUrlOrTitle.match(pattern2),
+            o = { site: 'commons.wikimedia.org', title: '', page: 0 };
 
-        if (matches) {
-            site = matches[1] + '.' + matches[2];
-            title = matches[3];
+        var qs = '?' + imageUrlOrTitle.split('?')[1]
+        if (matches1) {
+            o.site = matches1[1] + '.' + matches1[2];
+            o.title = matches1[3];
+            o.page = getParameterByName('page', qs);
+        } else if (matches2) {
+            o.site = matches2[1] + '.' + matches2[2];
+            o.title = getParameterByName('title', qs);
+            o.page = getParameterByName('page', qs);
         } else {
-            title = imageUrlOrTitle;
+            o.title = imageUrlOrTitle.split('?')[0];
+            o.page = getParameterByName('page', qs);
         }
 
         try {
-            title = decodeURIComponent(title);
+            o.title = decodeURIComponent(o.title);
         } catch (e) {
             // Ignore
         }
 
-        title = title
+        o.title = o.title
             .replace(/_/g, ' ')
             .replace(/^[^:]+:/, '');  // Strip off File:, Fil:, etc.
 
-        return { site: site, title: title };
+        return o;
     }
 
 
@@ -357,6 +370,7 @@ controller('AppCtrl', ['$scope', '$http', '$timeout', '$q', '$window', 'LoginSer
         var o = parseImageUrlOrTitle($scope.imageUrlOrTitle);
         $scope.site = o.site;
         $scope.title = o.title;
+        $scope.page = o.page;
         fetchImage();
     };
 
@@ -374,6 +388,7 @@ controller('AppCtrl', ['$scope', '$http', '$timeout', '$q', '$window', 'LoginSer
         $http.post('backend.php', {
             title: $scope.title,
             site: $scope.site,
+            page: $scope.page,
             cropmethod: $scope.cropmethod,
             x: $scope.crop_dim.x,
             y: $scope.crop_dim.y,
@@ -409,6 +424,7 @@ controller('AppCtrl', ['$scope', '$http', '$timeout', '$q', '$window', 'LoginSer
         var params = {
             title: $scope.title,
             site: $scope.site,
+            page: $scope.page,
             overwrite: $scope.overwrite,
             comment: $scope.uploadComment,
             filename: $scope.newTitle,
@@ -478,6 +494,7 @@ controller('AppCtrl', ['$scope', '$http', '$timeout', '$q', '$window', 'LoginSer
     if (!tmp) tmp = getParameterByName('imageUrlOrTitle');  // deprecated
     $scope.currentUrl = tmp;
     $scope.imageUrlOrTitle = $scope.currentUrl;
+    $scope.page = getParameterByName('page');
 
     $scope.openFile(false);
 
@@ -489,6 +506,10 @@ controller('AppCtrl', ['$scope', '$http', '$timeout', '$q', '$window', 'LoginSer
     $scope.aspectratio_cx = LocalStorageService.get('croptool-aspectratio-x') || '16';
     $scope.aspectratio_cy = LocalStorageService.get('croptool-aspectratio-y') || '9';;
     $scope.overwrite = LocalStorageService.get('croptool-overwrite') || 'overwrite';;
+    if ($scope.page) {
+        $scope.overwrite = 'rename';  // Force rename
+    }
+
 
     // On filename change, check with the MediaWiki API if the file exists.
     // Delay 500 ms before checking in case the user is in the process of typing.

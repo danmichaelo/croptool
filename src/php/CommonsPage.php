@@ -3,6 +3,7 @@
 class CommonsPage {
 
     public $pagename;
+    public $pagenumber;
     protected $cache = [];
 
     // Sites that are known to have the {{Extracted from}} template (feel free to add more):
@@ -15,12 +16,14 @@ class CommonsPage {
      * CommonsPage constructor.
      * @param MwApiClient $apiClient
      * @param string $pagename
-     * @param CommonsPage|null $derivedFrom
+     * @param int $pagenumber
+     * @param CommonsPage $derivedFrom
      */
-    public function __construct(MwApiClient $apiClient, $pagename, CommonsPage $derivedFrom = null)
+    public function __construct(MwApiClient $apiClient, $pagename, $pagenumber, CommonsPage $derivedFrom = null)
     {
         $this->api = $apiClient;
         $this->pagename = $pagename;
+        $this->pagenumber = intval($pagenumber);
         $this->derivedFrom = $derivedFrom;
     }
 
@@ -29,7 +32,7 @@ class CommonsPage {
      */
     public function getLocalFile()
     {
-        return new LocalFile($this->getImageInfo());
+        return new LocalFile($this->getImageInfo(), $this->pagenumber);
     }
 
     /**
@@ -111,7 +114,7 @@ class CommonsPage {
         {
             die('New pagename cannot be the same as the current pagename');
         }
-        $newPage = new CommonsPage($this->api, $pagename, $this);
+        $newPage = new CommonsPage($this->api, $pagename, $this->pagenumber, $this);
 
         // Clone original wikitext
         $wikitext = new WikiText($this->getWikiText());
@@ -155,9 +158,7 @@ class CommonsPage {
      */
     protected function getPath()
     {
-        $imageInfo = $this->getImageInfo();
-        $file = new LocalFile($imageInfo);
-        return $file->getAbsolutePath('_cropped');
+        return $this->getLocalFile()->getAbsolutePath('_cropped');
     }
 
     /**

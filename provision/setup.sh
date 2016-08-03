@@ -22,6 +22,9 @@ apt-get install -y ntp > /dev/null
 ntpdate pool.ntp.org
 service ntp restart
 
+echo "Installing djvulibre"
+apt-get install -y djvulibre-bin > /dev/null
+
 echo "Installing Imagemagick"
 apt-get install -y imagemagick > /dev/null
 

@@ -199,6 +199,10 @@
                 <span ng-show="cropresults">
                     <span translate translate-value-width="{{cropresults.width}}" translate-value-height="{{cropresults.height}}">crop-dimensions</span>
                 </span>
+
+                <span ng-show="page">
+                    <span translate>page</span>: {{page}}.
+                </span>
             </p>
         </div>
 
@@ -364,7 +368,7 @@
 
                         <div class="form-group">
                             <label class="radio-inline">
-                                <input type="radio" name="overwrite" ng-model="overwrite" value="overwrite" ng-disabled="busy" ng-change="updateUploadComment()">
+                                <input type="radio" name="overwrite" ng-model="overwrite" value="overwrite" ng-disabled="busy || page" ng-change="updateUploadComment()">
                                 <span translate>previewform-overwrite</span>
                             </label>
                             <label class="radio-inline">
@@ -376,6 +380,11 @@
                         <p ng-show="site == 'commons.wikimedia.org' && overwrite=='overwrite'">
                             <i class="fa fa-warning"></i>
                             <span translate translate-value-url="https://commons.wikimedia.org/wiki/Special:MyLanguage/Commons:Overwriting existing files">previewform-overwrite-policy</span>
+                        </p>
+
+                        <p ng-show="page">
+                            <i class="fa fa-warning"></i>
+                            <span translate>previewform-multipage-file</span>
                         </p>
 
                         <div class="form-group" ng-show="overwrite=='rename'" ng-class="{ 'has-error': exists[site + ':' + newTitle] === true, 'has-success': exists[site + ':' + newTitle] === false }">
