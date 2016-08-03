@@ -190,18 +190,14 @@ class CropToolController {
 
             $response = $page->upload($input->comment);
 
-            if (isset($response->error)) {
+            if (isset($response->error) || $response->upload->result != 'Success') {
                 $this->logger->addError('[main] ' . $shortSha1 . ' Upload failed');
                 return $response;
             }
-            if ($response->upload->result == 'Success') {
-                $this->logger->addInfo('[main] ' . $shortSha1 . ' Uploaded cropped file using the same name');
-                if ($page->removeStuff($input->elems)) {
-                    $this->logger->addInfo('[main] ' . $shortSha1 . ' Updated wikitext');
-                }
-            } else {
-                $this->logger->addError('[main] ' . $shortSha1 . ' Upload failed');
-                return $response;
+
+            $this->logger->addInfo('[main] ' . $shortSha1 . ' Uploaded cropped file using the same name');
+            if ($page->removeStuff($input->elems)) {
+                $this->logger->addInfo('[main] ' . $shortSha1 . ' Updated wikitext');
             }
 
         } else {
@@ -210,17 +206,12 @@ class CropToolController {
             $derivedPage = $page->makeDerivative($input->filename);
             $response = $derivedPage->upload($input->comment, $ignoreWarnings);
 
-            if (isset($response->error)) {
-                $this->logger->addError('[main] ' . $shortSha1 . ' Upload failed');
-                return $response;
-            }
-            if ($response->upload->result == 'Success') {
-                $this->logger->addInfo('[main] ' . $shortSha1 . ' Uploaded file as "' . $input->filename . '"');
-            } else {
+            if (isset($response->error) || $response->upload->result != 'Success') {
                 $this->logger->addError('[main] ' . $shortSha1 . ' Upload failed');
                 return $response;
             }
 
+            $this->logger->addInfo('[main] ' . $shortSha1 . ' Uploaded file as "' . $input->filename . '"');
         }
 
         $line = $page->pagename . "\t" . $user . "\n";
