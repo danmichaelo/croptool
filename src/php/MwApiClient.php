@@ -46,6 +46,11 @@ class MwApiClient
         $this->curl->follow_redirects = false;
     }
 
+    public function getSite()
+    {
+        return $this->site;
+    }
+
     /**
      * Returns true if authorized, or false if not
      */

@@ -5,6 +5,9 @@ class CommonsPage {
     public $pagename;
     protected $cache = [];
 
+    // Sites that are known to have the {{Extracted from}} template (feel free to add more):
+    protected $sitesHavingExtractedFromTemplate = ['commons.wikimedia.org'];
+
     /**
      * CommonsPage constructor.
      * @param MwApiClient $apiClient
@@ -111,7 +114,9 @@ class CommonsPage {
         $wikitext = new WikiText($this->getWikiText());
 
         // Append the {{Extracted from}} template
-        $wikitext->appendExtractedFromTemplate($this->pagename);
+        if (in_array($this->api->getSite(), $this->sitesHavingExtractedFromTemplate)) {
+            $wikitext->appendExtractedFromTemplate($this->pagename);
+        }
 
         // Remove templates that should not be copied, like license review templates
         $wikitext->removeTemplatesNotToBeCopied();
