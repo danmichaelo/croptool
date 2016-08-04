@@ -26,7 +26,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST')
         : 'commons.wikimedia.org';
 }
 
-$apiClient = new MwApiClient($site, $oauth, null, $log, $config);
+$apiClient = new MwApiClient($site, $oauth, $log, $config);
 $controller = new CropToolController($apiClient, $log);
 
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {

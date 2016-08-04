@@ -22,7 +22,6 @@ class MwApiClient
     public $user_agent;
     protected $logger;
     protected $oauth;
-    protected $curl;
     public $authError;
 
     /**
@@ -30,20 +29,20 @@ class MwApiClient
      */
     protected $username = null;
 
-    public function __construct($site, OAuthConsumer $oauth = null, Curl $curl = null, Logger $logger = null, $config = array())
+    /**
+     * MwApiClient constructor.
+     * @param string $site
+     * @param OAuthConsumer $oauth
+     * @param Logger $logger
+     * @param array $config
+     */
+    public function __construct($site, OAuthConsumer $oauth, Logger $logger, $config = array())
     {
         $this->site = $site;
         $this->api_url = 'https://' . $site . '/w/api.php';
-
-        $this->logger = $logger ?: new Logger;
-
-        $this->oauth = $oauth ?: new OAuthConsumer;
+        $this->logger = $logger;
+        $this->oauth = $oauth;
         $this->user_agent = array_get($config, 'userAgent', '');
-
-        $this->curl = $curl ?: new Curl;
-        $this->curl->cookie_file = $this->cookie_file;
-        $this->curl->user_agent = $this->user_agent;
-        $this->curl->follow_redirects = false;
     }
 
     public function getSite()

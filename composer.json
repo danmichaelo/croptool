@@ -6,7 +6,6 @@
         "ext-exif": "*",
         "ext-imagick": "*",
         "ext-curl": "*",
-        "shuber/curl": "master-dev",
         "danmichaelo/coma": "master-dev",
         "rollbar/rollbar": "~0.11.0",
         "monolog/monolog": "~1.13",
