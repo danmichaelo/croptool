@@ -79,7 +79,7 @@ class CropToolController {
         $image = $localFile->getImage();
 
         $thumb = $image->thumb($localFile->getAbsolutePath('_thumb'));
-        $this->logger->addInfo('[main] ' . $localFile->getShortSha1() . ' Got file "' . $page->pagename . '"');
+        $this->logger->addInfo('[main] ' . $localFile->getShortSha1() . ' Fetched "' . $page->pagename . '"');
 
         return array(
             'original' => array(
@@ -298,6 +298,7 @@ class CropToolController {
             http_response_code(200);
         } catch (\RuntimeException $ex) {
             http_response_code(500);
+            $this->logger->addError('[main] ' . $ex->getMessage() . '"');
             $response = [
                 'error' => $ex->getMessage()
             ];
