@@ -1,5 +1,7 @@
 <?php
 
+namespace CropTool;
+
 use Danmichaelo\Coma\ColorDistance;
 use Danmichaelo\Coma\sRGB;
 

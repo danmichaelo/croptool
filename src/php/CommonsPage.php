@@ -1,5 +1,7 @@
 <?php
 
+namespace CropTool;
+
 class CommonsPage {
 
     public $pagename;
@@ -148,7 +150,7 @@ class CommonsPage {
             'token' => $token,
             'comment' => $comment,
             'file' => (version_compare(PHP_VERSION, '5.5.0') >= 0)
-                ? new CURLFile($path)
+                ? new \CURLFile($path)
                 : '@' . $path
         );
     }

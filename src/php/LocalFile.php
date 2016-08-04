@@ -1,5 +1,7 @@
 <?php
 
+namespace CropTool;
+
 class LocalFile
 {
     protected $sha1;

@@ -1,5 +1,7 @@
 <?php
 
+namespace CropTool;
+
 use Monolog\Logger;
 
 /**
@@ -159,7 +161,7 @@ class MwApiClient
 
         if ( !$data ) {
             header( "HTTP/1.1 500 Internal Server Error" );
-            throw new \RunTimeException('Curl error: ' . htmlspecialchars( curl_error( $ch ) ));
+            throw new \RuntimeException('Curl error: ' . htmlspecialchars( curl_error( $ch ) ));
         }
 
         curl_close($ch);
@@ -231,7 +233,7 @@ class MwApiClient
         $response = $this->request($query, false, false);
 
         if (isset($response->error)) {
-            throw new Exception('Error: ' . $response->error->info . ' (' . $response->error->code . ')');
+            throw new \RuntimeException('Error: ' . $response->error->info . ' (' . $response->error->code . ')');
         }
 
         foreach ($response->query->pages as $pageid => $page) {

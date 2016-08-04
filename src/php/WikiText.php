@@ -1,5 +1,7 @@
 <?php
 
+namespace CropTool;
+
 class WikiText {
 
     /** @var string */

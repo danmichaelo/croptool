@@ -1,5 +1,7 @@
 <?php
 
+namespace CropTool;
+
 class ImageInfo {
 
 	protected $data;

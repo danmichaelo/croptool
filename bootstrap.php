@@ -1,11 +1,13 @@
 <?php
 
-require('../vendor/autoload.php');
-
 define('ROOT_PATH', dirname(__FILE__));
+
+require(ROOT_PATH . '/vendor/autoload.php');
 
 use Monolog\Logger;
 use Monolog\Handler\StreamHandler;
+use CropTool\Image;
+use CropTool\OAuthConsumer;
 
 /**********************************************************************************
  * PHP config

@@ -1,5 +1,7 @@
 <?php
 
+namespace CropTool;
+
 use Imagick;
 use ImagickPixel;
 

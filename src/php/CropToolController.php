@@ -1,5 +1,7 @@
 <?php
 
+namespace CropTool;
+
 use Monolog\Logger;
 
 class CropToolController {

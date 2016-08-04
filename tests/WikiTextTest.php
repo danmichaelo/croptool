@@ -1,12 +1,14 @@
 <?php
 
+use CropTool\WikiText;
+
 class WikiTextTest extends PHPUnit_Framework_TestCase
 {
     public function testRemovesTheImagesWithBordersCategory()
     {
         $wikitext = new WikiText('abc [[Category:SomeCategory]] [[Category:Images with borders]][[Category:SomeOtherCategory]] def');
 
-        $stuff = new StdClass;
+        $stuff = new \stdClass();
         $stuff->border = true;
         $wikitext->removeStuff($stuff);
 
@@ -17,7 +19,7 @@ class WikiTextTest extends PHPUnit_Framework_TestCase
     {
         $wikitext = new WikiText('abc [[Category:SomeCategory]] [[category:images with borders]][[Category:SomeOtherCategory]] def');
 
-        $stuff = new StdClass;
+        $stuff = new \stdClass();
         $stuff->border = true;
         $wikitext->removeStuff($stuff);
 
@@ -28,7 +30,7 @@ class WikiTextTest extends PHPUnit_Framework_TestCase
     {
         $wikitext = new WikiText('abc [[Category:SomeCategory]] [[Category:Images_with_borders]][[Category:SomeOtherCategory]] def');
 
-        $stuff = new StdClass;
+        $stuff = new \stdClass();
         $stuff->border = true;
         $wikitext->removeStuff($stuff);
 
@@ -39,7 +41,7 @@ class WikiTextTest extends PHPUnit_Framework_TestCase
     {
         $wikitext = new WikiText('abc {{Crop}} def');
 
-        $stuff = new StdClass;
+        $stuff = new \stdClass();
         $stuff->border = true;
         $wikitext->removeStuff($stuff);
 
@@ -50,7 +52,7 @@ class WikiTextTest extends PHPUnit_Framework_TestCase
     {
         $wikitext = new WikiText('abc {{Remove border}} def');
 
-        $stuff = new StdClass;
+        $stuff = new \stdClass();
         $stuff->border = true;
         $wikitext->removeStuff($stuff);
 

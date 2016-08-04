@@ -2,6 +2,9 @@
 
 require_once('../bootstrap.php');
 
+use CropTool\MwApiClient;
+use CropTool\CropToolController;
+
 if (isset($_GET['title'])) {
     // Store the title, so we can retrieve if after
     // having having authenticated at the OAuth endpoint
