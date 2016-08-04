@@ -1,4 +1,5 @@
-# m h  dom mon dow   command
 MAILTO=""
-0 */4 * * * jsub -j y -cwd -N CropToolCleanup -mem 256M cleanup.sh
-*/15 * * * *  jsub -l release=trusty -N CropToolServerCheck -once -quiet -cwd check-server.sh 
+
+# Min Hour Day Month Weekday Command
+   0  */4  *   *     *       jsub -j y -once -o cleanup.log      cleanup.sh
+*/15  *    *   *     *       jsub -j y -once -o check-server.log check-server.sh
