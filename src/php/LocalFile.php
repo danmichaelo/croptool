@@ -76,14 +76,15 @@ class LocalFile
         }
 
         if (!file_exists($path)) {
-            $data = file_get_contents($this->imageInfo->url);
-
-            if (!$data) {
-                throw new \RuntimeException('Failed to fetch url: ' . $this->imageInfo->url);
-            }
-            if (file_put_contents($path, $data) === false) {
+            $url = $this->imageInfo->url;
+            if (file_put_contents($path, fopen($url)) === false) {
                 throw new \RuntimeException('Failed to write image data to disk. Permission problem?');
             }
+
+            if (!filesize($data)) {
+                throw new \RuntimeException('Failed to fetch url: ' . $url);
+            }
+
             if (chmod($path, 0664) === false) {
                 throw new \RuntimeException('Failed to change permissions for file.');
             }
