@@ -311,8 +311,8 @@ controller('AppCtrl', ['$scope', '$http', '$timeout', '$q', '$window', 'LoginSer
 
     function parseImageUrlOrTitle( imageUrlOrTitle ) {
 
-        var pattern1 = /([a-z0-9.]+)\.(wikimedia.org|wikipedia.org|wmflabs.org)\/wiki\/([^?]+)/,
-            pattern2 = /([a-z0-9.]+)\.(wikimedia.org|wikipedia.org|wmflabs.org)\/w\/index.php/,
+        var pattern1 = /([a-z0-9.]+)\.(wikimedia.org|wikipedia.org|wmflabs.org|wikisource.org)\/wiki\/([^?]+)/,
+            pattern2 = /([a-z0-9.]+)\.(wikimedia.org|wikipedia.org|wmflabs.org|wikisource.org)\/w\/index.php/,
             matches1 = imageUrlOrTitle.match(pattern1),
             matches2 = imageUrlOrTitle.match(pattern2),
             o = { site: 'commons.wikimedia.org', title: '', page: 0 };
