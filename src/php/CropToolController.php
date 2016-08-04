@@ -8,9 +8,6 @@ class CropToolController {
 
     protected $maxMegaPixels = 100;  // A 100 megapixel image requires almost 500 MB of memory
 
-    protected $log_file = '../data/log.txt';
-    protected $count_file = '../data/count.txt';
-
     public $api;
     protected $logger;
 
@@ -211,13 +208,6 @@ class CropToolController {
                 $this->logger->addInfo('[main] ' . $shortSha1 . ' Added/updated {{Derivative versions}} in "' . $input->title . '"');
             }
         }
-
-        $line = $page->pagename . "\t" . $user . "\n";
-        file_put_contents($this->log_file, $line, FILE_APPEND);
-
-        $cnt = intval(file_get_contents($this->count_file));
-        $cnt++;
-        file_put_contents($this->count_file, $cnt);
 
         return $response->upload;
     }

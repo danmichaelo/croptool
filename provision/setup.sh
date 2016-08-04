@@ -29,9 +29,7 @@ echo "Installing Imagemagick"
 apt-get install -y imagemagick > /dev/null
 
 echo "Installing PHP"
-apt-get install -y php5-fpm php5-cli php5-mcrypt php5-imagick php5-curl > /dev/null
-ln -sf /etc/php5/mods-available/mcrypt.ini /etc/php5/fpm/conf.d/20-mcrypt.ini
-ln -sf /etc/php5/mods-available/mcrypt.ini /etc/php5/cli/conf.d/20-mcrypt.ini
+apt-get install -y php5-fpm php5-cli php5-imagick php5-curl > /dev/null
 
 echo "Configuring Nginx"
 if [[ ! -e /etc/nginx/server.key ]]; then
@@ -89,8 +87,9 @@ else
 	composer install --no-progress --prefer-dist
 fi
 
-
-npm install --silent -g bower
-bower install --allow-root
+echo "Installing npm packages and gulp build"
+npm install -g gulp --silent
+npm install --silent
+gulp build
 
 # chmod ug+x ./vendor/phpexiftool/exiftool/exiftool

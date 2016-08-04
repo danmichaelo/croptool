@@ -20,7 +20,6 @@ class MwApiClient
      */
     protected $site;
 
-    public $cookie_file = '../data/cookiejar.txt';
     public $user_agent;
     protected $logger;
     protected $oauth;

@@ -1,10 +1,13 @@
 ## CropTool
 
-[![Stories in Ready](https://badge.waffle.io/danmichaelo/croptool.png?label=ready)](https://waffle.io/danmichaelo/croptool)
+CropTool is a tool for cropping image files at Wikimedia Commons and other Wikimedia sites
+using the MediaWiki API with OAuth. It supports JPEG, PNG and (animated) GIF files, and can
+also extract pages from DJVU and PDF files as JPEG for cropping.
 
-Tool for cropping images at Wikimedia Commons. Lives at http://tools.wmflabs.org/croptool/ 
+It relies on [ImageMagick](https://www.imagemagick.org/) and [jpegtran](http://jpegclub.org/jpegtran/) (for lossless JPEG cropping) for the hard work. The frontend is made with [AngularJS](https://angularjs.org/) and [Jcrop](https://github.com/tapmodo/Jcrop).
 
-CropTool uses [jpegtran](http://jpegclub.org/jpegtran/), [Jcrop](//github.com/tapmodo/Jcrop), [AngularJS](//angularjs.org/) and Sean Huber's [Curl wrapper for php](//github.com/shuber/curl).
+* [CropTool installation on Tool Labs](http://tools.wmflabs.org/croptool/)
+* [About CropTool on Commons](https://commons.wikimedia.org/wiki/Commons:CropTool)
 
 ### Setting up a development environment
 
@@ -36,8 +39,10 @@ Download deps and configure croptool:
 
 1. `composer install`
 2. `cp config.dist.ini config.ini` and insert OAuth info and the path to jpegtran.
-3. Check that the server can write to `data`, `logs` and `public_html/files`.
+3. Check that the server can write to `logs` and `public_html/files`.
 4. `vendor/bin/phpunit`
 5. `crontab crontab.tools` to setup cronjobs.
 6. `npm install`
 7. `gulp build`
+8. `php generate-key.php`
+
