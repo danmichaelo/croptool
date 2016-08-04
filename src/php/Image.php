@@ -207,12 +207,12 @@ class Image
             if (empty($cmd_res)) {
                 switch ($return_var) {
                     case 127:
-                        throw new CropFailed('Command not found: ' . $cmd[0]);
+                        throw new CropFailed('Command ' . $cmd . ' not found: ' . $cmd[0]);
                     default:
-                        throw new CropFailed('Unknown error ' . $return_var);
+                        throw new CropFailed('Command ' . $cmd . ' exited with code ' . $return_var);
                 }
             }
-            throw new CropFailed($cmd_res);
+            throw new CropFailed('Command ' . $cmd . ' failed: ' . $cmd_res);
         }
     }
 

@@ -63,30 +63,21 @@ class CropToolController {
     protected function getMetadata(CommonsPage $page)
     {
         if ($page->waitingForLicenseReview()) {
-            return array('error' => 'This file is currently waiting for Flickr license review. Please wait until the review has been completed before cropping the file, since cropped files cannot be auto-reviewed by the FlickreviewR bot.');
+            throw new \RuntimeException('This file is currently waiting for Flickr license review. Please wait until the review has been completed before cropping the file, since cropped files cannot be auto-reviewed by the FlickreviewR bot.');
         }
 
         $imageInfo = $page->getImageInfo();
         $megaPixels = $imageInfo->width * $imageInfo->height / 1e6;
         if ($megaPixels > $this->maxMegaPixels) {
-            return array('error' => 'Sorry, the file is too large (' . round($megaPixels) . ' megapixels). CropTool supports files up to ' . $this->maxMegaPixels . ' megapixels.');
+            throw new \RuntimeException('Sorry, the file is too large (' . round($megaPixels) . ' megapixels). CropTool supports files up to ' . $this->maxMegaPixels . ' megapixels.');
         }
 
         if (in_array($imageInfo->mime, ['image/vnd.djvu', 'application/pdf']) && !$page->pagenumber) {
-            return array('error' => 'A "page" parameter must be specified when cropping a djvu or pdf file.');
+            throw new \RuntimeException('A "page" parameter must be specified when cropping a djvu or pdf file.');
         }
 
-        try {
-            $localFile = $page->getLocalFile();
-        } catch (InvalidMimeTypeException $ex) {
-            return array('error' => 'Sorry, the file type is not supported: ' . $imageInfo->mime);
-        }
-
-        try {
-            $image = $localFile->getImage();
-        } catch (\RuntimeException $ex) {
-            return array('error' => $ex->getMessage());
-        }
+        $localFile = $page->getLocalFile();
+        $image = $localFile->getImage();
 
         $thumb = $image->thumb($localFile->getAbsolutePath('_thumb'));
         $this->logger->addInfo('[main] ' . $localFile->getShortSha1() . ' Got file "' . $page->pagename . '"');
@@ -147,13 +138,9 @@ class CropToolController {
 
         $image = new Image($srcPath, $imageInfo->mime);
         $s1 = array($image->width, $image->height);
-        try {
-            $res = $image->crop($cropMethod, $destPath, $new_x, $new_y, $new_width, $new_height);
-        } catch (CropFailed $error) {
-            return array(
-                'error' => 'Crop failed: ' . $error->getMessage(),
-            );
-        }
+
+        $res = $image->crop($cropMethod, $destPath, $new_x, $new_y, $new_width, $new_height);
+
         $s2 = array($res['width'], $res['height']);
 
         // Make thumb
@@ -308,16 +295,25 @@ class CropToolController {
      */
     public function handleRequest($method, $data)
     {
-        if ($method == 'POST') {
-            $response = $this->handlePostRequest($data);
-        } else {
-            $response = $this->handleGetRequest(array_get($data, 'action'),
-                                                array_get($data, 'title'),
-                                                intval(array_get($data, 'page')));
+        try {
+            if ($method == 'POST') {
+                $response = $this->handlePostRequest($data);
+            } else {
+                $response = $this->handleGetRequest(array_get($data, 'action'),
+                                                    array_get($data, 'title'),
+                                                    intval(array_get($data, 'page')));
+            }
+            http_response_code(200);
+        } catch (\RuntimeException $ex) {
+            http_response_code(500);
+            $response = [
+                'error' => $ex->getMessage()
+            ];
         }
 
         header('Content-type: application/json');
         echo json_encode($response);
+        exit;
     }
 
 }

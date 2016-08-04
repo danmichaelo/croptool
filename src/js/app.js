@@ -183,13 +183,13 @@ controller('AppCtrl', ['$scope', '$http', '$timeout', '$q', '$window', 'LoginSer
 
         $http.get('backend.php?action=metadata&title=' + encodeURIComponent($scope.title) + '&site=' + encodeURIComponent($scope.site) + '&page=' + encodeURIComponent($scope.page)).
         error(function(response, status, headers) {
-            $scope.error = 'An error occured: ' + status + ' ' + response;
+            $scope.metadata = null;
+            $scope.error = 'An error occured: ' + status + ' ' + response.error;
             $scope.busy = false;
         }).
         success(function(response) {
 
             $scope.busy = false;
-            console.log(response);
 
             if (response.error) {
                 $scope.error = response.error;
@@ -396,19 +396,12 @@ controller('AppCtrl', ['$scope', '$http', '$timeout', '$q', '$window', 'LoginSer
             h: $scope.crop_dim.h
         }).
         success(function(response) {
-
             $scope.busy = false;
-            console.log(response);
-
-            if (response.error) {
-                $scope.error = '[Error] ' + response.error;
-            } else {
-                $scope.cropresults = response;
-                $scope.updateUploadComment();
-            }
+            $scope.cropresults = response;
+            $scope.updateUploadComment();
         }).
         error(function(response, status, headers) {
-            $scope.error = 'An error occured: ' + status + ' ' + response;
+            $scope.error = '[Error] ' + response.error;
             $scope.busy = false;
         });
 
@@ -471,7 +464,7 @@ controller('AppCtrl', ['$scope', '$http', '$timeout', '$q', '$window', 'LoginSer
         }).
         error(function(response, status, headers) {
             $scope.busy = false;
-            $scope.error = 'An error occured: ' + status + ' ' + response;
+            $scope.error = 'Upload failed! ' + response.error;
         });
 
     };
