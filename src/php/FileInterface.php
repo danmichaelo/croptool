@@ -1,0 +1,19 @@
+<?php
+
+namespace CropTool;
+
+interface FileInterface
+{
+
+    public function fetchPage($pageno);
+
+    public function getAbsolutePathForPage($pageno, $suffix = '');
+
+    public function getRelativePathForPage($pageno, $suffix = '');
+
+    public function exists($pageno, $suffix = '');
+
+    public function getDimensions($pageno, $suffix = '');
+
+    // TODO
+}

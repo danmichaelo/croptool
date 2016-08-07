@@ -4,62 +4,68 @@ use CropTool\WikiText;
 
 class WikiTextTest extends PHPUnit_Framework_TestCase
 {
-    public function testRemovesTheImagesWithBordersCategory()
+    public function testItRecognizesTheLicenseReviewTemplate()
     {
-        $wikitext = new WikiText('abc [[Category:SomeCategory]] [[Category:Images with borders]][[Category:SomeOtherCategory]] def');
+        $wikitext = new WikiText('abc [[Category:SomeCategory]] {{flickrreview}} def');
 
-        $stuff = new \stdClass();
-        $stuff->border = true;
-        $wikitext->removeStuff($stuff);
+        $this->assertTrue($wikitext->waitingForLicenseReview());
+    }
+
+    public function testItRemovesTheImagesWithBordersCategoryIfRequested()
+    {
+        $oldText = WikiText::make('abc [[Category:SomeCategory]] [[Category:Images with borders]][[Category:SomeOtherCategory]] def');
+        $newText = $oldText->withoutBorderTemplate();
+
+        $this->assertEquals(['border' => true], $oldText->possibleStuffToRemove());
+        $this->assertEquals([], $newText->possibleStuffToRemove());
+
+        $this->assertEquals('abc [[Category:SomeCategory]] [[Category:SomeOtherCategory]] def', $newText);
+    }
+
+    public function testItRemovesTheLowercasedImagesWithBordersCategoryIfRequested()
+    {
+        $wikitext = WikiText::make('abc [[Category:SomeCategory]] [[category:images with borders]][[Category:SomeOtherCategory]] def')
+            ->withoutBorderTemplate();
 
         $this->assertEquals('abc [[Category:SomeCategory]] [[Category:SomeOtherCategory]] def', $wikitext);
     }
 
-    public function testRemovesTheLowercasedImagesWithBordersCategory()
+    public function testItRemovesTheUnderscoredImagesWithBordersCategoryIfRequested()
     {
-        $wikitext = new WikiText('abc [[Category:SomeCategory]] [[category:images with borders]][[Category:SomeOtherCategory]] def');
-
-        $stuff = new \stdClass();
-        $stuff->border = true;
-        $wikitext->removeStuff($stuff);
+        $wikitext = WikiText::make('abc [[Category:SomeCategory]] [[Category:Images_with_borders]][[Category:SomeOtherCategory]] def')
+            ->withoutBorderTemplate();
 
         $this->assertEquals('abc [[Category:SomeCategory]] [[Category:SomeOtherCategory]] def', $wikitext);
     }
 
-    public function testRemovesTheUnderscoredImagesWithBordersCategory()
+    public function testItRemovesTheCropTemplateIfRequested()
     {
-        $wikitext = new WikiText('abc [[Category:SomeCategory]] [[Category:Images_with_borders]][[Category:SomeOtherCategory]] def');
-
-        $stuff = new \stdClass();
-        $stuff->border = true;
-        $wikitext->removeStuff($stuff);
-
-        $this->assertEquals('abc [[Category:SomeCategory]] [[Category:SomeOtherCategory]] def', $wikitext);
-    }
-
-    public function testRemovesTheCropTemplate()
-    {
-        $wikitext = new WikiText('abc {{Crop}} def');
-
-        $stuff = new \stdClass();
-        $stuff->border = true;
-        $wikitext->removeStuff($stuff);
+        $wikitext = WikiText::make('abc {{Crop}} def')
+            ->withoutBorderTemplate();
 
         $this->assertEquals('abc def', $wikitext);
     }
 
-    public function testRemovesTheRemoveBorderTemplate()
+    public function testItRemovesTheRemoveBorderTemplateIfRequested()
     {
-        $wikitext = new WikiText('abc {{Remove border}} def');
+        $wikitext = WikiText::make('abc {{Remove border}} {{watermark}} def')
+            ->withoutBorderTemplate();
 
-        $stuff = new \stdClass();
-        $stuff->border = true;
-        $wikitext->removeStuff($stuff);
-
-        $this->assertEquals('abc def', $wikitext);
+        $this->assertEquals('abc {{watermark}} def', $wikitext);
     }
 
-    public function testAddExtractedFromTemplateBeforeLicenseHeader()
+    public function testItRemovesTheWatermarkTemplateIfRequested()
+    {
+        $oldText = WikiText::make('abc {{Remove border}} {{watermark}} def');
+        $newText = $oldText->withoutWatermarkTemplate();
+
+        $this->assertEquals(['watermark' => true, 'border' => true], $oldText->possibleStuffToRemove());
+        $this->assertEquals(['border' => true], $newText->possibleStuffToRemove());
+
+        $this->assertEquals('abc {{Remove border}} def', $newText);
+    }
+
+    public function testItAddsTheExtractedFromTemplateBeforeLicenseHeader()
     {
         $oldText = '
 =={{int:filedesc}}==
@@ -100,12 +106,13 @@ class WikiTextTest extends PHPUnit_Framework_TestCase
 [[Category:Churches in Moscow]]
 ';
 
-        $wikitext = new WikiText($oldText);
-        $wikitext->appendExtractedFromTemplate('My new file.jpg');
+        $wikitext = WikiText::make($oldText)
+            ->appendExtractedFromTemplate('My new file.jpg');
+
         $this->assertEquals($newText, $wikitext);
     }
 
-    public function testAddExtractedFromTemplateBeforeCategories()
+    public function testItAddsTheExtractedFromTemplateBeforeCategories()
     {
         $oldText = '
 {{Information
@@ -132,15 +139,51 @@ class WikiTextTest extends PHPUnit_Framework_TestCase
 [[Category:Versus populum altars]]
 [[Category:Altar of Saint Peter\'s Basilica]]';
 
-        $wikitext = new WikiText($oldText);
-        $wikitext->appendExtractedFromTemplate('My old file.jpg');
+        $wikitext = WikiText::make($oldText)
+            ->appendExtractedFromTemplate('My old file.jpg');
+
         $this->assertEquals($newText, $wikitext);
     }
+
+    public function testItAppendsToExistingDerivativeVersionsTemplate()
+    {
+        $oldText = '
+{{Information
+|description={{zh|1=北师大启功像1。}}
+|date=2016-05-24 12:54:22
+|source={{own}}
+|author=[[User:三猎|三猎]]
+|other_versions={{DerivativeVersions|HoryujiYumedono0363 edit1.jpg}}
+|permission=public domain
+}}
+
+{{PD-self}}
+';
+
+        $newText = '
+{{Information
+|description={{zh|1=北师大启功像1。}}
+|date=2016-05-24 12:54:22
+|source={{own}}
+|author=[[User:三猎|三猎]]
+|other_versions={{DerivativeVersions|HoryujiYumedono0363 edit1.jpg|My new file.jpg}}
+|permission=public domain
+}}
+
+{{PD-self}}
+';
+
+        $wikitext = WikiText::make($oldText)
+            ->appendDerivativeVersionsTemplate('My new file.jpg');
+
+        $this->assertEquals($newText, $wikitext);
+    }
+
 
     /**
      * This test also test that multibyte wikitext is handled correctly
      */
-    public function testAddDerivativeVersionsTemplateToOtherVersions()
+    public function testItAddsTheDerivativeVersionsTemplateToOtherVersions()
     {
         $oldText = '
 =={{int:filedesc}}==
@@ -182,45 +225,13 @@ class WikiTextTest extends PHPUnit_Framework_TestCase
 [[Category:Bronze busts]]
 [[Category:Uploaded with UploadWizard]]';
 
-        $wikitext = new WikiText($oldText);
-        $wikitext->appendDerivativeVersionsTemplate('My new file.jpg');
+        $wikitext = WikiText::make($oldText)
+            ->appendDerivativeVersionsTemplate('My new file.jpg');
+
         $this->assertEquals($newText, $wikitext);
     }
 
-    public function testAppendFileToExistingDerivativeVersionsTemplate()
-    {
-        $oldText = '
-{{Information
-|description={{zh|1=北师大启功像1。}}
-|date=2016-05-24 12:54:22
-|source={{own}}
-|author=[[User:三猎|三猎]]
-|other_versions={{DerivativeVersions|HoryujiYumedono0363 edit1.jpg}}
-|permission=public domain
-}}
-
-{{PD-self}}
-';
-
-        $newText = '
-{{Information
-|description={{zh|1=北师大启功像1。}}
-|date=2016-05-24 12:54:22
-|source={{own}}
-|author=[[User:三猎|三猎]]
-|other_versions={{DerivativeVersions|HoryujiYumedono0363 edit1.jpg|My new file.jpg}}
-|permission=public domain
-}}
-
-{{PD-self}}
-';
-
-        $wikitext = new WikiText($oldText);
-        $wikitext->appendDerivativeVersionsTemplate('My new file.jpg');
-        $this->assertEquals($newText, $wikitext);
-    }
-
-    public function testAddDerivativeVersionsTemplateToOtherVersions2()
+    public function testItAddsDerivativeVersionsTemplateToOtherVersions2()
     {
         $oldText = "
 == {{int:filedesc}} ==
@@ -274,10 +285,10 @@ Sault-S<sup>te</sup>-Marie, Ontario, Canada<br>
 
 [[Category:Essar Steel Algoma]]";
 
-        $wikitext = new WikiText($oldText);
-        $wikitext->appendDerivativeVersionsTemplate('My new file.jpg');
+        $wikitext = WikiText::make($oldText)
+            ->appendDerivativeVersionsTemplate('My new file.jpg');
+
         $this->assertEquals($newText, $wikitext);
     }
-
 
 }

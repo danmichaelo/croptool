@@ -17,22 +17,20 @@ service('LoginService', ['$http', '$rootScope', function($http, $rootScope) {
 
     var that = this;
 
-    this.checkLogin = function(response) {
+    this.checkLogin = function(response, code) {
         if (response.user) {
             that.user = { name: response.user };
         } else {
             that.user = undefined;
         }
         that.loginResponse = response;
-        $rootScope.$broadcast('loginStatusChanged', response);
+        that.loginResponse.code = code;
+        $rootScope.$broadcast('loginStatusChanged', that.loginResponse);
     };
 
-    $http.get('backend.php?action=checkLogin')
+    $http.get('./api/auth/user')
       .success(this.checkLogin)
-      .error(function(err, code) {
-        that.loginResponse = { error: { code: code, info: err }};
-        $rootScope.$broadcast('loginStatusChanged');
-      });
+      .error(this.checkLogin);
 
 }]).
 
@@ -54,13 +52,12 @@ controller('LoginCtrl', ['$scope', '$http', 'LoginService', function($scope, $ht
     $scope.ready = false;
 
     $scope.oauthLogin = function() {
-        window.location.href = './backend.php?action=authorize';
+        window.location.href = './api/auth/login?returnTo=' + $scope.imageUrlOrTitle;
     };
 
     $scope.logout = function() {
-        $http.get('backend.php?action=logout').
+        $http.get('./api/auth/logout').
         success(function(response) {
-            console.log('LOGOUT');
             LoginService.checkLogin(response);
             $scope.user = LoginService.user;
         });
@@ -71,7 +68,9 @@ controller('LoginCtrl', ['$scope', '$http', 'LoginService', function($scope, $ht
         $scope.user = LoginService.user;
         $scope.ready = true;
         if (LoginService.loginResponse.error) {
-            var err = LoginService.loginResponse.error ? LoginService.loginResponse.error.code + ' : ' + LoginService.loginResponse.error.info : null;
+            var err = LoginService.loginResponse.code == 401
+                ? null
+                : LoginService.loginResponse.code + ' ' + LoginService.loginResponse.error;
             $scope.oauthError = err;
         }
 
@@ -83,7 +82,7 @@ controller('LoginCtrl', ['$scope', '$http', 'LoginService', function($scope, $ht
 
 }]).
 
-controller('AppCtrl', ['$scope', '$http', '$timeout', '$q', '$window', 'LoginService', 'localStorageService', 'WindowService', function($scope, $http, $timeout, $q, $window, LoginService, LocalStorageService, WindowService) {
+controller('AppCtrl', ['$scope', '$http', '$timeout', '$q', '$window', '$httpParamSerializer', 'LoginService', 'localStorageService', 'WindowService', function($scope, $http, $timeout, $q, $window, $httpParamSerializer, LoginService, LocalStorageService, WindowService) {
 
     var jcrop_api,
         everPushedSomething = false,
@@ -121,10 +120,10 @@ controller('AppCtrl', ['$scope', '$http', '$timeout', '$q', '$window', 'LoginSer
     }
 
     //LocalStorageService.setPrefix('croptool');
-    $scope.showNotice = !LocalStorageService.get('croptool-notice-3');
+    $scope.showNotice = !LocalStorageService.get('croptool-notice-4');
 
     $scope.dismissNotice = function() {
-        LocalStorageService.add('croptool-notice-3','hide');
+        LocalStorageService.add('croptool-notice-4','hide');
         $scope.showNotice = false;
     }
 
@@ -181,7 +180,11 @@ controller('AppCtrl', ['$scope', '$http', '$timeout', '$q', '$window', 'LoginSer
         $scope.busy = true;
         $scope.crop_dim = undefined;
 
-        $http.get('backend.php?action=metadata&title=' + encodeURIComponent($scope.title) + '&site=' + encodeURIComponent($scope.site) + '&page=' + encodeURIComponent($scope.page)).
+        $http.get('./api/file/thumb?' + $httpParamSerializer({
+            title: $scope.title,
+            site: $scope.site,
+            page: $scope.page
+        })).
         error(function(response, status, headers) {
             $scope.metadata = null;
             $scope.error = 'An error occured: ' + status + ' ' + response.error;
@@ -250,7 +253,11 @@ controller('AppCtrl', ['$scope', '$http', '$timeout', '$q', '$window', 'LoginSer
         if ($scope.borderLocatorBusy) return;
 
         $scope.borderLocatorBusy = true;
-        $http.get('backend.php?action=locateBorder&title=' + encodeURIComponent($scope.title) + '&site=' + encodeURIComponent($scope.site) + '&page=' + encodeURIComponent($scope.page))
+        $http.get('./api/file/autodetect?' + $httpParamSerializer({
+            title: $scope.title,
+            site: $scope.site,
+            page: $scope.page
+        }))
             .success(function(response) {
                 $scope.borderLocatorBusy = false;
                 console.log(response);
@@ -265,8 +272,8 @@ controller('AppCtrl', ['$scope', '$http', '$timeout', '$q', '$window', 'LoginSer
                     jcrop_api.setSelect(area);
                 }, 0); // update outside the digest cycle (TODO: Rewrite JCrop to be fully compatible with AngularJS)
             })
-            .error(function() {
-                alert("An error occured while trying to locate the border");
+            .error(function(response, status, headers) {
+                $scope.error = 'An error occured: ' + status + ' ' + response.error;
                 $scope.borderLocatorBusy = false;
             });
     };
@@ -385,16 +392,16 @@ controller('AppCtrl', ['$scope', '$http', '$timeout', '$q', '$window', 'LoginSer
         $scope.ignoreWarnings = false;
         $scope.busy = true;
 
-        $http.post('backend.php', {
+        $http.get('./api/file/crop?' + $httpParamSerializer({
             title: $scope.title,
             site: $scope.site,
             page: $scope.page,
-            cropmethod: $scope.cropmethod,
+            method: $scope.cropmethod,
             x: $scope.crop_dim.x,
             y: $scope.crop_dim.y,
-            w: $scope.crop_dim.w,
-            h: $scope.crop_dim.h
-        }).
+            width: $scope.crop_dim.w,
+            height: $scope.crop_dim.h
+        })).
         success(function(response) {
             $scope.busy = false;
             $scope.cropresults = response;
@@ -429,7 +436,7 @@ controller('AppCtrl', ['$scope', '$http', '$timeout', '$q', '$window', 'LoginSer
             params.ignorewarnings = '1';
         }
 
-        $http.post('backend.php', params).
+        $http.post('./api/file/publish', params).
         success(function(response) {
 
             console.log(response);
@@ -537,7 +544,10 @@ controller('AppCtrl', ['$scope', '$http', '$timeout', '$q', '$window', 'LoginSer
 
             console.log('Check existence of site:' + site + ', title:' + title);
 
-            $http.get('backend.php?action=exists&site=' + encodeURIComponent(site) + '&title=' + encodeURIComponent(title), {
+            $http.get('./api/file/exists?' + $httpParamSerializer({
+                site: site,
+                title: title
+            }), {
                 timeout: canceler.promise,
             }).success(function(response) {
                 var key = site + ':' + title;

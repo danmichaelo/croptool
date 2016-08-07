@@ -10,8 +10,8 @@ apt-get install -y git > /dev/null
 echo "Installing jpegtran"
 apt-get install -y libjpeg-progs > /dev/null
 
-echo "Installing Nginx"
-apt-get install -y nginx > /dev/null
+echo "Installing Lighttpd"
+apt-get install -y lighttpd > /dev/null
 
 echo "Installing Node.js and NPM"
 apt-get install -y build-essential nodejs npm
@@ -31,42 +31,30 @@ apt-get install -y imagemagick > /dev/null
 echo "Installing PHP"
 apt-get install -y php5-fpm php5-cli php5-imagick php5-curl > /dev/null
 
-echo "Configuring Nginx"
-if [[ ! -e /etc/nginx/server.key ]]; then
-	echo "Generate Nginx server private key..."
-	genrsa="$(openssl genrsa -out /etc/nginx/server.key 2048 2>&1)"
-	echo $genrsa
+echo "Configuring Lighttpd"
+chown -R vagrant:vagrant /var/www
+chown -R vagrant:vagrant /var/log/lighttpd
+if [[ ! -e /etc/lighttpd/certs/lighttpd.pem ]]; then
+	cd /etc/lighttpd/certs
+	openssl req -new -x509 -keyout lighttpd.pem -out lighttpd.pem -days 365 -nodes -subj "/CN=tools.wmflabs.org"
+	chmod 400 lighttpd.pem
 fi
-if [[ ! -e /etc/nginx/server.csr ]]; then
-	echo "Generate Certificate Signing Request (CSR)..."
-	openssl req -new -batch -key /etc/nginx/server.key -out /etc/nginx/server.csr
+sed -i 's/;cgi.fix_pathinfo=1/cgi.fix_pathinfo=1/g' /etc/php5/fpm/php.ini
+cp /vagrant/provision/15-php-fpm.conf /etc/lighttpd/conf-available/15-php-fpm.conf
+cp /vagrant/provision/lighttpd.conf /etc/lighttpd/lighttpd.conf
+lighttpd-enable-mod fastcgi
+lighttpd-enable-mod php-fpm
+
+if [[ ! -d /var/www/ ]]; then
+	mkdir -p /var/www/
 fi
-if [[ ! -e /etc/nginx/server.crt ]]; then
-	echo "Sign the certificate using the above private key and CSR..."
-	signcert="$(openssl x509 -req -days 365 -in /etc/nginx/server.csr -signkey /etc/nginx/server.key -out /etc/nginx/server.crt 2>&1)"
-	echo $signcert
-fi
-cp /vagrant/provision/nginx_vhost /etc/nginx/sites-available/nginx_vhost
-ln -sf /etc/nginx/sites-available/nginx_vhost /etc/nginx/sites-enabled/
-rm -f /etc/nginx/sites-available/default
+echo "Hello world. Looking for <a href='/croptool/'>CropTool</a>?" >| /var/www/index.html
+ln -sf /vagrant/public_html /var/www/croptool
 
-# Since we cannot chmod in a synced folder, we change the Nginx user 
-# from 'www-data' to 'vagrant' instead.
-sed -i 's/user = www-data/user = vagrant/g' /etc/php5/fpm/pool.d/www.conf
-sed -i 's/group = www-data/group = vagrant/g' /etc/php5/fpm/pool.d/www.conf
-
-if [[ ! -d /var/www/html/ ]]; then
-	mkdir -p /var/www/html/
-fi
-
-echo "Hello world. Looking for <a href='/croptool/'>CropTool</a>?" >| /var/www/html/index.html
-ln -sf /vagrant/public_html /var/www/html/croptool
-
-echo "Restarting Nginx and PHP-FPM"
-service nginx restart > /dev/null
 service php5-fpm restart > /dev/null
+service lighttpd restart > /dev/null
 
-# Composer 
+# Composer
 
 cd /vagrant
 

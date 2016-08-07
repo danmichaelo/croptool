@@ -197,7 +197,7 @@
                 </span>
 
                 <span ng-show="cropresults">
-                    <span translate translate-value-width="{{cropresults.width}}" translate-value-height="{{cropresults.height}}">crop-dimensions</span>
+                    <span translate translate-value-width="{{cropresults.crop.width}}" translate-value-height="{{cropresults.crop.height}}">crop-dimensions</span>
                 </span>
 
                 <span ng-show="page">
@@ -232,9 +232,9 @@
                 <!-- ********************************************************************************************************
                      Step 2 & Step 3
                      **************************************************************************************************** -->
-                <div ng-show="cropresults" class="inner transparentBg" ng-style="{'width': (cropresults.thumb ? cropresults.thumb.width : cropresults.width) + 'px', 'margin-left': 'auto', 'margin-right': 'auto'}">
+                <div ng-show="cropresults" class="inner transparentBg" ng-style="{'width': (cropresults.thumb ? cropresults.thumb.width : cropresults.crop.width) + 'px', 'margin-left': 'auto', 'margin-right': 'auto'}">
 
-                    <img ng-src="{{cropresults.thumb ? cropresults.thumb.name : cropresults.name}}" class="img-responsive" />
+                    <img ng-src="{{cropresults.thumb ? cropresults.thumb.name : cropresults.crop.name}}" class="img-responsive" />
 
                 </div>
 
@@ -359,8 +359,8 @@
 
                     <p ng-show="cropresults.method=='lossless'">
                         <span translate>previewform-lossless</span>
-                        <span ng-show="cropresults.width!=crop_dim.w || cropresults.height!=crop_dim.h">
-                            <span translate translate-value-wider="{{cropresults.width - crop_dim.w}}" translate-value-higher="{{cropresults.height - crop_dim.h}}" translate-value-url="//en.wikipedia.org/wiki/JPEG#Lossless_editing">previewform-lossless-explanation</span>
+                        <span ng-show="cropresults.crop.width!=crop_dim.w || cropresults.crop.height!=crop_dim.h">
+                            <span translate translate-value-wider="{{cropresults.crop.width - crop_dim.w}}" translate-value-higher="{{cropresults.crop.height - crop_dim.h}}" translate-value-url="//en.wikipedia.org/wiki/JPEG#Lossless_editing">previewform-lossless-explanation</span>
                         </span>
                     </p>
 

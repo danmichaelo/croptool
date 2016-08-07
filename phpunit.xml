@@ -1,13 +1,20 @@
-<phpunit 
-  colors="true"
-  bootstrap="vendor/autoload.php"
-  verbose="true"
-  stopOnFailure="true">
-
+<phpunit bootstrap="vendor/autoload.php" colors="true" stopOnFailure="true" verbose="true">
+    <filter>
+        <whitelist>
+            <directory suffix=".php">src/php</directory>
+        </whitelist>
+    </filter>
     <testsuites>
-            <testsuite name="TestSuite">
-                    <directory>tests/</directory>
-            </testsuite>
+        <testsuite name="TestSuite">
+            <directory suffix=".php">./tests</directory>
+            <exclude>./tests/integration/WebTestCase.php</exclude>
+        </testsuite>
     </testsuites>
-
+    <!--
+    <logging>
+        <log type="coverage-html" highlight="true" target="report/html" lowUpperBound="50" highLowerBound="80" />
+        <log type="coverage-clover" target="coverage.xml"/>
+        <log type="coverage-text" showUncoveredFiles="true" target="php://stdout"/>
+    </logging>
+    -->
 </phpunit>

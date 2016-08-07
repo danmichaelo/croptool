@@ -2,5 +2,6 @@
 
 namespace CropTool;
 
-class InvalidMimeTypeException extends \RunTimeException {
+class InvalidMimeTypeException extends \RuntimeException
+{
 }

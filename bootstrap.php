@@ -1,32 +1,23 @@
 <?php
 
-define('ROOT_PATH', dirname(__FILE__));
+use CropTool\AuthController;
+use CropTool\FileController;
+use Slim\Http\Request;
+use Slim\Http\Response;
 
-require(ROOT_PATH . '/vendor/autoload.php');
-
-use Monolog\Logger;
-use Monolog\Handler\StreamHandler;
-use CropTool\Image;
-use CropTool\OAuthConsumer;
+if (!defined('ROOT_PATH')) {
+    define('ROOT_PATH', __DIR__);
+}
 
 /**********************************************************************************
  * PHP config
  */
 
-# error_reporting(E_ALL);
-# ini_set('display_errors', '1');
+error_reporting(E_ALL);
+ini_set('display_errors', '1');
+ini_set('display_startup_errors', 1);
 ini_set('memory_limit', '512M');
 
-function shutdown() {
-    $error = error_get_last();
-    if ($error['type'] === E_ERROR) {
-        // fatal error has occured
-        header( "HTTP/1.1 500 Internal Server Error" );
-        print $error['message'];
-    }
-}
-
-register_shutdown_function('shutdown');
 
 /**********************************************************************************
  * The array_get method from Laravel
@@ -37,86 +28,75 @@ register_shutdown_function('shutdown');
  *
  * @return mixed
  */
-function array_get($data, $key, $default = null) {
-    if (!is_array($data)) {
-        return $default;
+if (! function_exists('array_get')) {
+
+    function array_get($data, $key, $default = null) {
+        if (!is_array($data)) {
+            return $default;
+        }
+        return isset($data[$key]) ? $data[$key] : $default;
     }
-    return isset($data[$key]) ? $data[$key] : $default;
 }
 
 /**********************************************************************************
- * Initialize session
+ * Middleware
  */
 
-$hostname = isset($_SERVER['HTTP_X_FORWARDED_SERVER'])
-                ? $_SERVER['HTTP_X_FORWARDED_SERVER']
-                : $_SERVER['SERVER_NAME'];
+$authMiddleware = function (Request $request, Response $response, $next) {
+    $user = $this->get(CropTool\UserService::class);
+    if (!$user->loggedin()) {
+        return $response->withStatus(401)->withJson(['error' => 'Unauthorized']);
+    }
 
-$hostnameProd = 'tools.wmflabs.org';
+    return $next($request, $response);
+};
 
-if ($hostname == 'tools.wmflabs.org, tools-eqiad.wmflabs.org' || $hostname == 'tools-eqiad.wmflabs.org') {
-    $hostname = $hostnameProd;
-}
+$pageMiddleware = function (Request $request, Response $response, $next) {
+    // Middleware that defines the current WikiPage
 
-$basepath = dirname($_SERVER['SCRIPT_NAME']);
-$testingEnv = ($hostname !== $hostnameProd);
+    $title = $request->isGet() ? $request->getQueryParam('title') : $request->getParsedBodyParam('title');
 
-session_name('croptool');
-session_set_cookie_params(0, $basepath, $hostnameProd);
-session_start();
+    $factory = $this->get('DI\FactoryInterface');
+
+    $this->set(CropTool\WikiPage::class, $factory->make(CropTool\WikiPage::class, [
+        'title' => $title,
+    ]));
+
+    return $next($request, $response);
+};
 
 /**********************************************************************************
- * Load config:
- * - consumerKey: The "consumer token" given to you when registering your app
- * - consumerSecret: The "secret token" given to you when registering your app
- * - jpegtranPath: Path to jpegtran
- * - rollbarToken: Token for the Rollbar service
- * - rollbarEnv: Rollbar environment
+ * Init app
  */
 
-$config = parse_ini_file(ROOT_PATH . '/config.ini');
-if ( $config === false ) {
-    header( "HTTP/1.1 500 Internal Server Error" );
-    echo 'The config.ini file could not be read';
-    exit(0);
-}
-if (!isset( $config['consumerKey'] ) || !isset( $config['consumerSecret'] )) {
-    header( "HTTP/1.1 500 Internal Server Error" );
-    echo 'Required configuration directives not found in ini file';
-    exit(0);
-}
-
-Image::$pathToJpegTran = $config['jpegtranPath'];
+$app = new CropTool\App();
+$app->add(CropTool\Session::class);
 
 /**********************************************************************************
- * Init Rollbar
+ * Auth routes
  */
 
-if (isset($config['rollbarToken'])) {
-    Rollbar::init(array(
-        'access_token' => $config['rollbarToken'],
-        'environment' => $config['rollbarEnv']
-    ));
-}
+$app->group('/api/auth', function () use ($authMiddleware) {
+
+    $this->get('/login', [AuthController::class, 'login']);
+    $this->get('/callback', [AuthController::class, 'authCallback']);
+    $this->get('/logout', [AuthController::class, 'logout']);
+    $this->get('/user', [AuthController::class, 'getUser'])->add($authMiddleware);
+
+});
 
 /**********************************************************************************
- * Setup logging
+ * Page routes
  */
 
-$logfile = ROOT_PATH . '/logs/croptool.log';
-if (!file_exists($logfile)) {
-    @touch($logfile);
-}
-if (!is_writable($logfile)) {
-    header( "HTTP/1.1 500 Internal Server Error" );
-    die("Log file " . $logfile . " is not writable");
-}
-$log = new Logger('croptool');
-$log->pushHandler(new StreamHandler($logfile, Logger::INFO));
+$app->group('/api/file', function () use ($authMiddleware) {
 
-/**********************************************************************************
- * Create our OAuthConsumer
- */
+    $this->get('/exists', [FileController::class, 'exists']);
+    $this->get('/thumb', [FileController::class, 'thumb']);
+    $this->get('/autodetect', [FileController::class, 'autodetect']);
+    $this->get('/crop', [FileController::class, 'crop']);
+    $this->post('/publish', [FileController::class, 'publish']);
 
-$keyFile = ROOT_PATH . '/croptool-secret-key.txt';
-$oauth = new OAuthConsumer('tools.wmflabs.org', 'croptool', false, $config, $keyFile, $log);
+})->add($authMiddleware)->add($pageMiddleware);
+
+return $app;

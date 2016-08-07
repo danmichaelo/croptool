@@ -2,9 +2,8 @@
 
 namespace CropTool;
 
-class WikiText {
-
-    /** @var string */
+class WikiText
+{
     protected $text;
 
     protected $elem_matches = array(
@@ -22,6 +21,15 @@ class WikiText {
     public function __construct($text)
     {
         $this->text = strval($text);
+    }
+
+    /**
+     * @param string|WikiText $text
+     * @return WikiText
+     */
+    public static function make($text)
+    {
+        return new self($text);
     }
 
     /**
@@ -49,46 +57,63 @@ class WikiText {
     {
         $data = array();
 
-        if (preg_match($this->elem_matches['tpl_remove_border'], $this->text)) $data['border'] = true;
-        if (preg_match($this->elem_matches['tpl_watermark'], $this->text)) $data['watermark'] = true;
-        if (preg_match($this->elem_matches['cat_border'], $this->text)) $data['border'] = true;
+        if (preg_match($this->elem_matches['tpl_remove_border'], $this->text)) {
+            $data['border'] = true;
+        }
+        if (preg_match($this->elem_matches['tpl_watermark'], $this->text)) {
+            $data['watermark'] = true;
+        }
+        if (preg_match($this->elem_matches['cat_border'], $this->text)) {
+            $data['border'] = true;
+        }
 
         return $data;
     }
 
-    /**
-     * @param $elems
-     * @return array
-     */
-    public function removeStuff($elems)
+    public function cloneIfModified($newText)
     {
-        $removed = array();
+        return ($newText == $this->text) ? $this : new self($newText);
+    }
 
-        if (isset($elems->border) && $elems->border) {
-            $t2 = preg_replace(array(
-                $this->elem_matches['tpl_remove_border'],
-                $this->elem_matches['cat_border'],
-            ), array('', ''), $this->text);
-            if ($t2 != $this->text) $removed['border'] = true;
-            $this->text = $t2;
-        }
-        if (isset($elems->watermark) && $elems->watermark) {
-            $t2 = preg_replace($this->elem_matches['tpl_watermark'], '', $this->text);
-            if ($t2 != $this->text) $removed['watermark'] = true;
-            $this->text = $t2;
-        }
+    /**
+     * Remove {{remove border}} template and category
+     *
+     * @return WikiText
+     */
+    public function withoutBorderTemplate()
+    {
+        $text = preg_replace(array(
+            $this->elem_matches['tpl_remove_border'],
+            $this->elem_matches['cat_border'],
+        ), array('', ''), $this->text);
 
-        return $removed;
+        return $this->cloneIfModified($text);
+    }
+
+    /**
+     * Remove {{remove watermark}} template
+     *
+     * @return WikiText
+     */
+    public function withoutWatermarkTemplate()
+    {
+        $text = preg_replace($this->elem_matches['tpl_watermark'], '', $this->text);
+
+        return $this->cloneIfModified($text);
     }
 
     /**
      * Some templates should not be copied to new files.
      *  - License review templates per <https://github.com/danmichaelo/croptool/issues/41>
      *  - Assessment templates per <https://github.com/danmichaelo/croptool/issues/69>
+     *
+     * @return WikiText
      */
-    public function removeTemplatesNotToBeCopied()
+    public function withoutTemplatesNotToBeCopied()
     {
-        $this->text = preg_replace($this->elem_matches['not_to_be_copied'], '', $this->text);
+        $text = preg_replace($this->elem_matches['not_to_be_copied'], '', $this->text);
+
+        return $this->cloneIfModified($text);
     }
 
     /**
@@ -109,48 +134,57 @@ class WikiText {
      * Otherwise do nothing.
      * @param string $newText
      * @param string $searchText
-     * @return bool
+     * @return WikiText
      */
     public function addBefore($newText, $searchText)
     {
         // 'pz' specifies: multiline perl-mode (http://docs.php.net/mb_regex_set_options)
         $res = $this->search($searchText);
         if ($res === false) {
-            return false;
+            return $this;
         }
         $start = $res[0];
-        $this->text = rtrim(substr($this->text, 0, $start)) . "\n" . $newText . "\n\n" . ltrim(substr($this->text, $start));
-        return true;
+        $text = rtrim(substr($this->text, 0, $start)) . "\n" . $newText . "\n\n" . ltrim(substr($this->text, $start));
+        return $this->cloneIfModified($text);
+    }
+
+    protected function appendTemplate($tpl)
+    {
+        // Try to add before the license header
+        $wt = $this->addBefore($tpl, '==\s*\{\{\s*int:license-header\s*\}\}\s*==');
+        if ($wt !== $this) {
+            return $wt;
+        }
+
+        // Try to add before the first category
+        $wt = $this->addBefore($tpl, '\[\[\s*category:');
+        if ($wt !== $this) {
+            return $wt;
+        }
+
+        // Last option: just append it at the end
+        return new self($this->text . $tpl);
     }
 
     /**
      * Appends the {{Extracted from}} template.
      *
      * @param string $name  Name of the original file
+     * @return WikiText
      */
     public function appendExtractedFromTemplate($name)
     {
         $tpl = "{{Extracted from|" . $name . "}}";
 
-        // Try to add before the license header
-        if ($this->addBefore($tpl, '==\s*\{\{\s*int:license-header\s*\}\}\s*==')) {
-            return;
-        }
-
-        // Try to add before the first category
-        if ($this->addBefore($tpl, '\[\[\s*category:')) {
-            return;
-        }
-
-        // Last option: just append it at the end
-        $this->text .= $tpl;
+        return $this->appendTemplate($tpl);
     }
 
     /**
      * Appends the {{Derivative versions}} template.
      * Note to self: Use substr, not mb_substr
      *
-     * @param string $name  Name of the new file
+     * @param string $name Name of the new file
+     * @return WikiText
      */
     public function appendDerivativeVersionsTemplate($name)
     {
@@ -158,8 +192,8 @@ class WikiText {
         list($start, $length) = $this->search('{{\s*derivative ?(versions|works?)(\s*|\|[^\}]+)}}');
         if (!is_null($start)) {
             // Append |$name before the }} of the template
-            $this->text = substr($this->text, 0, $start + $length - 2) . "|" . $name . substr($this->text, $start + $length - 2);
-            return;
+            $text = substr($this->text, 0, $start + $length - 2) . "|" . $name . substr($this->text, $start + $length - 2);
+            return new self($text);
         }
 
         // Otherwise, try adding the template
@@ -168,22 +202,11 @@ class WikiText {
         // If the 'other_versions' field is present, try adding it there:
         list($start, $length) = $this->search('other[ _]versions\s*\= ?');
         if (!is_null($start)) {
-            $this->text = substr($this->text, 0, $start + $length) . $tpl . substr($this->text, $start + $length);
-            return;
+            $text = substr($this->text, 0, $start + $length) . $tpl . substr($this->text, $start + $length);
+            return new self($text);
         }
 
-        // Try to add before the license header
-        if ($this->addBefore($tpl, '==\s*\{\{\s*int:license-header\s*\}\}\s*==')) {
-            return;
-        }
-
-        // Try to add before the first category
-        if ($this->addBefore($tpl, '\[\[\s*category:')) {
-            return;
-        }
-
-        // Last option: just append it at the end
-        $this->text .= $tpl;
+        // Otherwise, try the standard locations
+        return $this->appendTemplate($tpl);
     }
-
 }

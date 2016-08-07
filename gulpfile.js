@@ -3,7 +3,6 @@
 var gulp = require('gulp-help')(require('gulp'));
 var jshint = require('gulp-jshint');
 var stylish = require('jshint-stylish');
-var minifyHtml = require('gulp-minify-html');
 var uglify = require('gulp-uglify');
 var csso = require('gulp-csso');
 var sourcemaps = require('gulp-sourcemaps');

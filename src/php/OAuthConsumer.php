@@ -5,10 +5,12 @@ namespace CropTool;
 use Defuse\Crypto\Crypto;
 use Defuse\Crypto\Exception\WrongKeyOrModifiedCiphertextException;
 use Defuse\Crypto\Key;
+use Psr\Log\LoggerInterface;
 
 // See also: http://oauth.googlecode.com/svn/code/php/OAuth.php
 
-class OAuthConsumer {
+class OAuthConsumer implements AuthServiceInterface
+{
 
     /**
      * The Special:OAuth URL.
@@ -16,6 +18,8 @@ class OAuthConsumer {
      * index.php?title=Special:OAuth works fine.
      */
     protected $mwOAuthUrl = 'https://www.mediawiki.org/w/index.php?title=Special:OAuth';
+
+    protected $callbackUrl; // = 'https://tools.wmflabs.org/croptool/api/auth/callback';
 
     /**
      * The interwiki prefix for the OAuth central wiki.
@@ -49,44 +53,36 @@ class OAuthConsumer {
      */
     protected $basepath;
 
+    protected $logger;
+    protected $session;
+    protected $cookieKey;
+
     public $warnings = [];
     const INVALID_COOKIE = 'INVALID_COOKIE';
 
-    /**
-     * Are we on a test/development server?
-     */
-    protected $testingEnv = false;
-
-    function loadEncryptionKeyFromConfig($keyFile)
+    public function __construct(Config $config, LoggerInterface $logger, Session $session, $keyFile, $callbackUrl)
     {
-        $keyAscii = file_get_contents($keyFile);
-        return Key::loadFromAsciiSafeString($keyAscii);
-    }
-
-    public function __construct($hostname, $basepath, $testingEnv, $config, $keyFile, $logger)
-    {
-        $this->hostname = $hostname;
-        $this->basepath = $basepath;
-        $this->testingEnv = $testingEnv;
-        $this->gUserAgent = $config['userAgent'];
-        $this->gConsumerKey = $config['consumerKey'];
-        $this->gConsumerSecret = $config['consumerSecret'];
+        $this->hostname = $config->get('hostname');
+        $this->basepath = $config->get('basepath');
+        $this->gUserAgent = $config->get('userAgent');
+        $this->gConsumerKey = $config->get('consumerKey');
+        $this->gConsumerSecret = $config->get('consumerSecret');
         $this->logger = $logger;
+        $this->session = $session;
         $this->cookieKey = $this->loadEncryptionKeyFromConfig($keyFile);
+        $this->callbackUrl = $callbackUrl;
 
         // Load the user token (request or access) from the session
         $this->gTokenKey = '';
         $this->gTokenSecret = '';
 
         // Grab temporary request token from SESSION
-        if ( isset( $_SESSION['mwKey'] ) && isset( $_SESSION['mwSecret'] ) ) {
-            $this->gTokenKey = $_SESSION['mwKey'];
-            $this->gTokenSecret = $_SESSION['mwSecret'];
-            unset($_SESSION['mwKey']);
-            unset($_SESSION['mwSecret']);
+        if ($this->session->has('mwKey') && $this->session->has('mwSecret')) {
+            $this->gTokenKey = $this->session->pull('mwKey');
+            $this->gTokenSecret = $this->session->pull('mwSecret');
 
         // or grab permanent token from COOKIE
-        } else if ( isset( $_COOKIE['mwKey'] ) && isset( $_COOKIE['mwSecret'] ) ) {
+        } elseif (isset($_COOKIE['mwKey']) && isset($_COOKIE['mwSecret'])) {
             try {
                 $this->gTokenKey = Crypto::decrypt($_COOKIE['mwKey'], $this->cookieKey);
                 $this->gTokenSecret = Crypto::decrypt($_COOKIE['mwSecret'], $this->cookieKey);
@@ -96,22 +92,20 @@ class OAuthConsumer {
         }
     }
 
-    public function handleCallbackRequest($verifier)
+    protected function loadEncryptionKeyFromConfig($keyFile)
     {
-        // Fetch the access token if this is the callback from requesting authorization
-        $this->logger->addInfo('[oauth] ' . substr(sha1($this->gTokenKey), 0, 7) . ': Successful authorization');
-        $this->fetchAccessToken($verifier);
-        if (isset($_SESSION['title'])) {
-            header('Location: ./?title=' . urlencode(str_replace(' ', '_', $_SESSION['title'])));
-        } else {
-            header('Location: ./');
-        }
-        exit;
+        $keyAscii = file_get_contents($keyFile);
+        return Key::loadFromAsciiSafeString($keyAscii);
     }
 
     public function getUserAgent()
     {
         return $this->gUserAgent;
+    }
+
+    public function isAuthorized()
+    {
+        return $this->gTokenSecret != '';
     }
 
     public function hasTokenSecret()
@@ -120,58 +114,63 @@ class OAuthConsumer {
     }
 
     /**
-     * Handle a callback to fetch the access token
-     * @param $oauth_verifier
+     * Handle a callback to fetch the permanent access token
+     * @param string $oauth_verifier
      */
-    private function fetchAccessToken($oauth_verifier)
+    public function handleCallbackRequest($oauth_verifier)
     {
-        if (empty($this->gTokenKey)) {
+        $requestToken = $this->gTokenKey;
+        $requestTokenSha1 = substr(sha1($requestToken), 0, 7);
+
+        if (empty($requestToken)) {
             throw new \RuntimeException('Cannot fetch access token when no token key set.');
         }
 
         $url = $this->mwOAuthUrl . '/token';
-        $url .= strpos( $url, '?' ) ? '&' : '?';
-        $url .= http_build_query( array(
+        $url .= strpos($url, '?') ? '&' : '?';
+        $url .= http_build_query(array(
             'format' => 'json',
 
             // OAuth information
             'oauth_consumer_key' => $this->gConsumerKey,
-            'oauth_token' => $this->gTokenKey, // request token
+            'oauth_token' => $requestToken,
             'oauth_verifier' => $oauth_verifier,
             'oauth_version' => '1.0',
-            'oauth_nonce' => md5( microtime() . mt_rand() ),
+            'oauth_nonce' => md5(microtime() . mt_rand()),
             'oauth_timestamp' => time(),
 
             // We're using secret key signatures here.
             'oauth_signature_method' => $this->signatureMethod,
-        ) );
+        ));
 
-        $signature = $this->signRequest( 'GET', $url );
+        $signature = $this->signRequest('GET', $url);
 
-        $url .= "&oauth_signature=" . urlencode( $signature );
+        $url .= "&oauth_signature=" . urlencode($signature);
         $ch = curl_init();
-        curl_setopt( $ch, CURLOPT_URL, $url );
-        //curl_setopt( $ch, CURLOPT_SSL_VERIFYPEER, false );
-        curl_setopt( $ch, CURLOPT_USERAGENT, $this->gUserAgent );
-        curl_setopt( $ch, CURLOPT_HEADER, 0 );
-        curl_setopt( $ch, CURLOPT_RETURNTRANSFER, 1 );
-        $data = curl_exec( $ch );
-        if ( !$data ) {
-            header( "HTTP/1.1 500 Internal Server Error" );
-            $this->logger->addError('[oauth] ' . substr(sha1($this->gTokenKey), 0, 7) . ': Failed to fetch permanent token, got curl error: ' .  curl_error( $ch ));
-            throw new \RuntimeException('Curl error: ' . htmlspecialchars( curl_error( $ch ) ));
+        curl_setopt($ch, CURLOPT_URL, $url);
+        curl_setopt($ch, CURLOPT_USERAGENT, $this->gUserAgent);
+        curl_setopt($ch, CURLOPT_HEADER, 0);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+        $data = curl_exec($ch);
+        if (!$data) {
+            header("HTTP/1.1 500 Internal Server Error");
+            $this->logger->error('[oauth] ' . $requestTokenSha1 . ': Failed to fetch permanent token, got curl error: ' .  curl_error($ch));
+            throw new \RuntimeException('Curl error: ' . htmlspecialchars(curl_error($ch)));
         }
-        curl_close( $ch );
-        $token = json_decode( $data );
+        curl_close($ch);
+        $token = json_decode($data);
 
-        if ( is_object( $token ) && isset( $token->error ) ) {
-            header( "HTTP/1.1 500 Internal Server Error" );
-            $this->logger->addError('[oauth] ' . substr(sha1($this->gTokenKey), 0, 7) . ': Failed to fetch permanent token: ' . htmlspecialchars( $token->error ) );
-            throw new \RuntimeException('Error retrieving token: ' . htmlspecialchars( $token->error ));
+        var_dump($url);
+        var_dump($token);
+
+        if (is_object($token) && isset($token->error)) {
+            header("HTTP/1.1 500 Internal Server Error");
+            $this->logger->error('[oauth] ' . $requestTokenSha1 . ': Failed to fetch permanent token: ' . htmlspecialchars($token->error));
+            throw new \RuntimeException('Error retrieving token: ' . htmlspecialchars($token->error));
         }
-        if ( !is_object( $token ) || !isset( $token->key ) || !isset( $token->secret ) ) {
-            header( "HTTP/1.1 500 Internal Server Error" );
-            $this->logger->addError('[oauth] ' . substr(sha1($this->gTokenKey), 0, 7) . ': Failed to fetch permanent token, got invalid response.');
+        if (!is_object($token) || !isset($token->key) || !isset($token->secret)) {
+            header("HTTP/1.1 500 Internal Server Error");
+            $this->logger->error('[oauth] ' . $requestTokenSha1 . ': Failed to fetch permanent token, got invalid response.');
             throw new \RuntimeException('Invalid response from token request');
         }
 
@@ -185,11 +184,11 @@ class OAuthConsumer {
             $twoYears,
             $this->basepath,
             $this->hostname,
-            !$this->testingEnv,  // only secure (https)
+            true,  // only secure (https)
             true   // httponly
         )) {
-            header( "HTTP/1.1 500 Internal Server Error" );
-            $this->logger->addError('[oauth] Failed to store permanent token');
+            header("HTTP/1.1 500 Internal Server Error");
+            $this->logger->error('[oauth] Failed to store permanent token');
             throw new \RuntimeException('Failed to store key');
         }
 
@@ -199,14 +198,15 @@ class OAuthConsumer {
             $twoYears,
             $this->basepath,
             $this->hostname,
-            !$this->testingEnv,  // only secure (https) unless we are on a testing server
+            true,  // only secure (https)
             true   // httponly
         )) {
-            header( "HTTP/1.1 500 Internal Server Error" );
-            $this->logger->addError('[oauth] Failed to store permanent token');
+            header("HTTP/1.1 500 Internal Server Error");
+            $this->logger->error('[oauth] Failed to store permanent token');
             throw new \RuntimeException('Failed to store secret.');
         }
 
+        $this->logger->info('[oauth] ' . $requestTokenSha1 . ': Authorization successful');
     }
 
     /**
@@ -220,44 +220,42 @@ class OAuthConsumer {
      * @param array $params Extra parameters for the Authorization header or post
      *  data (if application/x-www-form-urlencoded).
      * @return string Signature
-     * @throws Exception
+     * @throws \RuntimeException
      */
-    function signRequest( $method, $url, $params = array()) {
-
-        $parts = parse_url( $url );
+    protected function signRequest($method, $url, $params = array())
+    {
+        $parts = parse_url($url);
 
         // We need to normalize the endpoint URL
-        $scheme = isset( $parts['scheme'] ) ? $parts['scheme'] : 'http';
-        $host = isset( $parts['host'] ) ? $parts['host'] : '';
-        $port = isset( $parts['port'] ) ? $parts['port'] : ( $scheme == 'https' ? '443' : '80' );
-        $path = isset( $parts['path'] ) ? $parts['path'] : '';
-        if ( ( $scheme == 'https' && $port != '443' ) ||
-            ( $scheme == 'http' && $port != '80' ) 
-        ) {
+        $scheme = array_get($parts, 'scheme', 'http');
+        $host = array_get($parts, 'host', '');
+        $port = array_get($parts, 'port', $scheme == 'https' ? '443' : '80');
+        $path = array_get($parts, 'path', '');
+        if (($scheme == 'https' && $port != '443') || ($scheme == 'http' && $port != '80')) {
             // Only include the port if it's not the default
             $host = "$host:$port";
         }
 
         // Also the parameters
         $pairs = array();
-        parse_str( isset( $parts['query'] ) ? $parts['query'] : '', $query );
+        parse_str(array_get($parts, 'query', ''), $query);
         $query += $params;
-        unset( $query['oauth_signature'] );
-        if ( $query ) {
+        unset($query['oauth_signature']);
+        if ($query) {
             $query = array_combine(
-                // rawurlencode follows RFC 3986 since PHP 5.3
-                array_map( 'rawurlencode', array_keys( $query ) ),
-                array_map( 'rawurlencode', array_values( $query ) )
+            // rawurlencode follows RFC 3986 since PHP 5.3
+                array_map('rawurlencode', array_keys($query)),
+                array_map('rawurlencode', array_values($query))
             );
-            ksort( $query, SORT_STRING );
-            foreach ( $query as $k => $v ) {
+            ksort($query, SORT_STRING);
+            foreach ($query as $k => $v) {
                 $pairs[] = "$k=$v";
             }
         }
 
-        $toSign = rawurlencode( strtoupper( $method ) ) . '&' .
-            rawurlencode( "$scheme://$host$path" ) . '&' .
-            rawurlencode( join( '&', $pairs ) );
+        $toSign = rawurlencode(strtoupper($method)) . '&' .
+            rawurlencode("$scheme://$host$path") . '&' .
+            rawurlencode(join('&', $pairs));
 
         if ($this->signatureMethod == 'rsa') {
 
@@ -272,41 +270,37 @@ class OAuthConsumer {
 
             $privateKey = openssl_pkey_get_private(file_get_contents($this->rsaPrivateKeyFile));
             if ($privateKey === false) {
-                throw new Exception('Unable to open private key file.');
+                throw new \RuntimeException('Unable to open private key file.');
             }
 
             // Sign using the key
             if (openssl_sign($toSign, $signature, $privateKey) === false) {
-                throw new Exception('Unable to sign using the private key file.');
+                throw new \RuntimeException('Unable to sign using the private key file.');
             }
 
             // Release the key resource
             openssl_free_key($privateKey);
 
             return base64_encode($signature);
-
         } else {
-
-            $key = rawurlencode( $this->gConsumerSecret ) . '&' . rawurlencode( $this->gTokenSecret );
-            return base64_encode( hash_hmac( 'sha1', $toSign, $key, true ) );
-
+            $key = rawurlencode($this->gConsumerSecret) . '&' . rawurlencode($this->gTokenSecret);
+            return base64_encode(hash_hmac('sha1', $toSign, $key, true));
         }
-
     }
 
     public function doLogout()
     {
-        $this->logger->addInfo('[oauth] Destroy authorization (logout)');
+        $this->logger->info('[oauth] Destroy authorization (logout)');
 
-        setcookie('mwKey', '', time() - 3600, $this->basepath, $this->hostname, !$this->testingEnv, true);
-        setcookie('mwSecret', '', time() - 3600, $this->basepath, $this->hostname, !$this->testingEnv, true);
+        setcookie('mwKey', '', time() - 3600, $this->basepath, $this->hostname, true, true);
+        setcookie('mwSecret', '', time() - 3600, $this->basepath, $this->hostname, true, true);
 
         // The domain is sometimes prepended by a dot (http://stackoverflow.com/q/2285010):
         // To make sure the cookies are deleted:
-        setcookie('mwKey', '', time() - 3600, $this->basepath, '.' . $this->hostname, !$this->testingEnv, true);
-        setcookie('mwSecret', '', time() - 3600, $this->basepath, '.' . $this->hostname, !$this->testingEnv, true);
-        setcookie('mwKey', '', time() - 3600, $this->basepath, '', !$this->testingEnv, true);
-        setcookie('mwSecret', '', time() - 3600, $this->basepath, '', !$this->testingEnv, true);
+        setcookie('mwKey', '', time() - 3600, $this->basepath, '.' . $this->hostname, true, true);
+        setcookie('mwSecret', '', time() - 3600, $this->basepath, '.' . $this->hostname, true, true);
+        setcookie('mwKey', '', time() - 3600, $this->basepath, '', true, true);
+        setcookie('mwSecret', '', time() - 3600, $this->basepath, '', true, true);
 
         $this->gTokenKey = '';
         $this->gTokenSecret = '';
@@ -314,77 +308,76 @@ class OAuthConsumer {
 
     /**
      * Request authorization
-     * @return void
+     * @param string $state
+     * @return string
      */
-    function doAuthorizationRedirect() {
+    public function getAuthorizationUrl($state)
+    {
 
         // First, we need to fetch a temporary request token.
         // The request is signed with an empty token secret and no token key.
         $this->gTokenSecret = '';
         $url = $this->mwOAuthUrl . '/initiate';
-        $url .= strpos( $url, '?' ) ? '&' : '?';
-        $url .= http_build_query( array(
+        $url .= strpos($url, '?') ? '&' : '?';
+        $url .= http_build_query(array(
             'format' => 'json',
 
             // OAuth information
-            'oauth_callback' => 'https://tools.wmflabs.org/croptool/backend.php',
+            'oauth_callback' => $this->callbackUrl . '?' . $state,
             'oauth_consumer_key' => $this->gConsumerKey,
             'oauth_version' => '1.0',
-            'oauth_nonce' => md5( microtime() . mt_rand() ),
+            'oauth_nonce' => md5(microtime() . mt_rand()),
             'oauth_timestamp' => time(),
 
             // We're using secret key signatures here.
             'oauth_signature_method' => $this->signatureMethod,
-        ) );
-        $signature = $this->signRequest( 'GET', $url );
-        $url .= "&oauth_signature=" . urlencode( $signature );
+        ));
+        $signature = $this->signRequest('GET', $url);
+        $url .= "&oauth_signature=" . urlencode($signature);
         $ch = curl_init();
-        curl_setopt( $ch, CURLOPT_URL, $url );
-        //curl_setopt( $ch, CURLOPT_SSL_VERIFYPEER, false );
-        curl_setopt( $ch, CURLOPT_USERAGENT, $this->gUserAgent );
-        curl_setopt( $ch, CURLOPT_HEADER, 0 );
-        curl_setopt( $ch, CURLOPT_RETURNTRANSFER, 1 );
-        $data = curl_exec( $ch );
-        if ( !$data ) {
-            header( "HTTP/1.1 500 Internal Server Error" );
-            $this->logger->addError('[oauth] No data received: ' . curl_error( $ch ));
-            echo 'Curl error: ' . htmlspecialchars( curl_error( $ch ) );
+        curl_setopt($ch, CURLOPT_URL, $url);
+        curl_setopt($ch, CURLOPT_USERAGENT, $this->gUserAgent);
+        curl_setopt($ch, CURLOPT_HEADER, 0);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+        $data = curl_exec($ch);
+        if (!$data) {
+            header("HTTP/1.1 500 Internal Server Error");
+            $this->logger->error('[oauth] No data received: ' . curl_error($ch));
+            echo 'Curl error: ' . htmlspecialchars(curl_error($ch));
             exit(0);
         }
-        curl_close( $ch );
-        $token = json_decode( $data );
+        curl_close($ch);
+        $token = json_decode($data);
 
-        if ( is_object( $token ) && isset( $token->error ) ) {
-            header( "HTTP/1.1 500 Internal Server Error" );
-            $this->logger->addError('[oauth] Failed to initiate: ' . htmlspecialchars( $token->error ) );
-            echo 'Error retrieving token: ' . htmlspecialchars( $token->error );
+        if (is_object($token) && isset($token->error)) {
+            header("HTTP/1.1 500 Internal Server Error");
+            $this->logger->error('[oauth] Failed to initiate: ' . htmlspecialchars($token->error));
+            echo 'Error retrieving token: ' . htmlspecialchars($token->message);
             exit(0);
         }
-        if ( !is_object( $token ) || !isset( $token->key ) || !isset( $token->secret ) ) {
-            header( "HTTP/1.1 500 Internal Server Error" );
-            $this->logger->addError('[oauth] Invalid response from initiate request');
+        if (!is_object($token) || !isset($token->key) || !isset($token->secret)) {
+            header("HTTP/1.1 500 Internal Server Error");
+            $this->logger->error('[oauth] Invalid response from initiate request');
             echo 'Invalid response from token request';
             exit(0);
         }
 
         // Now we have the request token, we need to save it for later.
-        //session_start();
 
-        $_SESSION['mwKey'] = $token->key;
-        $_SESSION['mwSecret'] = $token->secret; // What do we need this for?
+        $this->session->put('mwKey', $token->key);
+        $this->session->put('mwSecret', $token->secret);  // What do we need this for?
 
         // Then we send the user off to authorize
         $url = $this->mwOAuthUrl . '/authorize';
 
-        $url .= strpos( $url, '?' ) ? '&' : '?';
-        $url .= http_build_query( array(
+        $url .= strpos($url, '?') ? '&' : '?';
+        $url .= http_build_query(array(
             'oauth_token' => $token->key,
             'oauth_consumer_key' => $this->gConsumerKey,
-        ) );
+        ));
 
-        $this->logger->addInfo('[oauth] ' . substr(sha1($token->key), 0, 7) . ': Requesting authorization');
-        header( "Location: $url" );
-        echo 'Please see <a href="' . htmlspecialchars( $url ) . '">' . htmlspecialchars( $url ) . '</a>';
+        $this->logger->info('[oauth] ' . substr(sha1($token->key), 0, 7) . ': Requesting authorization');
+        return $url;
     }
 
     /**
@@ -400,18 +393,17 @@ class OAuthConsumer {
             'oauth_consumer_key' => $this->gConsumerKey,
             'oauth_token' => $this->gTokenKey,
             'oauth_version' => '1.0',
-            'oauth_nonce' => md5( microtime() . mt_rand() ),
+            'oauth_nonce' => md5(microtime() . mt_rand()),
             'oauth_timestamp' => time(),
             'oauth_signature_method' => $this->signatureMethod,
         );
 
         $headers['oauth_signature'] = $this->signRequest($method, $url, $data + $headers);
         $header = array();
-        foreach ( $headers as $k => $v ) {
-            $header[] = rawurlencode( $k ) . '="' . rawurlencode( $v ) . '"';
+        foreach ($headers as $k => $v) {
+            $header[] = rawurlencode($k) . '="' . rawurlencode($v) . '"';
         }
-        $header = 'Authorization: OAuth ' . join( ', ', $header );
+        $header = 'Authorization: OAuth ' . join(', ', $header);
         return $header;
     }
-
 }

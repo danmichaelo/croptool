@@ -5,14 +5,11 @@ namespace CropTool;
 use Imagick;
 use ImagickPixel;
 
-/**
- * Class that does the actual cropping
- */
-class Image
+class ImageEditor
 {
 
-    public static $pathToJpegTran = '/usr/local/bin/jpegtran';
-    public static $filesFolder = 'files/';
+    protected $pathToJpegTran = '/usr/local/bin/jpegtran';
+    protected $filesFolder = 'files/';
 
     public $error;
 
@@ -25,23 +22,45 @@ class Image
 
     protected $thumbWidth = 800;
     protected $thumbHeight = 800;
+    protected $filePermission = 0664;  // user + group: rw, other: r
 
-    public function __construct($path, $mime)
+    protected $supportedFileTypes = [
+        '.jpg' => 'image/jpeg',
+        '.png' => 'image/png',
+        '.gif' => 'image/gif',
+        '.djvu' => 'image/vnd.djvu',
+        '.pdf' => 'application/pdf',
+    ];
+
+    public function __construct(Config $config)
     {
-        $this->path = $path;
-        $this->mime = $mime;
-        $this->_load();
+        $this->pathToJpegTran = $config->get('jpegtranPath');
     }
 
-    public function _load()
+    protected function mimeFromPath($path)
+    {
+        $fileExt = substr($path, strrpos($path, '.'));
+        if (!isset($this->supportedFileTypes[$fileExt])) {
+            throw new \RuntimeException('[ImageEditor] Invalid file extension: ' . $fileExt);
+        }
+        return $this->supportedFileTypes[$fileExt];
+    }
+
+    public function open($path)
+    {
+        $this->path = $path;
+        $this->mime = $this->mimeFromPath($path);
+        $this->loadFile();
+        return $this;
+    }
+
+    protected function loadFile()
     {
         if ($this->mime != 'image/jpeg') {
-
             $this->orientation = 0;
             $sz = getimagesize($this->path);
             $this->width = $sz[0];
             $this->height = $sz[1];
-
         } else {
             $exif = @exif_read_data($this->path, 'IFD0');
             $this->orientation = (isset($exif) && isset($exif['Orientation'])) ? intval($exif['Orientation']) : 0;
@@ -50,8 +69,7 @@ class Image
             $sf = explode(',', $image->getImageProperty('jpeg:sampling-factor'));
             $this->samplingFactor = $sf[0];
 
-            switch($this->orientation)
-            {
+            switch ($this->orientation) {
                 case Imagick::ORIENTATION_UNDEFINED:    // 0
                 case Imagick::ORIENTATION_TOPLEFT:      // 1 : no rotation
                 case Imagick::ORIENTATION_BOTTOMRIGHT:  // 3 : 180 deg
@@ -73,21 +91,22 @@ class Image
         }
 
         if (!$this->width || !$this->height) {
-            unlink($this->path);
+
+            // @TODO: This should move to a safer place:
+            // unlink($this->path);
+
             throw new \RuntimeException('Invalid image file ' . $this->path . '. Refreshing the page might help in some cases.');
         }
     }
 
     public function getCropCoordinates($x, $y, $width, $height)
     {
-
         // Remember:
         // - Origin is in the upper left corner
         // - Positive x is rightwards
         // - Positive y is downwards
 
-        switch($this->orientation)
-        {
+        switch ($this->orientation) {
             case Imagick::ORIENTATION_UNDEFINED:    // 0
             case Imagick::ORIENTATION_TOPLEFT:      // 1 : no rotation
                 // No rotation
@@ -137,8 +156,7 @@ class Image
 
     public function flipped()
     {
-        switch($this->orientation)
-        {
+        switch ($this->orientation) {
             case Imagick::ORIENTATION_UNDEFINED:    // 0
             case Imagick::ORIENTATION_TOPLEFT:      // 1 : no rotation
                 return false;
@@ -158,7 +176,7 @@ class Image
         }
     }
 
-    public function crop($method, $destPath, $x, $y, $width, $height)
+    public function crop($destPath, $method, $x, $y, $width, $height)
     {
         if (file_exists($destPath)) {
             unlink($destPath);
@@ -169,25 +187,17 @@ class Image
 
         if ($method == 'gif') {
             $this->gifCrop($destPath, $coords);
-        } else if ($method == 'lossless') {
+        } elseif ($method == 'lossless') {
             $this->losslessCrop($destPath, $coords);
-            $size = getimagesize($destPath);
-            $width = $this->flipped() ? $size[1] : $size[0];
-            $height = $this->flipped() ? $size[0] : $size[1];
-        } else if ($method == 'precise') {
+        } elseif ($method == 'precise') {
             $this->preciseCrop($destPath, $coords);
         } else {
-            die('Unknown crop method');
+            throw new \RuntimeException('Unknown crop method specified');
         }
 
-        chmod($destPath, 0664);
+        chmod($destPath, $this->filePermission);
 
-        return array(
-            'method' => $method,
-            'name' => Image::$filesFolder . basename($destPath) . '?ts=' . time(),
-            'width' => $width,
-            'height' => $height,
-        );
+        return true;
     }
 
     public function preciseCrop($destPath, $coords)
@@ -240,17 +250,16 @@ class Image
     public function losslessCrop($destPath, $coords)
     {
         $dim = $coords['width'] . 'x' . $coords['height'] . '+' . $coords['x'] .'+' . $coords['y'];
-        $this->cropUsingCmd(Image::$pathToJpegTran . ' -copy all -crop {dim} {src} > {dest}',
+        $this->cropUsingCmd($this->pathToJpegTran . ' -copy all -crop {dim} {src} > {dest}',
             $destPath, $dim);
     }
 
-    public function _thumb($thumbPath, $maxWidth, $maxHeight)
+    protected function genThumb($thumbPath, $maxWidth, $maxHeight)
     {
         $im = new Imagick();
         $im->readImage($this->path);
 
-        switch($this->orientation)
-        {
+        switch ($this->orientation) {
             case Imagick::ORIENTATION_UNDEFINED:    // 0
             case Imagick::ORIENTATION_TOPLEFT:      // 1 : no rotation
                 break;
@@ -293,25 +302,25 @@ class Image
 
     public function thumb($thumb_path)
     {
+        // Unlink first, in case a new thumb is not needed
+        if (file_exists($thumb_path)) {
+            unlink($thumb_path);
+        }
+
         if ($this->mime == 'image/gif') {
-            return null;
+            return false;
         }
         /* We always create a thumbnail if orientation > 1 because
             not all browsers respects EXIF orientation. The thumbnail
             will be "hard oriented".
         */
         if ($this->orientation <= 1 && $this->width <= $this->thumbWidth && $this->height <= $this->thumbHeight) {
-            return null;
+            return false;
         }
 
-        $dim = $this->_thumb($thumb_path, $this->thumbWidth, $this->thumbHeight);
-        chmod($thumb_path, 0664);
+        $this->genThumb($thumb_path, $this->thumbWidth, $this->thumbHeight);
+        chmod($thumb_path, $this->filePermission);
 
-        return array(
-            'name' => Image::$filesFolder . basename($thumb_path) . '?ts=' . time(),
-            'width' => $dim[0],
-            'height' => $dim[1],
-        );
+        return true;
     }
-
 }
