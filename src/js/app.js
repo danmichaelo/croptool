@@ -13,7 +13,7 @@ config(['$translateProvider', function($translateProvider) {
 
 service('LoginService', ['$http', '$rootScope', function($http, $rootScope) {
 
-    console.log('Init LoginService');
+    // console.log('Init LoginService');
 
     var that = this;
 
@@ -24,6 +24,11 @@ service('LoginService', ['$http', '$rootScope', function($http, $rootScope) {
             that.user = undefined;
         }
         that.loginResponse = response;
+        if (typeof that.loginResponse != 'object') {
+            that.loginResponse = {
+                error: 'The CropTool backend is currently having problems.',
+            };
+        }
         that.loginResponse.code = code;
         $rootScope.$broadcast('loginStatusChanged', that.loginResponse);
     };
@@ -46,13 +51,13 @@ service('WindowService', ['$rootScope', '$window', function($rootScope, $window)
 
 }]).
 
-controller('LoginCtrl', ['$scope', '$http', 'LoginService', function($scope, $http, LoginService) {
+controller('LoginCtrl', ['$scope', '$http', '$httpParamSerializer', 'LoginService', function($scope, $http, $httpParamSerializer, LoginService) {
 
     $scope.user = LoginService.user;
     $scope.ready = false;
 
     $scope.oauthLogin = function() {
-        window.location.href = './api/auth/login?returnTo=' + $scope.imageUrlOrTitle;
+        window.location.href = './api/auth/login?' + $httpParamSerializer($scope.currentUrlParams);
     };
 
     $scope.logout = function() {
@@ -78,7 +83,7 @@ controller('LoginCtrl', ['$scope', '$http', 'LoginService', function($scope, $ht
 
     });
 
-    console.log('Init LoginCtrl');
+    // console.log('Init LoginCtrl');
 
 }]).
 
@@ -89,9 +94,10 @@ controller('AppCtrl', ['$scope', '$http', '$timeout', '$q', '$window', '$httpPar
         pixelratio = [1,1],
         setSelectCalled = false;
 
-    $scope.site = '';     // Site-part of the URL
-    $scope.title = '';    // Title-part of the URL
-
+    $scope.currentUrlParams = {};
+    /*.site = '';     // Site-part of the URL
+    $scope.currentUrlParams.title = '';    // Title-part of the URL
+*/
     function getParameterByName(name, source) {
         name = name.replace(/[\[]/, "\\\[").replace(/[\]]/, "\\\]");
         var regex = new RegExp("[\\?&]" + name + "=([^&#]*)"),
@@ -169,9 +175,9 @@ controller('AppCtrl', ['$scope', '$http', '$timeout', '$q', '$window', '$httpPar
 
     function fetchImage() {
 
-        console.log('[fetchImage] Site: ' + $scope.site + ', title: ' + $scope.title + ', page: ' + $scope.page);
+        console.log('[fetchImage] Site: ' + $scope.currentUrlParams.site + ', title: ' + $scope.currentUrlParams.title + ', page: ' + $scope.currentUrlParams.page);
 
-        if (!$scope.title) {
+        if (!$scope.currentUrlParams.title) {
             console.log('[fetchImage] No title given, nothing to fetch');
             return;
         }
@@ -181,13 +187,13 @@ controller('AppCtrl', ['$scope', '$http', '$timeout', '$q', '$window', '$httpPar
         $scope.crop_dim = undefined;
 
         $http.get('./api/file/thumb?' + $httpParamSerializer({
-            title: $scope.title,
-            site: $scope.site,
-            page: $scope.page
+            title: $scope.currentUrlParams.title,
+            site: $scope.currentUrlParams.site,
+            page: $scope.currentUrlParams.page
         })).
         error(function(response, status, headers) {
             $scope.metadata = null;
-            $scope.error = 'An error occured: ' + status + ' ' + response.error;
+            $scope.error = response.error;
             $scope.busy = false;
         }).
         success(function(response) {
@@ -210,11 +216,11 @@ controller('AppCtrl', ['$scope', '$http', '$timeout', '$q', '$window', '$httpPar
 
             if (!response.error) {
 
-                var p = $scope.title.lastIndexOf('.');
-                if ($scope.page) {
-                    $scope.newTitle = $scope.title.substr(0, p) + ' (page ' + $scope.page + ' crop).jpg';
+                var p = $scope.currentUrlParams.title.lastIndexOf('.');
+                if ($scope.currentUrlParams.page) {
+                    $scope.newTitle = $scope.currentUrlParams.title.substr(0, p) + ' (page ' + $scope.currentUrlParams.page + ' crop).jpg';
                 } else {
-                    $scope.newTitle = $scope.title.substr(0, p) + ' (cropped)' + $scope.title.substr(p);
+                    $scope.newTitle = $scope.currentUrlParams.title.substr(0, p) + ' (cropped)' + $scope.currentUrlParams.title.substr(p);
                 }
 
                 $timeout(function() {
@@ -254,9 +260,9 @@ controller('AppCtrl', ['$scope', '$http', '$timeout', '$q', '$window', '$httpPar
 
         $scope.borderLocatorBusy = true;
         $http.get('./api/file/autodetect?' + $httpParamSerializer({
-            title: $scope.title,
-            site: $scope.site,
-            page: $scope.page
+            title: $scope.currentUrlParams.title,
+            site: $scope.currentUrlParams.site,
+            page: $scope.currentUrlParams.page
         }))
             .success(function(response) {
                 $scope.borderLocatorBusy = false;
@@ -316,68 +322,89 @@ controller('AppCtrl', ['$scope', '$http', '$timeout', '$q', '$window', '$httpPar
         }
     };
 
-    function parseImageUrlOrTitle( imageUrlOrTitle ) {
+    function parseImageUrlOrTitle( params ) {
 
         var pattern1 = /([a-z0-9.]+)\.(wikimedia.org|wikipedia.org|wmflabs.org|wikisource.org)\/wiki\/([^?]+)/,
             pattern2 = /([a-z0-9.]+)\.(wikimedia.org|wikipedia.org|wmflabs.org|wikisource.org)\/w\/index.php/,
-            matches1 = imageUrlOrTitle.match(pattern1),
-            matches2 = imageUrlOrTitle.match(pattern2),
-            o = { site: 'commons.wikimedia.org', title: '', page: 0 };
+            matches1 = params.title.match(pattern1),
+            matches2 = params.title.match(pattern2);
 
-        var qs = '?' + imageUrlOrTitle.split('?')[1]
+        var qs = '?' + params.title.split('?')[1];
         if (matches1) {
-            o.site = matches1[1] + '.' + matches1[2];
-            o.title = matches1[3];
-            o.page = getParameterByName('page', qs);
+            params.site = matches1[1] + '.' + matches1[2];
+            params.title = matches1[3];
+            params.page = getParameterByName('page', qs) || params.page;
         } else if (matches2) {
-            o.site = matches2[1] + '.' + matches2[2];
-            o.title = getParameterByName('title', qs);
-            o.page = getParameterByName('page', qs);
+            params.site = matches2[1] + '.' + matches2[2];
+            params.title = getParameterByName('title', qs);
+            params.page = getParameterByName('page', qs);
         } else {
-            o.title = imageUrlOrTitle.split('?')[0];
-            o.page = getParameterByName('page', qs);
+            params.site = params.site || 'commons.wikimedia.org';
+            params.title = params.title.split('?')[0];
+            params.page = getParameterByName('page', qs) || params.page;
         }
 
         try {
-            o.title = decodeURIComponent(o.title);
+            params.title = decodeURIComponent(params.title);
         } catch (e) {
             // Ignore
         }
 
-        o.title = o.title
+        params.title = params.title
             .replace(/_/g, ' ')
             .replace(/^[^:]+:/, '');  // Strip off File:, Fil:, etc.
 
-        return o;
+        if (params.title.match(/\.(pdf|djvu)$/) && !params.page) {
+            params.page = 1;
+        }
+
+        return params;
     }
 
 
     $scope.openFile = function(updateHistory) {
 
+        if (updateHistory === false) {
+            $scope.currentUrlParams = {
+                site: getParameterByName('site'),
+                title: getParameterByName('title'),
+                page: getParameterByName('page'),
+            };
+        }
+
         if (updateHistory !== false) {
-            var newUrl = location.href.split('?', 1)[0] + ($scope.imageUrlOrTitle ? '?title=' + encodeURIComponent($scope.imageUrlOrTitle.replace(/ /g, '_')) : '');
+            var params = $httpParamSerializer($scope.currentUrlParams);
+            var newUrl = location.href.split('?', 1)[0] + (params.length ? '?' + params : '');
             window.history.pushState(null, null, newUrl);
             everPushedSomething = true;
         }
 
-        if (!$scope.imageUrlOrTitle) {
+        if (!$scope.currentUrlParams.title) {
+
             if (jcrop_api) {
                 jcrop_api.destroy();
                 $('#cropbox').removeAttr('style');
             }
-            $scope.site = ''; // Site part of URL
-            $scope.title = ''; // Title part of URL
-            $scope.newTitle = ''; // Title part of URL
+
+            // Resetting state
+            $scope.error = '';
+            $scope.currentUrlParams = {};
+            $scope.newTitle = '';
             $scope.cropresults = null;
             $scope.uploadresults = null;
             $scope.metadata = null;
+
             return;
         }
 
-        var o = parseImageUrlOrTitle($scope.imageUrlOrTitle);
-        $scope.site = o.site;
-        $scope.title = o.title;
-        $scope.page = o.page;
+        console.log('   params before parse: ',$scope.currentUrlParams);
+        $scope.currentUrlParams = parseImageUrlOrTitle($scope.currentUrlParams);
+        console.log('    params after parse: ',$scope.currentUrlParams);
+
+        // $scope.currentUrlParams.site = o.site;
+        // $scope.currentUrlParams.title = o.title;
+        // $scope.currentUrlParams.page = o.page;
+
         fetchImage();
     };
 
@@ -390,12 +417,12 @@ controller('AppCtrl', ['$scope', '$http', '$timeout', '$q', '$window', '$httpPar
         $scope.error = '';
         $scope.allowIgnoreWarnings = false;
         $scope.ignoreWarnings = false;
-        $scope.busy = true;
+        $scope.ladda = true;
 
         $http.get('./api/file/crop?' + $httpParamSerializer({
-            title: $scope.title,
-            site: $scope.site,
-            page: $scope.page,
+            title: $scope.currentUrlParams.title,
+            site: $scope.currentUrlParams.site,
+            page: $scope.currentUrlParams.page,
             method: $scope.cropmethod,
             x: $scope.crop_dim.x,
             y: $scope.crop_dim.y,
@@ -403,13 +430,18 @@ controller('AppCtrl', ['$scope', '$http', '$timeout', '$q', '$window', '$httpPar
             height: $scope.crop_dim.h
         })).
         success(function(response) {
-            $scope.busy = false;
+            $scope.ladda = false;
+
+
+            // TODO: Add timestamps to invalidate cache!
+
+
             $scope.cropresults = response;
             $scope.updateUploadComment();
         }).
         error(function(response, status, headers) {
             $scope.error = '[Error] ' + response.error;
-            $scope.busy = false;
+            $scope.ladda = false;
         });
 
 
@@ -417,14 +449,14 @@ controller('AppCtrl', ['$scope', '$http', '$timeout', '$q', '$window', '$httpPar
 
     $scope.upload = function(isRetrying) {
 
-        $scope.busy = true;
+        $scope.ladda2 = true;
         $scope.error = '';
         $scope.allowIgnoreWarnings = false;
 
         var params = {
-            title: $scope.title,
-            site: $scope.site,
-            page: $scope.page,
+            title: $scope.currentUrlParams.title,
+            site: $scope.currentUrlParams.site,
+            page: $scope.currentUrlParams.page,
             overwrite: $scope.overwrite,
             comment: $scope.uploadComment,
             filename: $scope.newTitle,
@@ -441,7 +473,7 @@ controller('AppCtrl', ['$scope', '$http', '$timeout', '$q', '$window', '$httpPar
 
             console.log(response);
 
-            $scope.busy = false;
+            $scope.ladda2 = false;
             if (response.result === 'Success') {
                 $scope.uploadresults = response; //.imageinfo.descriptionurl;
 
@@ -470,7 +502,7 @@ controller('AppCtrl', ['$scope', '$http', '$timeout', '$q', '$window', '$httpPar
 
         }).
         error(function(response, status, headers) {
-            $scope.busy = false;
+            $scope.ladda2 = false;
             $scope.error = 'Upload failed! ' + response.error;
         });
 
@@ -484,17 +516,9 @@ controller('AppCtrl', ['$scope', '$http', '$timeout', '$q', '$window', '$httpPar
             return;
         }
         $scope.$apply(function() {
-            console.log('LOCATION CHANGED: ' + getParameterByName('imageUrlOrTitle'));
-            $scope.imageUrlOrTitle = getParameterByName('imageUrlOrTitle');
             $scope.openFile(false);
         });
     });
-
-    var tmp = getParameterByName('title');
-    if (!tmp) tmp = getParameterByName('imageUrlOrTitle');  // deprecated
-    $scope.currentUrl = tmp;
-    $scope.imageUrlOrTitle = $scope.currentUrl;
-    $scope.page = getParameterByName('page');
 
     $scope.openFile(false);
 
@@ -506,7 +530,7 @@ controller('AppCtrl', ['$scope', '$http', '$timeout', '$q', '$window', '$httpPar
     $scope.aspectratio_cx = LocalStorageService.get('croptool-aspectratio-x') || '16';
     $scope.aspectratio_cy = LocalStorageService.get('croptool-aspectratio-y') || '9';;
     $scope.overwrite = LocalStorageService.get('croptool-overwrite') || 'overwrite';;
-    if ($scope.page) {
+    if ($scope.currentUrlParams.page) {
         $scope.overwrite = 'rename';  // Force rename
     }
 
@@ -566,22 +590,24 @@ controller('AppCtrl', ['$scope', '$http', '$timeout', '$q', '$window', '$httpPar
         }, 300);
     }
 
-    $scope.$watch('imageUrlOrTitle', function() {
+    // Check for file existence as you type
+    $scope.$watch('titleInput', function() {
 
-        var o = parseImageUrlOrTitle( $scope.imageUrlOrTitle ),
-            key = o.site + ':' + o.title;
+        if (!$scope.titleInput) {
+            return;
+        }
 
-        $scope.site = o.site;
-        $scope.title = o.title;
+        var params = parseImageUrlOrTitle({title: $scope.titleInput}),
+            key = params.site + ':' + params.title;
 
-        if ($scope.imageUrlOrTitle !== undefined && $scope.exists[key] === undefined) {
-            if ($scope.imageUrlOrTitle !== $scope.currentUrl) {
+        if (params.title && $scope.exists[key] === undefined) {
+            if ($scope.title !== params.title) {
                 $scope.error = '';
-                $scope.currentUrl = $scope.imageUrlOrTitle;
-                fileExists( $scope.site, $scope.title );
+                fileExists( params.site, params.title );
             }
         }
 
+        $scope.currentUrlParams = params;
     });
 
     $scope.updateUploadComment = function() {
@@ -604,12 +630,12 @@ controller('AppCtrl', ['$scope', '$http', '$timeout', '$q', '$window', '$httpPar
                 s = 'Removed watermark'
             }
             if ($scope.overwrite == 'rename') {
-                s += ' from [[File:' + $scope.title + ']]';
+                s += ' from [[File:' + $scope.currentUrlParams.title + ']]';
             }
             s += ' by cropping';
         } else {
             if ($scope.overwrite == 'rename') {
-                s += '[[File:' + $scope.title + ']] cropped';
+                s += '[[File:' + $scope.currentUrlParams.title + ']] cropped';
             } else {
                 s += 'Cropped';
             }
@@ -622,8 +648,8 @@ controller('AppCtrl', ['$scope', '$http', '$timeout', '$q', '$window', '$httpPar
 
         // TODO: !!! pageExists -> imageUrlOrTitleExists
 
-        if ($scope.newTitle && $scope.exists[$scope.site + ':' + $scope.newTitle] === undefined) {
-            fileExists($scope.site, $scope.newTitle);
+        if ($scope.newTitle && $scope.exists[$scope.currentUrlParams.site + ':' + $scope.newTitle] === undefined) {
+            fileExists($scope.currentUrlParams.site, $scope.newTitle);
         }
 
     });
