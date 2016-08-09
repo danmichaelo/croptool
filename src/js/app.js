@@ -400,6 +400,10 @@ controller('AppCtrl', ['$scope', '$http', '$timeout', '$q', '$window', '$httpPar
         console.log('   params before parse: ',$scope.currentUrlParams);
         $scope.currentUrlParams = parseImageUrlOrTitle($scope.currentUrlParams);
         console.log('    params after parse: ',$scope.currentUrlParams);
+        if ($scope.currentUrlParams.page) {
+            $scope.overwrite = 'rename';  // Force rename
+        }
+
 
         // $scope.currentUrlParams.site = o.site;
         // $scope.currentUrlParams.title = o.title;
@@ -530,10 +534,6 @@ controller('AppCtrl', ['$scope', '$http', '$timeout', '$q', '$window', '$httpPar
     $scope.aspectratio_cx = LocalStorageService.get('croptool-aspectratio-x') || '16';
     $scope.aspectratio_cy = LocalStorageService.get('croptool-aspectratio-y') || '9';;
     $scope.overwrite = LocalStorageService.get('croptool-overwrite') || 'overwrite';;
-    if ($scope.currentUrlParams.page) {
-        $scope.overwrite = 'rename';  // Force rename
-    }
-
 
     // On filename change, check with the MediaWiki API if the file exists.
     // Delay 500 ms before checking in case the user is in the process of typing.
