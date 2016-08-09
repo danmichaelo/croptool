@@ -6,7 +6,9 @@ php:
   - 7.0
 
 before_script:
+  - printf "\n" | pecl install imagick
   - composer install --no-interaction
+  - cp config.dist.ini config.ini
   - php generate-key.php
 
 script:
