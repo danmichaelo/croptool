@@ -197,7 +197,7 @@ class WikiText
         }
 
         // Otherwise, try adding the template
-        $tpl = '{{Derivative versions|display=150|' . $name . '}}';
+        $tpl = '{{Derivative versions|display=100|' . $name . '}}';
 
         // If the 'other_versions' field is present, try adding it there:
         list($start, $length) = $this->search('other[ _]versions\s*\= ?');

@@ -213,7 +213,7 @@ class WikiTextTest extends PHPUnit_Framework_TestCase
 |source={{own}}
 |author=[[User:三猎|三猎]]
 |permission=
-|other versions={{Derivative versions|display=150|My new file.jpg}}
+|other versions={{Derivative versions|display=100|My new file.jpg}}
 }}
 
 =={{int:license-header}}==
@@ -277,7 +277,7 @@ Sault-S<sup>te</sup>-Marie, Ontario, Canada<br>
  |source = {{own assumed}}
  |author = {{Author assumed|[[User:Fungus Guy|Fungus Guy]]}}
  |permission = 
- |other_versions = {{Derivative versions|display=150|My new file.jpg}}
+ |other_versions = {{Derivative versions|display=100|My new file.jpg}}
 }}
 
 == {{int:license-header}} ==
