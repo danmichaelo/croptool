@@ -72,6 +72,10 @@ class FilePublishTest extends WebTestCase
         $this->assertTrue($body->success);
     }
 
+    /**
+     * @expectedException RuntimeException
+     * @expectedExceptionMessageRegExp /File already exists/
+     */
     public function testItWillNotOverwriteWhenUploadingANewFile()
     {
         $faker = Faker\Factory::create();
@@ -86,9 +90,6 @@ class FilePublishTest extends WebTestCase
             ->shouldReceive('getWikitext')->once()->andReturn($wikitext)
             ->shouldReceive('upload')->never()
             ->shouldReceive('savePage')->never();
-
-        $this->expectException(\RuntimeException::class);
-        $this->expectExceptionMessageRegExp('/File already exists: ' . $newFile . '/');
 
         $this->client->post('/api/file/publish', [
             'title' => $existingFile,
