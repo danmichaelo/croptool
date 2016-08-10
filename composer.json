@@ -7,7 +7,7 @@
         "ext-imagick": "*",
         "ext-curl": "*",
         "danmichaelo/coma": "master-dev",
-        "rollbar/rollbar": "~0.11.0",
+        "rollbar/rollbar": "^0.18",
         "monolog/monolog": "~1.13",
         "defuse/php-encryption": "^2.0",
         "php-di/php-di": "^5.3",
