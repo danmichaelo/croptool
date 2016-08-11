@@ -35,8 +35,9 @@ echo "Configuring Lighttpd"
 chown -R vagrant:vagrant /var/www
 chown -R vagrant:vagrant /var/log/lighttpd
 if [[ ! -e /etc/lighttpd/certs/lighttpd.pem ]]; then
+	mkdir -p /etc/lighttpd/certs
 	cd /etc/lighttpd/certs
-	openssl req -new -x509 -keyout lighttpd.pem -out lighttpd.pem -days 365 -nodes -subj "/CN=tools.wmflabs.org"
+	openssl req -new -x509 -keyout lighttpd.pem -out lighttpd.pem -days 365 -nodes -subj "/CN=tools.wmflabs.org" > /dev/null
 	chmod 400 lighttpd.pem
 fi
 sed -i 's/;cgi.fix_pathinfo=1/cgi.fix_pathinfo=1/g' /etc/php5/fpm/php.ini
