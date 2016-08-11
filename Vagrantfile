@@ -8,6 +8,8 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   # Use the NAT hosts DNS resolver as it's faster
   # <http://serverfault.com/a/595010/221948>
   config.vm.provider "virtualbox" do |v|
+    v.name = "croptool"
+
     v.customize ["modifyvm", :id, "--natdnshostresolver1", "on"]
     v.customize ["modifyvm", :id, "--natdnsproxy1", "on"]
 
