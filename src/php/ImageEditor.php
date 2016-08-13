@@ -4,6 +4,7 @@ namespace CropTool;
 
 use Imagick;
 use ImagickPixel;
+use pastuhov\Command\Command;
 
 class ImageEditor
 {
@@ -214,44 +215,26 @@ class ImageEditor
         $image->destroy();
     }
 
-    public function exec($cmd)
-    {
-        $cmd_res = exec($cmd, $output, $return_var);
-        $cmd = explode(' ', $cmd);
-        if ($cmd_res != "" || $return_var !== 0) {
-            if (empty($cmd_res)) {
-                switch ($return_var) {
-                    case 127:
-                        throw new CropFailed('Command ' . $cmd . ' not found: ' . $cmd[0]);
-                    default:
-                        throw new CropFailed('Command ' . $cmd . ' exited with code ' . $return_var);
-                }
-            }
-            throw new CropFailed('Command ' . $cmd . ' failed: ' . $cmd_res);
-        }
-    }
-
-    public function cropUsingCmd($cmd, $destPath, $dim)
-    {
-        $cmd = str_replace(
-            array('{src}', '{dest}', '{dim}'),
-            array(escapeshellarg($this->path), escapeshellarg($destPath), escapeshellarg($dim)),
-            $cmd
-        );
-        $this->exec($cmd);
-    }
-
     public function gifCrop($destPath, $coords)
     {
         $dim = $coords['width'] . 'x' . $coords['height'] . '+' . $coords['x'] .'+' . $coords['y'] . '!';
-        $this->cropUsingCmd('convert {src} -crop {dim} {dest}', $destPath, $dim);
+
+        Command::exec('convert {src} -crop {dim} {dest}', [
+            'src' => $this->path,
+            'dest' => $destPath,
+            'dim' => $dim,
+        ]);
     }
 
     public function losslessCrop($destPath, $coords)
     {
         $dim = $coords['width'] . 'x' . $coords['height'] . '+' . $coords['x'] .'+' . $coords['y'];
-        $this->cropUsingCmd($this->pathToJpegTran . ' -copy all -crop {dim} {src} > {dest}',
-            $destPath, $dim);
+
+        Command::exec($this->pathToJpegTran . ' -copy all -crop {dim} {src} > {dest}', [
+            'src' => $this->path,
+            'dest' => $destPath,
+            'dim' => $dim,
+        ]);
     }
 
     protected function genThumb($thumbPath, $maxWidth, $maxHeight)

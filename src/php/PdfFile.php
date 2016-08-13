@@ -2,6 +2,8 @@
 
 namespace CropTool;
 
+use pastuhov\Command\Command;
+
 class PdfFile extends File implements FileInterface
 {
     protected $multipage = true;
@@ -18,22 +20,14 @@ class PdfFile extends File implements FileInterface
             return;
         }
 
-        $djvuFile = $this->getAbsolutePath();
+        $pdfFile = $this->getAbsolutePath();
         $jpgFile = $this->getAbsolutePathForPage($pageno);
 
-        $cmd = sprintf(
-            'gs -sDEVICE=jpeg -dNOPAUSE -dBATCH -dSAFER -dFirstPage=%s -dLastPage=%s -r300 -dUseCropBox -sOutputFile=%s %s',
-            escapeshellarg($pageno),
-            escapeshellarg($pageno),
-            escapeshellarg($jpgFile),
-            escapeshellarg($djvuFile)
-        );
-
-        exec($cmd, $out, $return_var);
-
-        if ($return_var != 0) {
-            throw new \RuntimeException('ghostscript exited with code ' . $return_var);
-        }
+        Command::exec('gs -sDEVICE=jpeg -dNOPAUSE -dBATCH -dSAFER -dFirstPage={page} -dLastPage={page} -r300 -dUseCropBox -sOutputFile={dest} {src}', [
+            'page' => $pageno,
+            'src' => $pdfFile,
+            'dest' => $jpgFile,
+        ]);
 
         $this->logMsg('Extracted page ' . $pageno);
 

@@ -2,6 +2,8 @@
 
 namespace CropTool;
 
+use pastuhov\Command\Command;
+
 class DjvuFile extends File implements FileInterface
 {
     protected $multipage = true;
@@ -23,27 +25,17 @@ class DjvuFile extends File implements FileInterface
         }
 
         // Extract page as tiff
-        $cmd = sprintf(
-            'ddjvu -page=%s -format=tiff %s %s',
-            escapeshellarg($pageno),
-            escapeshellarg($djvuFile),
-            escapeshellarg($tiffFile)
-        );
-        exec($cmd, $out, $return_var);
-        if ($return_var != 0) {
-            throw new \RuntimeException('ddjvu exited with code ' . $return_var);
-        }
+        Command::exec('ddjvu -page={page} -format=tiff {src} {dest}', [
+            'page' => $pageno,
+            'src' => $djvuFile,
+            'dest' => $tiffFile,
+        ]);
 
         // Convert tiff to jpg
-        $cmd = sprintf(
-            'convert %s %s',
-            escapeshellarg($tiffFile),
-            escapeshellarg($jpgFile)
-        );
-        exec($cmd, $out, $return_var);
-        if ($return_var != 0) {
-            throw new \RuntimeException('convert  exited with code ' . $return_var);
-        }
+        Command::exec('convert {src} {dest}', [
+            'src' => $tiffFile,
+            'dest' => $jpgFile,
+        ]);
 
         // Remove temporary tiff file
         unlink($tiffFile);
