@@ -41,6 +41,7 @@ if [[ ! -e /etc/lighttpd/certs/lighttpd.pem ]]; then
 	chmod 400 lighttpd.pem
 fi
 sed -i 's/;cgi.fix_pathinfo=1/cgi.fix_pathinfo=1/g' /etc/php5/fpm/php.ini
+sed -i 's/www-data/vagrant/g' /etc/php5/fpm/pool.d/www.conf
 cp /vagrant/provision/15-php-fpm.conf /etc/lighttpd/conf-available/15-php-fpm.conf
 cp /vagrant/provision/lighttpd.conf /etc/lighttpd/lighttpd.conf
 lighttpd-enable-mod fastcgi > /dev/null
