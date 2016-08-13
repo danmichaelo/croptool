@@ -138,6 +138,10 @@ controller('AppCtrl', ['$scope', '$http', '$timeout', '$q', '$window', '$httpPar
         $scope.error = '';
     };
 
+    $scope.pageChanged = function() {
+        $scope.openFile();
+    };
+
     $scope.onCropDimChange = function(current_coord) {
 
         var ratio = getAspectRatio();
@@ -207,6 +211,11 @@ controller('AppCtrl', ['$scope', '$http', '$timeout', '$q', '$window', '$httpPar
             }
 
             $scope.metadata = response;
+
+            $scope.availablePages = [];
+            for (var i = 1; i <= $scope.metadata.pagecount; i++) {
+                $scope.availablePages.push(i);
+            }
 
             if ($scope.metadata.thumb) {
                 pixelratio = [$scope.metadata.original.width/$scope.metadata.thumb.width, $scope.metadata.original.height/$scope.metadata.thumb.height];
@@ -379,21 +388,21 @@ controller('AppCtrl', ['$scope', '$http', '$timeout', '$q', '$window', '$httpPar
             everPushedSomething = true;
         }
 
+
+        if (jcrop_api) {
+            jcrop_api.destroy();
+            $('#cropbox').removeAttr('style');
+        }
+
+        // Resetting state
+        $scope.error = '';
+        $scope.newTitle = '';
+        $scope.cropresults = null;
+        $scope.uploadresults = null;
+
         if (!$scope.currentUrlParams.title) {
-
-            if (jcrop_api) {
-                jcrop_api.destroy();
-                $('#cropbox').removeAttr('style');
-            }
-
-            // Resetting state
-            $scope.error = '';
-            $scope.currentUrlParams = {};
-            $scope.newTitle = '';
-            $scope.cropresults = null;
-            $scope.uploadresults = null;
             $scope.metadata = null;
-
+            $scope.currentUrlParams = {};
             return;
         }
 

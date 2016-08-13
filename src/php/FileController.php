@@ -54,6 +54,7 @@ class FileController
             'site' => $page->site,
             'title' => $page->title,
             'description' => $page->imageinfo->descriptionurl,
+            'pagecount' => $page->imageinfo->pagecount,
             'mime' => $page->imageinfo->mime,
             'original' => $this->fileResponse($page->file, $pageno),
             'thumb' => $this->fileResponse($page->file, $pageno, '_thumb'),

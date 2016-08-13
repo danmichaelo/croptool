@@ -11,6 +11,7 @@ class ImageInfoResponse
     public $width;
     public $height;
     public $descriptionurl;
+    public $pagecount;
 
     public function __construct($response=null)
     {
@@ -35,6 +36,7 @@ class ImageInfoResponse
         $this->width = $data->width;
         $this->height = $data->height;
         $this->descriptionurl = $data->descriptionurl;
+        $this->pagecount = isset($data->pagecount) ? $data->pagecount : 1;
     }
 
     public function getShortSha1()

@@ -201,7 +201,10 @@
                 </span>
 
                 <span ng-show="currentUrlParams.page">
-                    <span translate>page</span>: {{currentUrlParams.page}}.
+                    <span translate>page</span>:
+                    <select ng-model="currentUrlParams.page"
+                            ng-options="option for option in availablePages track by option"
+                            ng-change="pageChanged()"></select>
                 </span>
             </p>
         </div>
@@ -225,7 +228,7 @@
                 <div ng-show="!cropresults" class="inner" ng-style="{'width': (metadata.thumb ? metadata.thumb.width : metadata.original.width) + 'px', 'margin-left': 'auto', 'margin-right': 'auto'}">
 
                     <!-- This is the image we're attaching Jcrop to -->
-                    <img id="cropbox" ng-src="{{metadata.thumb ? metadata.thumb.name : metadata.original.name}}">
+                    <img id="cropbox" ng-class="{imageloading: busy}" ng-src="{{metadata.thumb ? metadata.thumb.name : metadata.original.name}}">
 
                 </div>
 

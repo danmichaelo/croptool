@@ -131,3 +131,11 @@ justify-content: space-between;
     95% {left: 120%;}
     to {left: 100%;}
 }
+
+#cropbox {
+  transition: opacity 1s ease-in-out;
+  opacity: 1;
+}
+#cropbox.imageloading {
+  opacity: 0.2;
+}
