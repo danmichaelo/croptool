@@ -51,5 +51,5 @@ gulp.task('build', 'Builds the app', [], function() {
 });
 
 gulp.task('watch', 'Re-builds the app on changes', ['build'], function () {
-  gulp.watch(['src/js/**/*.js', 'src/js/**/*.css', 'src/index.html'], ['build']);
+  gulp.watch(['src/js/**/*.js', 'src/css/**/*.css', 'src/index.html'], ['build']);
 });
