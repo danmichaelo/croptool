@@ -113,6 +113,11 @@ class OAuthConsumer implements AuthServiceInterface
         return $this->gTokenSecret != '';
     }
 
+    public function getMessages()
+    {
+        return $this->warnings;
+    }
+
     /**
      * Handle a callback to fetch the permanent access token
      * @param string $oauth_verifier

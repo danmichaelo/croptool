@@ -44,8 +44,12 @@ if (! function_exists('array_get')) {
 
 $authMiddleware = function (Request $request, Response $response, $next) {
     $user = $this->get(CropTool\UserService::class);
+    $auth = $this->get(CropTool\AuthServiceInterface::class);
     if (!$user->loggedin()) {
-        return $response->withStatus(401)->withJson(['error' => 'Unauthorized']);
+        return $response->withStatus(401)->withJson([
+            'error' => 'Unauthorized',
+            'messages' => $auth->getMessages(),
+        ]);
     }
 
     return $next($request, $response);

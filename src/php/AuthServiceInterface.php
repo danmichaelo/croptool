@@ -13,4 +13,6 @@ interface AuthServiceInterface
     public function doLogout();
 
     public function isAuthorized();
+
+    public function getMessages();
 }
