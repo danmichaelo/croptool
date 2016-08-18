@@ -65,7 +65,7 @@ class WikiTextTest extends PHPUnit_Framework_TestCase
         $this->assertEquals('abc {{Remove border}} def', $newText);
     }
 
-    public function testItAddsTheExtractedFromTemplateBeforeLicenseHeader()
+    public function testItAddsTheExtractedFromToOtherVersions()
     {
         $oldText = '
 =={{int:filedesc}}==
@@ -94,9 +94,8 @@ class WikiTextTest extends PHPUnit_Framework_TestCase
 |source=http://forum.vgd.ru/1410/46846/20.htm?a=stdforum_view&o=
 |author=Шерер и Набгольц
 |permission=
-|other versions=
+|other versions={{Extracted from|My new file.jpg}}
 }}
-{{Extracted from|My new file.jpg}}
 
 =={{int:license-header}}==
 {{PD-old-70-1923}}

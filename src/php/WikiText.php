@@ -150,6 +150,13 @@ class WikiText
 
     protected function appendTemplate($tpl)
     {
+        // If the 'other_versions' field is present, try adding it there:
+        list($start, $length) = $this->search('other[ _]versions\s*\= ?');
+        if (!is_null($start)) {
+            $text = substr($this->text, 0, $start + $length) . $tpl . substr($this->text, $start + $length);
+            return new self($text);
+        }
+
         // Try to add before the license header
         $wt = $this->addBefore($tpl, '==\s*\{\{\s*int:license-header\s*\}\}\s*==');
         if ($wt !== $this) {
@@ -199,14 +206,6 @@ class WikiText
         // Otherwise, try adding the template
         $tpl = '{{Derivative versions|display=100|' . $name . '}}';
 
-        // If the 'other_versions' field is present, try adding it there:
-        list($start, $length) = $this->search('other[ _]versions\s*\= ?');
-        if (!is_null($start)) {
-            $text = substr($this->text, 0, $start + $length) . $tpl . substr($this->text, $start + $length);
-            return new self($text);
-        }
-
-        // Otherwise, try the standard locations
         return $this->appendTemplate($tpl);
     }
 }
