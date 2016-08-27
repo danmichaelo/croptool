@@ -14,13 +14,17 @@ class FileController
      * Utility method to return an array with the relative path + file dimensions
      *
      * @param FileInterface $file
-     * @param ImageEditor $img
+     * @param Image $img
      * @param int $pageno
      * @param string $suffix
      * @return array|null
      */
-    protected function fileResponse(FileInterface $file, ImageEditor $img, $pageno, $suffix = '')
+    protected function fileResponse(FileInterface $file, Image $img, $pageno, $suffix = '')
     {
+        if (is_null($img)) {
+            return null;
+        }
+
         return [
             'name' => $file->getRelativePathForPage($pageno, $suffix),
             'width' => $img->width,
@@ -47,14 +51,8 @@ class FileController
         $srcPath = $page->file->getAbsolutePathForPage($pageno);
         $thumbPath = $page->file->getAbsolutePathForPage($pageno, '_thumb');
 
-        $editor->open($srcPath)->thumb($thumbPath);
-
-        $original = $this->fileResponse($page->file, $editor, $pageno);
-        try {
-            $thumb = $this->fileResponse($page->file, $editor->open($thumbPath), $pageno, '_thumb');
-        } catch (FileNotFoundException $e) {
-            $thumb = null;
-        }
+        $original = $editor->open($srcPath);     // instance of Image
+        $thumb = $original->thumb($thumbPath);   // instance of Image or null
 
         return $response->withJson([
             'site' => $page->site,
@@ -62,10 +60,10 @@ class FileController
             'description' => $page->imageinfo->descriptionurl,
             'pagecount' => $page->imageinfo->pagecount,
             'mime' => $page->imageinfo->mime,
-            'original' => $original,
-            'thumb' => $thumb,
-            'samplingFactor' => $editor->samplingFactor,
-            'orientation' => $editor->orientation,
+            'original' => $this->fileResponse($page->file, $original, $pageno),
+            'thumb' => $this->fileResponse($page->file, $thumb, $pageno, '_thumb'),
+            'samplingFactor' => $original->samplingFactor,
+            'orientation' => $original->orientation,
         ]);
     }
 
@@ -101,29 +99,22 @@ class FileController
         $destPath = $page->file->getAbsolutePathForPage($pageno, '_cropped');
         $thumbPath = $page->file->getAbsolutePathForPage($pageno, '_cropped_thumb');
 
-        $editor->open($srcPath)->crop($destPath, $method, $x, $y, $width, $height);
-        $editor->open($destPath)->thumb($thumbPath);
+        $original = $editor->open($srcPath);
+        $crop = $original->crop($destPath, $method, $x, $y, $width, $height);
+        $thumb = $crop->thumb($thumbPath);
 
         $logger->info('[{sha1}] Cropped using {method} mode', [
             'sha1' => $page->file->getShortSha1(),
             'method' => $method,
         ]);
 
-        $original = $this->fileResponse($page->file, $editor, $pageno);
-        $crop = $this->fileResponse($page->file, $editor->open($destPath), $pageno, '_cropped');
-        try {
-            $thumb = $this->fileResponse($page->file, $editor->open($thumbPath), $pageno, '_cropped_thumb');
-        } catch (FileNotFoundException $e) {
-            $thumb = null;
-        }
-
         $dim = array();
-        if ($original['width'] != $crop['width']) {
-            $cropPercentX = round(($original['width']-$crop['width']) / $original['width'] * 100);
+        if ($original->width != $crop->width) {
+            $cropPercentX = round(($original->width - $crop->width) / $original->width * 100);
             $dim[] = ($cropPercentX ?: ' < 1') . ' % horizontally';
         }
-        if ($original['height'] != $crop['height']) {
-            $cropPercentY = round(($original['height']-$crop['height']) / $original['height'] * 100);
+        if ($original->height != $crop->height) {
+            $cropPercentY = round(($original->height - $crop->height) / $original->height * 100);
             $dim[] = ($cropPercentY ?: ' < 1') . ' % vertically';
         }
 
@@ -136,8 +127,8 @@ class FileController
             'page' => [
                 'elems' => $page->wikitext->possibleStuffToRemove(),
             ],
-            'crop' => $crop,
-            'thumb' => $thumb,
+            'crop' => $this->fileResponse($page->file, $crop, $pageno, '_cropped'),
+            'thumb' => $this->fileResponse($page->file, $thumb, $pageno, '_cropped_thumb'),
             'time' => time(),
             'msecs' => round(microtime(true)*1000 - $t0),
         ]);

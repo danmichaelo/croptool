@@ -13,5 +13,7 @@ interface FileInterface
 
     public function exists($pageno, $suffix = '');
 
+    public function getShortSha1();
+
     // TODO
 }
