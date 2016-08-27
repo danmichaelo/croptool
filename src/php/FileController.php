@@ -186,8 +186,10 @@ class FileController
             $uploadResponse = $newPage->upload($cropPath, $editComment, $ignoreWarnings);
             $logger->info('Uploaded new version of "' . $page->title . '" as "' . $newPage->title . '".');
 
-            $page->setWikitext($page->wikitext->appendDerivativeVersionsTemplate($newName))
-                ->save('Added/updated {{Derivative versions}} using [[Commons:CropTool|CropTool]]');
+            if (in_array($page->site, $sitesSupportingDerivativeVersionsTemplate)) {
+                $page->setWikitext($page->wikitext->appendDerivativeVersionsTemplate($newName))
+                    ->save('Added/updated {{Derivative versions}} using [[Commons:CropTool|CropTool]]');
+            }
         }
 
         return $response->withJson($uploadResponse);
