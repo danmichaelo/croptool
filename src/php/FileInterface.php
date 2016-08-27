@@ -13,7 +13,5 @@ interface FileInterface
 
     public function exists($pageno, $suffix = '');
 
-    public function getDimensions($pageno, $suffix = '');
-
     // TODO
 }

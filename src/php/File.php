@@ -80,13 +80,6 @@ class File implements FileInterface
         return file_exists($path);
     }
 
-    public function getDimensions($pageno = 0, $suffix = '')
-    {
-        $this->fetchPage($pageno);
-
-        return getimagesize($this->getAbsolutePathForPage($pageno, $suffix));
-    }
-
     public function fetch()
     {
         if ($this->exists()) {

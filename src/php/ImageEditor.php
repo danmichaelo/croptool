@@ -49,6 +49,9 @@ class ImageEditor
 
     public function open($path)
     {
+        if (!file_exists($path)) {
+            throw new FileNotFoundException(null, 0, null, $path);
+        }
         $this->path = $path;
         $this->mime = $this->mimeFromPath($path);
         $this->loadFile();

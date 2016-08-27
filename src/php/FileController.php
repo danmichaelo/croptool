@@ -14,20 +14,17 @@ class FileController
      * Utility method to return an array with the relative path + file dimensions
      *
      * @param FileInterface $file
+     * @param ImageEditor $img
      * @param int $pageno
      * @param string $suffix
      * @return array|null
      */
-    protected function fileResponse(FileInterface $file, $pageno, $suffix = '')
+    protected function fileResponse(FileInterface $file, ImageEditor $img, $pageno, $suffix = '')
     {
-        if (!$file->exists($pageno, $suffix, $suffix)) {
-            return null;
-        }
-        list($width, $height) = $file->getDimensions($pageno, $suffix);
         return [
             'name' => $file->getRelativePathForPage($pageno, $suffix),
-            'width' => $width,
-            'height' => $height,
+            'width' => $img->width,
+            'height' => $img->height,
         ];
     }
 
@@ -46,9 +43,18 @@ class FileController
 
         $page->assertExists();
         $page->file->fetchPage($pageno);
+
         $srcPath = $page->file->getAbsolutePathForPage($pageno);
         $thumbPath = $page->file->getAbsolutePathForPage($pageno, '_thumb');
+
         $editor->open($srcPath)->thumb($thumbPath);
+
+        $original = $this->fileResponse($page->file, $editor, $pageno);
+        try {
+            $thumb = $this->fileResponse($page->file, $editor->open($thumbPath), $pageno, '_thumb');
+        } catch (FileNotFoundException $e) {
+            $thumb = null;
+        }
 
         return $response->withJson([
             'site' => $page->site,
@@ -56,8 +62,8 @@ class FileController
             'description' => $page->imageinfo->descriptionurl,
             'pagecount' => $page->imageinfo->pagecount,
             'mime' => $page->imageinfo->mime,
-            'original' => $this->fileResponse($page->file, $pageno),
-            'thumb' => $this->fileResponse($page->file, $pageno, '_thumb'),
+            'original' => $original,
+            'thumb' => $thumb,
             'samplingFactor' => $editor->samplingFactor,
             'orientation' => $editor->orientation,
         ]);
@@ -103,9 +109,13 @@ class FileController
             'method' => $method,
         ]);
 
-        $original = $this->fileResponse($page->file, $pageno);
-        $crop = $this->fileResponse($page->file, $pageno, '_cropped');
-        $thumb = $this->fileResponse($page->file, $pageno, '_cropped_thumb');
+        $original = $this->fileResponse($page->file, $editor, $pageno);
+        $crop = $this->fileResponse($page->file, $editor->open($destPath), $pageno, '_cropped');
+        try {
+            $thumb = $this->fileResponse($page->file, $editor->open($thumbPath), $pageno, '_cropped_thumb');
+        } catch (FileNotFoundException $e) {
+            $thumb = null;
+        }
 
         $dim = array();
         if ($original['width'] != $crop['width']) {
