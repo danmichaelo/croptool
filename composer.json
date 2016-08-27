@@ -1,12 +1,6 @@
 {
     "name": "danmichaelo/croptool",
     "description": "Tool for cropping images at Wikimedia sites",
-    "repositories": [
-        {
-            "type": "vcs",
-            "url": "https://github.com/danmichaelo/php-exec-command"
-        }
-    ],
     "require": {
         "php": "~5.5|~7.0",
         "ext-exif": "*",
@@ -19,7 +13,7 @@
         "php-di/php-di": "^5.3",
         "php-di/slim-bridge": "^1.0",
         "slim/slim": "^3.0",
-        "pastuhov/php-exec-command": "dev-misc"
+        "pastuhov/php-exec-command": "^1.1.0"
     },
     "require-dev": {
         "phpunit/phpunit": "^4.8|5.*",
