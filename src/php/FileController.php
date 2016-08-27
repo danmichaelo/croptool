@@ -19,7 +19,7 @@ class FileController
      * @param string $suffix
      * @return array|null
      */
-    protected function fileResponse(FileInterface $file, Image $img, $pageno, $suffix = '')
+    protected function fileResponse(FileInterface $file, Image $img = null, $pageno = 0, $suffix = '')
     {
         if (is_null($img)) {
             return null;
