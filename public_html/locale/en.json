@@ -38,7 +38,7 @@
     "cropform-aspect-ratio-fixed": "Custom",
     "cropping-progress": "Please wait while cropping...",
     "previewform-lossless": "A lossless crop was performed.",
-    "previewform-lossless-explanation": "The resulting image is {{wider}} px wider and {{higher}} px higher than the region you selected. <a href=\"{{url}}\">Why?<\/a> Note that the extra pixels included are in the left and\/or top part of the image.",
+    "previewform-lossless-explanation": "The resulting image is {{wider}} px wider and {{higher}} px higher than the region you selected. <a target=\"_blank\" href=\"{{url}}\">Why?<\/a> Note that the extra pixels included are in the left and\/or top part of the image.",
     "previewform-precise": "A precise crop was performed.",
     "previewform-overwrite-policy": "Before overwriting, make sure you are familiar with <a href=\"{{url}}\">COM:CROP<\/a>.",
     "previewform-multipage-file": "The overwrite option is disabled because this is a multipage file.",
