@@ -1,13 +1,25 @@
 ## CropTool
 
-CropTool is a tool for cropping image files at Wikimedia Commons and other Wikimedia sites
-using the MediaWiki API with OAuth. It supports JPEG, PNG and (animated) GIF files, and can
-also extract pages from DJVU and PDF files as JPEG for cropping.
+[CropTool](https://tools.wmflabs.org/croptool/) is a tool for cropping image files
+at Wikimedia Commons and other Wikimedia sites using the MediaWiki API with OAuth.
+[Help page on Commons](https://commons.wikimedia.org/wiki/Commons:CropTool).
 
-It relies on [ImageMagick](https://www.imagemagick.org/) and [jpegtran](http://jpegclub.org/jpegtran/) (for lossless JPEG cropping) for the hard work. The frontend is made with [AngularJS](https://angularjs.org/) and [Jcrop](https://github.com/tapmodo/Jcrop).
 
-* [CropTool installation on Tool Labs](http://tools.wmflabs.org/croptool/)
-* [About CropTool on Commons](https://commons.wikimedia.org/wiki/Commons:CropTool)
+* Supports JPEG, PNG and (animated) GIF files, and also single pages from
+  DJVU and PDF files.
+* JPEGs can be cropped losslessly using [jpegtran](http://jpegclub.org/jpegtran/)
+  or pixel perfect using [ImageMagick](https://www.imagemagick.org/).
+* Detects [`{{Remove border}}`](https://commons.wikimedia.org/wiki/Template:Remove_border),
+  [Category:Images with borders](https://commons.wikimedia.org/wiki/Category:Images_with_borders)
+  and [`{{Watermark}}`](https://commons.wikimedia.org/wiki/Template:Watermark), and
+  provides check boxes for optional removal of these upon cropping.
+* The result can replace the original file or be uploaded as a new one.
+* If the result is uploaded as a new file on Commons, the `{{Extracted from}}`
+  template is added to the new file, and the `{{Derivative versions}}` template
+  is added or updated on the original.
+* Stops users from cropping images having
+  [`{{Flickrreview}}`](https://commons.wikimedia.org/wiki/Template:Flickrreview),
+  since images should be reviewed before being altered.
 
 ### Setting up a development environment
 
