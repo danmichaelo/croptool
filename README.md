@@ -15,7 +15,7 @@ at Wikimedia Commons and other Wikimedia sites using the MediaWiki API with OAut
   provides check boxes for optional removal of these upon cropping.
 * The result can replace the original file or be uploaded as a new one.
 * If the result is uploaded as a new file on Commons, the `{{Extracted from}}`
-  template is added to the new file, and the `{{Derivative versions}}` template
+  template is added to the new file, and the `{{Image extracted}}` template
   is added or updated on the original.
 * Stops users from cropping images having
   [`{{Flickrreview}}`](https://commons.wikimedia.org/wiki/Template:Flickrreview),
