@@ -187,16 +187,16 @@ class WikiText
     }
 
     /**
-     * Appends the {{Derivative versions}} template.
+     * Appends the {{Image extracted}} template.
      * Note to self: Use substr, not mb_substr
      *
      * @param string $name Name of the new file
      * @return WikiText
      */
-    public function appendDerivativeVersionsTemplate($name)
+    public function appendImageExtractedTemplate($name)
     {
-        // If the page already contains a {{DerivativeVersions}} template, append the file to it
-        list($start, $length) = $this->search('{{\s*derivative ?(versions|works?)(\s*|\|[^\}]+)}}');
+        // If the page already contains a {{Image extracted}} template, append the file to it
+        list($start, $length) = $this->search('{{\s*(extracted ?(images?|file|photo)?|image ?extracted|cropped version)\s*(\s*|\|[^\}]+)}}');
         if (!is_null($start)) {
             // Append |$name before the }} of the template
             $text = substr($this->text, 0, $start + $length - 2) . "|" . $name . substr($this->text, $start + $length - 2);
@@ -204,7 +204,7 @@ class WikiText
         }
 
         // Otherwise, try adding the template
-        $tpl = '{{Derivative versions|display=100|' . $name . '}}';
+        $tpl = '{{Image extracted|' . $name . '}}';
 
         return $this->appendTemplate($tpl);
     }

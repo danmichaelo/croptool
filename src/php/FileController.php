@@ -139,7 +139,7 @@ class FileController
         $sitesSupportingExtractedFromTemplate = [
             'commons.wikimedia.org',
         ];
-        $sitesSupportingDerivativeVersionsTemplate = [
+        $sitesSupportingImageExtractedTemplate = [
             'commons.wikimedia.org',
         ];
 
@@ -186,9 +186,9 @@ class FileController
             $uploadResponse = $newPage->upload($cropPath, $editComment, $ignoreWarnings);
             $logger->info('Uploaded new version of "' . $page->title . '" as "' . $newPage->title . '".');
 
-            if (in_array($page->site, $sitesSupportingDerivativeVersionsTemplate)) {
-                $page->setWikitext($page->wikitext->appendDerivativeVersionsTemplate($newName))
-                    ->save('Added/updated {{Derivative versions}} using [[Commons:CropTool|CropTool]]');
+            if (in_array($page->site, $sitesSupportingImageExtractedTemplate)) {
+                $page->setWikitext($page->wikitext->appendImageExtractedTemplate($newName))
+                    ->save('Added/updated {{Image extracted}} using [[Commons:CropTool|CropTool]]');
             }
         }
 

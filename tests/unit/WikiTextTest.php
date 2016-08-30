@@ -144,7 +144,7 @@ class WikiTextTest extends PHPUnit_Framework_TestCase
         $this->assertEquals($newText, $wikitext);
     }
 
-    public function testItAppendsToExistingDerivativeVersionsTemplate()
+    public function testItAppendsToExistingImageExtractedTemplate()
     {
         $oldText = '
 {{Information
@@ -152,7 +152,7 @@ class WikiTextTest extends PHPUnit_Framework_TestCase
 |date=2016-05-24 12:54:22
 |source={{own}}
 |author=[[User:三猎|三猎]]
-|other_versions={{DerivativeVersions|HoryujiYumedono0363 edit1.jpg}}
+|other_versions={{Image extracted|HoryujiYumedono0363 edit1.jpg}}
 |permission=public domain
 }}
 
@@ -165,7 +165,7 @@ class WikiTextTest extends PHPUnit_Framework_TestCase
 |date=2016-05-24 12:54:22
 |source={{own}}
 |author=[[User:三猎|三猎]]
-|other_versions={{DerivativeVersions|HoryujiYumedono0363 edit1.jpg|My new file.jpg}}
+|other_versions={{Image extracted|HoryujiYumedono0363 edit1.jpg|My new file.jpg}}
 |permission=public domain
 }}
 
@@ -173,7 +173,7 @@ class WikiTextTest extends PHPUnit_Framework_TestCase
 ';
 
         $wikitext = WikiText::make($oldText)
-            ->appendDerivativeVersionsTemplate('My new file.jpg');
+            ->appendImageExtractedTemplate('My new file.jpg');
 
         $this->assertEquals($newText, $wikitext);
     }
@@ -182,7 +182,7 @@ class WikiTextTest extends PHPUnit_Framework_TestCase
     /**
      * This test also test that multibyte wikitext is handled correctly
      */
-    public function testItAddsTheDerivativeVersionsTemplateToOtherVersions()
+    public function testItAddsTheImageExtractedTemplateToOtherVersions()
     {
         $oldText = '
 =={{int:filedesc}}==
@@ -212,7 +212,7 @@ class WikiTextTest extends PHPUnit_Framework_TestCase
 |source={{own}}
 |author=[[User:三猎|三猎]]
 |permission=
-|other versions={{Derivative versions|display=100|My new file.jpg}}
+|other versions={{Image extracted|My new file.jpg}}
 }}
 
 =={{int:license-header}}==
@@ -225,12 +225,12 @@ class WikiTextTest extends PHPUnit_Framework_TestCase
 [[Category:Uploaded with UploadWizard]]';
 
         $wikitext = WikiText::make($oldText)
-            ->appendDerivativeVersionsTemplate('My new file.jpg');
+            ->appendImageExtractedTemplate('My new file.jpg');
 
         $this->assertEquals($newText, $wikitext);
     }
 
-    public function testItAddsDerivativeVersionsTemplateToOtherVersions2()
+    public function testItAddsImageExtractedTemplateToOtherVersions2()
     {
         $oldText = "
 == {{int:filedesc}} ==
@@ -276,7 +276,7 @@ Sault-S<sup>te</sup>-Marie, Ontario, Canada<br>
  |source = {{own assumed}}
  |author = {{Author assumed|[[User:Fungus Guy|Fungus Guy]]}}
  |permission = 
- |other_versions = {{Derivative versions|display=100|My new file.jpg}}
+ |other_versions = {{Image extracted|My new file.jpg}}
 }}
 
 == {{int:license-header}} ==
@@ -285,7 +285,7 @@ Sault-S<sup>te</sup>-Marie, Ontario, Canada<br>
 [[Category:Essar Steel Algoma]]";
 
         $wikitext = WikiText::make($oldText)
-            ->appendDerivativeVersionsTemplate('My new file.jpg');
+            ->appendImageExtractedTemplate('My new file.jpg');
 
         $this->assertEquals($newText, $wikitext);
     }
