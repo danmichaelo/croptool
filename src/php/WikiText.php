@@ -6,11 +6,12 @@ class WikiText
 {
     protected $text;
 
-    /**
-     * List of assessment templates. These templates should not be copied to
-     * new pages (See #69 and #82), and pages having these templates should
-     * not be overwritten (See #83).
-     */
+    /*
+    |--------------------------------------------------------------------------
+    | Assessment templates
+    |--------------------------------------------------------------------------
+    | These should not be copied to new pages (See #69 and #82)
+    */
     protected $assessmentTemplates = array(
         'featured[_ ]?picture', 'fp',
         'valued[_ ]image', 'vi',
@@ -19,44 +20,92 @@ class WikiText
         'assessments', 'featured[_ ]picture[_ ]mul',
     );
 
-    /**
-     * License review templates that if present without any parameters,
-     * should stop the user from cropping the image. If present with parameters,
-     * they should not be copied to new pages.
-     */
+    /*
+    |--------------------------------------------------------------------------
+    | License review templates
+    |--------------------------------------------------------------------------
+    | These should not be copied to new pages.
+    | If any of these templates are present without any parameters, the image
+    | is waiting for review and the user should not be allowed to crop it yet.
+    */
     protected $licenseReviewTemplates = array(
         '(license|flickr|panoramio|openstreetmap|openphoto)[_ -]?review', // See #41
     );
 
-    /**
-     * License review templates that, if present with out without any parameters,
-     * should stop the user from cropping the image.
-     */
+    /*
+    |--------------------------------------------------------------------------
+    | License review error templates
+    |--------------------------------------------------------------------------
+    | If any of these templates are present, the image has possible license
+    | issues that should be resolved before cropping the image.
+    */
     protected $licenseReviewProblemTemplates = array(
         'User:FlickreviewR\/reviewed-(error|notmatching|nosource|fail-recent|blacklisted)',
     );
 
-    /**
-     * Templates other than assessment templates that should not to be copied
-     * to the new page when uploading the cropped image to a new page on
-     * Wikimedia Commons.
-     */
+    /*
+    |--------------------------------------------------------------------------
+    | Other templates not to be copied
+    |--------------------------------------------------------------------------
+    | Templates other than assessment templates and license review templates
+    | that should not be copied to the new page when uploading the cropped image
+    | to a new page on Wikimedia Commons.
+    */
     protected $otherTemplatesNotToBeCopied = array(
         'image[_ ]extracted|extracted|extracted[_ ](images?|file|photo)|cropped[_ ]version',
         'extractedfrom|extracted[_ ]image|ef|cropped|image extracted from',
     );
 
+    /*
+    |--------------------------------------------------------------------------
+    | Categories not to be copied
+    |--------------------------------------------------------------------------
+    | Categories that should not be copied to the new page when uploading the
+    | cropped image to a new page on Wikimedia Commons.
+    */
     protected $categoriesNotToBeCopied = array(
         '(valued|quality)[_ ]images[_ ](by|of)[^\]]+',
+    );
+
+    /*
+    |--------------------------------------------------------------------------
+    | Remove border templates
+    |--------------------------------------------------------------------------
+    | Templates, with or without parameters, that should be removed from the
+    | cropped image page if the user confirms the removal of the border.
+    */
+    protected $removeBorderTemplates = array(
+        'crop',
+        'remove[ _]?borders?',
+    );
+
+    /*
+    |--------------------------------------------------------------------------
+    | Remove border categories
+    |--------------------------------------------------------------------------
+    | Categories that should be removed from the cropped image page if the
+    | user confirms the removal of the border.
+    */
+    protected $removeBorderCategories = array(
+        'images(?: |_)with(?: |_)borders',
+    );
+
+    /*
+    |--------------------------------------------------------------------------
+    | Watermark templates
+    |--------------------------------------------------------------------------
+    | Templates, with or without parameters, that should be removed from the
+    | cropped image page if the user confirms the removal of the watermark.
+    */
+    protected $watermarkTemplates = array(
+        'wmr',
+        'imagewatermark',
+        '(remove[ _])?water[ _]?m[ae]rk(ed)?',
     );
 
     protected $patterns = array(
         'templates' => '/{{\s*%NAMES%\s*%PARAMS%}}\s*/i',
         'categories' => '/\[\[category:%NAMES%\]\]\s*/i',
-
-        'tpl_remove_border' => '/{{\s*(crop|remove ?borders?)(\s*|\|[^\}]+)}}\s*/i',
-        'tpl_watermark' => '/{{\s*(wmr|(remove |image)?water ?m(a|e)rk(ed)?)(\s*|\|[^\}]+)}}\s*/i',
-        'cat_border' => '/\[\[category:images(?: |_)with(?: |_)borders\]\]\s*/i',
     );
 
     /**
@@ -100,6 +149,15 @@ class WikiText
         );
     }
 
+    protected function compileCategoryPattern($categories)
+    {
+        return str_replace(
+            '%NAMES%',
+            '(' . implode('|', $categories) . ')',
+            $this->patterns['categories']
+        );
+    }
+
     /**
      * Test if the page is waiting for license review
      *
@@ -120,13 +178,13 @@ class WikiText
     {
         $data = array();
 
-        if (preg_match($this->patterns['tpl_remove_border'], $this->text)) {
+        if (preg_match($this->compileTemplatePattern($this->removeBorderTemplates), $this->text)) {
             $data['border'] = true;
         }
-        if (preg_match($this->patterns['tpl_watermark'], $this->text)) {
+        if (preg_match($this->compileTemplatePattern($this->watermarkTemplates), $this->text)) {
             $data['watermark'] = true;
         }
-        if (preg_match($this->patterns['cat_border'], $this->text)) {
+        if (preg_match($this->compileCategoryPattern($this->removeBorderCategories), $this->text)) {
             $data['border'] = true;
         }
 
@@ -146,8 +204,8 @@ class WikiText
     public function withoutBorderTemplate()
     {
         $text = preg_replace(array(
-            $this->patterns['tpl_remove_border'],
-            $this->patterns['cat_border'],
+            $this->compileTemplatePattern($this->removeBorderTemplates),
+            $this->compileCategoryPattern($this->removeBorderCategories),
         ), array('', ''), $this->text);
 
         return $this->cloneIfModified($text);
@@ -160,7 +218,7 @@ class WikiText
      */
     public function withoutWatermarkTemplate()
     {
-        $text = preg_replace($this->patterns['tpl_watermark'], '', $this->text);
+        $text = preg_replace($this->compileTemplatePattern($this->watermarkTemplates), '', $this->text);
 
         return $this->cloneIfModified($text);
     }
@@ -179,11 +237,7 @@ class WikiText
             $this->otherTemplatesNotToBeCopied
         ), true);
 
-        $categoryPattern = str_replace(
-            '%NAMES%',
-            '(' . implode('|', $this->categoriesNotToBeCopied) . ')',
-            $this->patterns['categories']
-        );
+        $categoryPattern = $this->compileCategoryPattern($this->categoriesNotToBeCopied);
         $text = preg_replace([$templatePattern, $categoryPattern], ['', ''], $this->text);
 
         return $this->cloneIfModified($text);
