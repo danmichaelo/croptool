@@ -10,7 +10,7 @@ class WikiText
         'tpl_remove_border' => '/{{\s*(crop|remove ?borders?)(\s*|\|[^\}]+)}}\s*/i',
         'tpl_watermark' => '/{{\s*(wmr|(remove |image)?water ?m(a|e)rk(ed)?)(\s*|\|[^\}]+)}}\s*/i',
         'cat_border' => '/\[\[category:images(?: |_)with(?: |_)borders\]\]\s*/i',
-        'not_to_be_copied' => '/({{\s*(featured( |_)picture|valued( |_)image|qualityimage|quality( |_)image|picture( |_)of( |_)the( |_)day|assessments|(license|flickr|panoramio|openstreetmap|openphoto)[ -]?review)\s*(\|[^\}]+)?}}\s*|\[\[category:(valued(_| )images(_| )of(_| )birds|Quality(_| )images|)( |_)(by|of)( |_).*\]\])/i',
+        'not_to_be_copied' => '/({{\s*(featured( |_)picture||vivalued( |_)image|qualityimage|quality( |_)image|picture( |_)of( |_)the( |_)day|assessments|(license|flickr|panoramio|openstreetmap|openphoto)[ -]?review)\s*(\|[^\}]+)?}}\s*|\[\[category:(valued(_| )images|quality(_| )images)( |_)(by|of)( |_).*\]\])/i',
         'tpl_waiting_for_review' => '/{{\s*flickrreview\s*}}/i',
     );
 
