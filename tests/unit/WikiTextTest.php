@@ -6,9 +6,13 @@ class WikiTextTest extends PHPUnit_Framework_TestCase
 {
     public function testItRecognizesTheLicenseReviewTemplate()
     {
-        $wikitext = new WikiText('abc [[Category:SomeCategory]] {{flickrreview}} def');
+        $wt1 = new WikiText('abc [[Category:SomeCategory]] {{flickrreview}} def');
+        $wt2 = new WikiText('abc [[Category:SomeCategory]] {{flickrreview|Dodo|November 30th, 2006}} def');
+        $wt3 = new WikiText('abc [[Category:SomeCategory]] {{User:FlickreviewR/reviewed-fail-recent|Inmediahk|....|}} def');
 
-        $this->assertTrue($wikitext->waitingForLicenseReview());
+        $this->assertTrue($wt1->waitingForReview());
+        $this->assertFalse($wt2->waitingForReview());
+        $this->assertTrue($wt3->waitingForReview());
     }
 
     public function testItRemovesTheImagesWithBordersCategoryIfRequested()

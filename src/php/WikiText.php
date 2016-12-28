@@ -7,24 +7,41 @@ class WikiText
     protected $text;
 
     /**
-     * Case insensitive list of templates and categories not to be copied to the new page
-     * when uploading the cropped image to a new page on Wikimedia Commons. See
-     *  - https://github.com/danmichaelo/croptool/issues/41 (license review templates)
-     *  - https://github.com/danmichaelo/croptool/issues/69 (assessment templates)
-     *  - https://github.com/danmichaelo/croptool/issues/82 (more assessment templates)
+     * List of assessment templates. These templates should not be copied to
+     * new pages (See #69 and #82), and pages having these templates should
+     * not be overwritten (See #83).
      */
-    protected $templatesNotToBeCopied = array(
-        // License review
-        '(license|flickr|panoramio|openstreetmap|openphoto)[_ -]?review',
-
-        // Quality assessment
+    protected $assessmentTemplates = array(
         'featured[_ ]?picture', 'fp',
         'valued[_ ]image', 'vi',
         'quality[_ ]?image',
         'picture[_ ]of[_ ]the[_ ]day',
         'assessments', 'featured[_ ]picture[_ ]mul',
+    );
 
-        // Other
+    /**
+     * License review templates that if present without any parameters,
+     * should stop the user from cropping the image. If present with parameters,
+     * they should not be copied to new pages.
+     */
+    protected $licenseReviewTemplates = array(
+        '(license|flickr|panoramio|openstreetmap|openphoto)[_ -]?review', // See #41
+    );
+
+    /**
+     * License review templates that, if present with out without any parameters,
+     * should stop the user from cropping the image.
+     */
+    protected $licenseReviewProblemTemplates = array(
+        'User:FlickreviewR\/reviewed-(error|notmatching|nosource|fail-recent|blacklisted)',
+    );
+
+    /**
+     * Templates other than assessment templates that should not to be copied
+     * to the new page when uploading the cropped image to a new page on
+     * Wikimedia Commons.
+     */
+    protected $otherTemplatesNotToBeCopied = array(
         'image[_ ]extracted|extracted|extracted[_ ](images?|file|photo)|cropped[_ ]version',
         'extractedfrom|extracted[_ ]image|ef|cropped|image extracted from',
     );
@@ -34,13 +51,12 @@ class WikiText
     );
 
     protected $patterns = array(
-        'templates' => '/{{\s*%NAMES%\s*(\|[^\}]+)?}}\s*/i',
+        'templates' => '/{{\s*%NAMES%\s*%PARAMS%}}\s*/i',
         'categories' => '/\[\[category:%NAMES%\]\]\s*/i',
 
         'tpl_remove_border' => '/{{\s*(crop|remove ?borders?)(\s*|\|[^\}]+)}}\s*/i',
         'tpl_watermark' => '/{{\s*(wmr|(remove |image)?water ?m(a|e)rk(ed)?)(\s*|\|[^\}]+)}}\s*/i',
         'cat_border' => '/\[\[category:images(?: |_)with(?: |_)borders\]\]\s*/i',
-        'tpl_waiting_for_review' => '/{{\s*flickrreview\s*}}/i',
     );
 
     /**
@@ -69,14 +85,32 @@ class WikiText
         return $this->text;
     }
 
+    protected function compileTemplatePattern($templates, $withParams=true)
+    {
+        return str_replace(
+            [
+                '%NAMES%',
+                '%PARAMS%'
+            ],
+            [
+                '(' . implode('|', $templates) . ')',
+                ($withParams ? '(\|[^\}]+)?' : '')
+            ],
+            $this->patterns['templates']
+        );
+    }
+
     /**
      * Test if the page is waiting for license review
      *
      * @return bool
      */
-    public function waitingForLicenseReview()
+    public function waitingForReview()
     {
-        return preg_match($this->patterns['tpl_waiting_for_review'], $this->text) == true;
+        $pattern1 = $this->compileTemplatePattern($this->licenseReviewTemplates, false);
+        $pattern2 = $this->compileTemplatePattern($this->licenseReviewProblemTemplates, true);
+
+        return preg_match($pattern1, $this->text) == true || preg_match($pattern2, $this->text) == true;
     }
 
     /**
@@ -133,17 +167,18 @@ class WikiText
 
     /**
      * Remove templates that should not be copied to new files. See documentation
-     * for $templatesNotToBeCopied above.
+     * for $otherTemplatesNotToBeCopied above.
      *
      * @return WikiText
      */
     public function withoutTemplatesNotToBeCopied()
     {
-        $templatePattern = str_replace(
-            '%NAMES%',
-            '(' . implode('|', $this->templatesNotToBeCopied) . ')',
-            $this->patterns['templates']
-        );
+        $templatePattern = $this->compileTemplatePattern(array_merge(
+            $this->assessmentTemplates,
+            $this->licenseReviewTemplates,
+            $this->otherTemplatesNotToBeCopied
+        ), true);
+
         $categoryPattern = str_replace(
             '%NAMES%',
             '(' . implode('|', $this->categoriesNotToBeCopied) . ')',

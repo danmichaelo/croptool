@@ -25,8 +25,9 @@ at Wikimedia Commons and other Wikimedia sites using the MediaWiki API with OAut
   license review templates and crop tracking templates
   ([Extracted from](https://commons.wikimedia.org/wiki/Template:Extracted_from)
   and [Image extracted](https://commons.wikimedia.org/wiki/Template:Image_extracted)).
-* Stops users from cropping images having
-  [`{{Flickrreview}}`](https://commons.wikimedia.org/wiki/Template:Flickrreview),
+* Stops users from cropping images waiting for license review (having
+  [`{{Flickrreview}}`](https://commons.wikimedia.org/wiki/Template:Flickrreview)
+  without any parameters, or some of the `User:FlickreviewR` subtemplates),
   since images should be reviewed before being altered.
 
 ### Setting up a development environment

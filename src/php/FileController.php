@@ -46,6 +46,7 @@ class FileController
         $pageno = intval($request->getQueryParam('page', 0));
 
         $page->assertExists();
+        $page->assertNotWaitingForLicenseReview();
         $page->file->fetchPage($pageno);
 
         $srcPath = $page->file->getAbsolutePathForPage($pageno);
