@@ -54,6 +54,14 @@ class WikiTextTest extends PHPUnit_Framework_TestCase
         $this->assertEquals('abc {{watermark}} def', $wikitext);
     }
 
+    public function testItRemovesQualityAssessmentTemplatesIfRequested()
+    {
+        $wikitext = WikiText::make('abc {{Valued_image|example}} ghi {{vi|example}} {{quality image | example}} {{license review}} {{watermark}} def [[Category:Quality images by Abc]] ]]')
+            ->withoutTemplatesNotToBeCopied();
+
+        $this->assertEquals('abc ghi {{watermark}} def ]]', strval($wikitext));
+    }
+
     public function testItRemovesTheWatermarkTemplateIfRequested()
     {
         $oldText = WikiText::make('abc {{Remove border}} {{watermark}} def');

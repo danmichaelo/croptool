@@ -7,16 +7,22 @@ at Wikimedia Commons and other Wikimedia sites using the MediaWiki API with OAut
 
 * Supports JPEG, PNG and (animated) GIF files, and also single pages from
   DJVU and PDF files.
-* JPEGs can be cropped losslessly using [jpegtran](http://jpegclub.org/jpegtran/)
+* JPEGs can be cropped either losslessly using [jpegtran](http://jpegclub.org/jpegtran/)
   or pixel perfect using [ImageMagick](https://www.imagemagick.org/).
 * Detects [`{{Remove border}}`](https://commons.wikimedia.org/wiki/Template:Remove_border),
   [Category:Images with borders](https://commons.wikimedia.org/wiki/Category:Images_with_borders)
   and [`{{Watermark}}`](https://commons.wikimedia.org/wiki/Template:Watermark), and
   provides check boxes for optional removal of these upon cropping.
 * The result can replace the original file or be uploaded as a new one.
-* If the result is uploaded as a new file on Commons, the `{{Extracted from}}`
-  template is added to the new file, and the `{{Image extracted}}` template
-  is added or updated on the original.
+* If the result is uploaded as a new file on Wikimedia Commons,
+  * the `{{Extracted from}}` template is added to the new file, and the
+  `{{Image extracted}}` template is added or updated on the original.
+  * quality assessment templates ([Featured picture](https://commons.wikimedia.org/wiki/Template:Featured picture),
+  [Valued image](https://commons.wikimedia.org/wiki/Template:Valued_image),
+  [Quality image](https://commons.wikimedia.org/wiki/Template:Quality_image),
+  [Picture of the day](https://commons.wikimedia.org/wiki/Template:Picture_of_the_day),
+  [Assessments](https://commons.wikimedia.org/wiki/Template:Assessments))
+  and license review templates are not copied to the new page.
 * Stops users from cropping images having
   [`{{Flickrreview}}`](https://commons.wikimedia.org/wiki/Template:Flickrreview),
   since images should be reviewed before being altered.

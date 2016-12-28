@@ -6,11 +6,33 @@ class WikiText
 {
     protected $text;
 
-    protected $elem_matches = array(
+    /**
+     * Case insensitive list of templates and categories not to be copied to the new page
+     * when uploading the cropped image to a new page on Wikimedia Commons. See
+     *  - https://github.com/danmichaelo/croptool/issues/41 (license review templates)
+     *  - https://github.com/danmichaelo/croptool/issues/69 (assessment templates)
+     *  - https://github.com/danmichaelo/croptool/issues/82 (more assessment templates)
+     */
+    protected $templatesNotToBeCopied = array(
+        '(license|flickr|panoramio|openstreetmap|openphoto)[_ -]?review',
+        'featured[_ ]?picture', 'fp',
+        'valued[_ ]image', 'vi',
+        'quality[_ ]?image',
+        'picture[_ ]of[_ ]the[_ ]day',
+        'assessments', 'featured[_ ]picture[_ ]mul',
+    );
+
+    protected $categoriesNotToBeCopied = array(
+        '(valued|quality)[_ ]images[_ ](by|of)[^\]]+',
+    );
+
+    protected $patterns = array(
+        'templates' => '/{{\s*%NAMES%\s*(\|[^\}]+)?}}\s*/i',
+        'categories' => '/\[\[category:%NAMES%\]\]\s*/i',
+
         'tpl_remove_border' => '/{{\s*(crop|remove ?borders?)(\s*|\|[^\}]+)}}\s*/i',
         'tpl_watermark' => '/{{\s*(wmr|(remove |image)?water ?m(a|e)rk(ed)?)(\s*|\|[^\}]+)}}\s*/i',
         'cat_border' => '/\[\[category:images(?: |_)with(?: |_)borders\]\]\s*/i',
-        'not_to_be_copied' => '/({{\s*(featured( |_)picture|vi|valued( |_)image|qualityimage|quality( |_)image|picture( |_)of( |_)the( |_)day|assessments|(license|flickr|panoramio|openstreetmap|openphoto)[ -]?review)\s*(\|[^\}]+)?}}\s*|\[\[category:(valued(_| )images|quality(_| )images)( |_)(by|of)( |_).*\]\])/i',
         'tpl_waiting_for_review' => '/{{\s*flickrreview\s*}}/i',
     );
 
@@ -47,7 +69,7 @@ class WikiText
      */
     public function waitingForLicenseReview()
     {
-        return preg_match($this->elem_matches['tpl_waiting_for_review'], $this->text) == true;
+        return preg_match($this->patterns['tpl_waiting_for_review'], $this->text) == true;
     }
 
     /**
@@ -57,13 +79,13 @@ class WikiText
     {
         $data = array();
 
-        if (preg_match($this->elem_matches['tpl_remove_border'], $this->text)) {
+        if (preg_match($this->patterns['tpl_remove_border'], $this->text)) {
             $data['border'] = true;
         }
-        if (preg_match($this->elem_matches['tpl_watermark'], $this->text)) {
+        if (preg_match($this->patterns['tpl_watermark'], $this->text)) {
             $data['watermark'] = true;
         }
-        if (preg_match($this->elem_matches['cat_border'], $this->text)) {
+        if (preg_match($this->patterns['cat_border'], $this->text)) {
             $data['border'] = true;
         }
 
@@ -83,8 +105,8 @@ class WikiText
     public function withoutBorderTemplate()
     {
         $text = preg_replace(array(
-            $this->elem_matches['tpl_remove_border'],
-            $this->elem_matches['cat_border'],
+            $this->patterns['tpl_remove_border'],
+            $this->patterns['cat_border'],
         ), array('', ''), $this->text);
 
         return $this->cloneIfModified($text);
@@ -97,21 +119,30 @@ class WikiText
      */
     public function withoutWatermarkTemplate()
     {
-        $text = preg_replace($this->elem_matches['tpl_watermark'], '', $this->text);
+        $text = preg_replace($this->patterns['tpl_watermark'], '', $this->text);
 
         return $this->cloneIfModified($text);
     }
 
     /**
-     * Some templates should not be copied to new files.
-     *  - License review templates per <https://github.com/danmichaelo/croptool/issues/41>
-     *  - Assessment templates per <https://github.com/danmichaelo/croptool/issues/69>
+     * Remove templates that should not be copied to new files. See documentation
+     * for $templatesNotToBeCopied above.
      *
      * @return WikiText
      */
     public function withoutTemplatesNotToBeCopied()
     {
-        $text = preg_replace($this->elem_matches['not_to_be_copied'], '', $this->text);
+        $templatePattern = str_replace(
+            '%NAMES%',
+            '(' . implode('|', $this->templatesNotToBeCopied) . ')',
+            $this->patterns['templates']
+        );
+        $categoryPattern = str_replace(
+            '%NAMES%',
+            '(' . implode('|', $this->categoriesNotToBeCopied) . ')',
+            $this->patterns['categories']
+        );
+        $text = preg_replace([$templatePattern, $categoryPattern], ['', ''], $this->text);
 
         return $this->cloneIfModified($text);
     }
