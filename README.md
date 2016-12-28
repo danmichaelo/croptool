@@ -17,12 +17,14 @@ at Wikimedia Commons and other Wikimedia sites using the MediaWiki API with OAut
 * If the result is uploaded as a new file on Wikimedia Commons,
   * the `{{Extracted from}}` template is added to the new file, and the
   `{{Image extracted}}` template is added or updated on the original.
-  * quality assessment templates ([Featured picture](https://commons.wikimedia.org/wiki/Template:Featured picture),
+  * some templates are not copied to the new page: quality assessment templates ([Featured picture](https://commons.wikimedia.org/wiki/Template:Featured picture),
   [Valued image](https://commons.wikimedia.org/wiki/Template:Valued_image),
   [Quality image](https://commons.wikimedia.org/wiki/Template:Quality_image),
   [Picture of the day](https://commons.wikimedia.org/wiki/Template:Picture_of_the_day),
-  [Assessments](https://commons.wikimedia.org/wiki/Template:Assessments))
-  and license review templates are not copied to the new page.
+  [Assessments](https://commons.wikimedia.org/wiki/Template:Assessments)),
+  license review templates and crop tracking templates
+  ([Extracted from](https://commons.wikimedia.org/wiki/Template:Extracted_from)
+  and [Image extracted](https://commons.wikimedia.org/wiki/Template:Image_extracted)).
 * Stops users from cropping images having
   [`{{Flickrreview}}`](https://commons.wikimedia.org/wiki/Template:Flickrreview),
   since images should be reviewed before being altered.

@@ -14,12 +14,19 @@ class WikiText
      *  - https://github.com/danmichaelo/croptool/issues/82 (more assessment templates)
      */
     protected $templatesNotToBeCopied = array(
+        // License review
         '(license|flickr|panoramio|openstreetmap|openphoto)[_ -]?review',
+
+        // Quality assessment
         'featured[_ ]?picture', 'fp',
         'valued[_ ]image', 'vi',
         'quality[_ ]?image',
         'picture[_ ]of[_ ]the[_ ]day',
         'assessments', 'featured[_ ]picture[_ ]mul',
+
+        // Other
+        'image[_ ]extracted|extracted|extracted[_ ](images?|file|photo)|cropped[_ ]version',
+        'extractedfrom|extracted[_ ]image|ef|cropped|image extracted from',
     );
 
     protected $categoriesNotToBeCopied = array(

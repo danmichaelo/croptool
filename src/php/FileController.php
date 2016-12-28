@@ -178,10 +178,13 @@ class FileController
             $newPage = $factory->make(WikiPage::class, ['title' => $newName]);
             $newPage->assertNotExists();
 
+            // Remove templates before appending {{Extracted from}}
+            $wikitext = $wikitext->withoutTemplatesNotToBeCopied();
+
             if (in_array($newPage->site, $sitesSupportingExtractedFromTemplate)) {
                 $wikitext = $wikitext->appendExtractedFromTemplate($page->title);
             }
-            $newPage->setWikitext($wikitext->withoutTemplatesNotToBeCopied());
+            $newPage->setWikitext($wikitext);
 
             $uploadResponse = $newPage->upload($cropPath, $editComment, $ignoreWarnings);
             $logger->info('Uploaded new version of "' . $page->title . '" as "' . $newPage->title . '".');
