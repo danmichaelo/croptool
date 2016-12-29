@@ -15,6 +15,15 @@ class WikiTextTest extends PHPUnit_Framework_TestCase
         $this->assertTrue($wt3->waitingForReview());
     }
 
+    public function testItRecognizesQualityAssessmentTemplates()
+    {
+        $wt1 = new WikiText('abc {{quality image}}');
+        $wt2 = new WikiText('abc {{other image}}');
+
+        $this->assertTrue($wt1->hasAssessmentTemplates());
+        $this->assertFalse($wt2->hasAssessmentTemplates());
+    }
+
     public function testItRemovesTheImagesWithBordersCategoryIfRequested()
     {
         $oldText = WikiText::make('abc [[Category:SomeCategory]] [[Category:Images with borders]][[Category:SomeOtherCategory]] def');

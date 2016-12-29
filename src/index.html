@@ -371,7 +371,7 @@
 
                         <div class="form-group">
                             <label class="radio-inline">
-                                <input type="radio" name="overwrite" ng-model="overwrite" value="overwrite" ng-disabled="ladda2 || currentUrlParams.page" ng-change="updateUploadComment()">
+                                <input type="radio" name="overwrite" ng-disabled="!cropresults.page.allowOverwrite" ng-model="overwrite" value="overwrite" ng-disabled="ladda2 || currentUrlParams.page" ng-change="updateUploadComment()">
                                 <span translate>previewform-overwrite</span>
                             </label>
                             <label class="radio-inline">
@@ -379,6 +379,11 @@
                                 <span translate>previewform-create-new</span>
                             </label>
                         </div>
+
+                        <p ng-show="!cropresults.page.allowOverwrite">
+                            <i class="fa fa-warning"></i>
+                            <span translate>previewform-overwrite-disabled</span>
+                        </p>
 
                         <p ng-show="currentUrlParams.site == 'commons.wikimedia.org' && overwrite=='overwrite'">
                             <i class="fa fa-warning"></i>

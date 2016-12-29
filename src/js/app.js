@@ -444,7 +444,9 @@ controller('AppCtrl', ['$scope', '$http', '$timeout', '$q', '$window', '$httpPar
         })).
         success(function(response) {
             $scope.ladda = false;
-
+            if (!response.page.allowOverwrite) {
+                $scope.overwrite = "rename";
+            }
 
             // TODO: Add timestamps to invalidate cache!
 

@@ -10,7 +10,8 @@ class WikiText
     |--------------------------------------------------------------------------
     | Assessment templates
     |--------------------------------------------------------------------------
-    | These should not be copied to new pages (See #69 and #82)
+    | These should not be copied to new pages (See #69 and #82).
+    | Pages having these templates should not be overwritten (See #83).
     */
     protected $assessmentTemplates = array(
         'featured[_ ]?picture', 'fp',
@@ -54,6 +55,8 @@ class WikiText
     protected $otherTemplatesNotToBeCopied = array(
         'image[_ ]extracted|extracted|extracted[_ ](images?|file|photo)|cropped[_ ]version',
         'extractedfrom|extracted[_ ]image|ef|cropped|image extracted from',
+        'FlickrVerifiedByUploadWizard',
+        'User:FlickreviewR\/reviewed-[a-z]+',
     );
 
     /*
@@ -169,6 +172,18 @@ class WikiText
         $pattern2 = $this->compileTemplatePattern($this->licenseReviewProblemTemplates, true);
 
         return preg_match($pattern1, $this->text) == true || preg_match($pattern2, $this->text) == true;
+    }
+
+    /**
+     * Test if the page has any quality assessment templates
+     *
+     * @return bool
+     */
+    public function hasAssessmentTemplates()
+    {
+        $pattern = $this->compileTemplatePattern($this->assessmentTemplates);
+
+        return preg_match($pattern, $this->text) == true;
     }
 
     /**

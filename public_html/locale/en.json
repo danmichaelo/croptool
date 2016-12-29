@@ -41,6 +41,7 @@
     "previewform-lossless-explanation": "The resulting image is {{wider}} px wider and {{higher}} px higher than the region you selected. <a target=\"_blank\" href=\"{{url}}\">Why?<\/a> Note that the extra pixels included are in the left and\/or top part of the image.",
     "previewform-precise": "A precise crop was performed.",
     "previewform-overwrite-policy": "Before overwriting, make sure you are familiar with <a href=\"{{url}}\">COM:CROP<\/a>.",
+    "previewform-overwrite-disabled": "The overwrite option is disabled because the image has passed an assessment process.",
     "previewform-multipage-file": "The overwrite option is disabled because this is a multipage file.",
     "previewform-removed-border": "I've removed the border",
     "previewform-removed-border-help": "Confirms removal of the 'remove border' template",
