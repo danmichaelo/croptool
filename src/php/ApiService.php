@@ -184,4 +184,65 @@ class ApiService
             'text' => $text
         ]);
     }
+
+    /**
+     * Create a new Wikibase claim
+     *
+     * @param string $entity (e.g. 'Q42')
+     * @param string $property (e.g. 'P18')
+     * @param string $value (e.g. 'Test.jpg')
+     * @param string $snaktype (defaults to 'value')
+     */
+    public function createClaim($entity, $property, $value, $snaktype='value')
+    {
+        $token = $this->getEditToken();
+
+        return $this->request([
+            'action' => 'wbcreateclaim',
+            'entity' => $entity,
+            'property' => $property,
+            'snaktype' => $snaktype,
+            'value' => $value,
+            'token' => $token,
+        ]);
+    }
+
+    /**
+     * Get the claims for a given entity, filtered by property.
+     *
+     * @param string $entity (e.g. 'Q42')
+     * @param string $property (e.g. 'P18')
+     */
+    public function getClaimsByProperty($entity, $property)
+    {
+        $response = $this->request([
+            'action' => 'wbgetclaims',
+            'entity' => $entity,
+        ]);
+
+        if (!isset($response->claims->{$property})) {
+            return [];
+        }
+
+        return $response->claims->{$property};
+    }
+
+    /**
+     * Get data for one or more Wikidata entities.
+     *
+     * @param string $entity (e.g. 'Q42' or 'Q42|Q17')
+     */
+    public function getEntities($entities)
+    {
+        $response = $this->request([
+            'action' => 'wbgetentities',
+            'ids' => $entities,
+        ]);
+
+        if (isset($response->error)) {
+            throw new NoSuchEntity();
+        }
+
+        return $response->entities;
+    }
 }

@@ -78,7 +78,7 @@ class FileController
         ]);
     }
 
-    public function crop(Response $response, Request $request, WikiPage $page, ImageEditor $editor, LoggerInterface $logger)
+    public function crop(Response $response, Request $request, WikiPage $page, ImageEditor $editor, LoggerInterface $logger, FactoryInterface $factory)
     {
         // @TODO: DRY
         $pageno = intval($request->getQueryParam('page', 0));
@@ -119,6 +119,20 @@ class FileController
             $dim[] = ($cropPercentY ?: ' < 1') . ' % vertically';
         }
 
+        $options = $page->wikitext->possibleStuffToRemove();
+        $wd = null;
+        if (isset($options['wikidata-item'])) {
+            try {
+                $item = $factory->make(Item::class, ['entity' => $options['wikidata-item']]);
+                $el = $item->get();
+                $wd = ['labels' => []];
+                foreach ($el->labels as $k => $v) {
+                    $wd['labels'][$k] = $v->value;
+                }
+            } catch (NoSuchEntity $e) {
+            }
+        }
+
         return $response->withJson([
             'site' => $page->site,
             'title' => $page->title,
@@ -126,12 +140,13 @@ class FileController
             'method' => $method,
             'dim' => implode(' and ', $dim) . ' using [[Commons:CropTool|CropTool]] with ' . $method . ' mode.',
             'page' => [
-                'elems' => $page->wikitext->possibleStuffToRemove(),
+                'elems' => $options,
                 'allowOverwrite' => !$page->wikitext->hasAssessmentTemplates(),
             ],
             'crop' => $this->fileResponse($page->file, $crop, $pageno, '_cropped'),
             'thumb' => $this->fileResponse($page->file, $thumb, $pageno, '_cropped_thumb'),
             'time' => time(),
+            'wikidata' => $wd,
             'msecs' => round(microtime(true)*1000 - $t0),
         ]);
     }
@@ -158,14 +173,14 @@ class FileController
         $cropPath = $page->file->getAbsolutePathForPage($pageno, '_cropped');
 
         $wikitext = $page->wikitext;
-        $removed = [];
+        $elems = [];
         if (array_get($stuffToRemove, 'border')) {
             $wikitext = $wikitext->withoutBorderTemplate();
-            $removed[] = 'border';
+            $elems['border'] = 1;
         }
         if (array_get($stuffToRemove, 'watermark')) {
             $wikitext = $wikitext->withoutWatermarkTemplate();
-            $removed[] = 'watermark';
+            $elems['watermark'] = 1;
         }
 
         if ($overwrite) {
@@ -175,13 +190,18 @@ class FileController
             $logger->info('Uploaded new version of "' . $page->title . '".');
 
             $page->setWikitext($wikitext)
-                ->save('Removed ' . (implode(' and ', $removed)) . ' using [[Commons:CropTool|CropTool]]');
+                ->save('Removed ' . (implode(' and ', array_keys($elems))) . ' using [[Commons:CropTool|CropTool]]');
         } else {
             $newPage = $factory->make(WikiPage::class, ['title' => $newName]);
             $newPage->assertNotExists();
 
             // Remove templates before appending {{Extracted from}}
             $wikitext = $wikitext->withoutTemplatesNotToBeCopied();
+
+            if (array_get($stuffToRemove, 'wikidata')) {
+                $wikitext = $wikitext->withoutCropForWikidataTemplate();
+                $elems['wikidata'] = array_get($stuffToRemove, 'wikidata-item');
+            }
 
             if (in_array($newPage->site, $sitesSupportingExtractedFromTemplate)) {
                 $wikitext = $wikitext->appendExtractedFromTemplate($page->title);
@@ -192,10 +212,22 @@ class FileController
             $logger->info('Uploaded new version of "' . $page->title . '" as "' . $newPage->title . '".');
 
             if (in_array($page->site, $sitesSupportingImageExtractedTemplate)) {
-                $page->setWikitext($page->wikitext->appendImageExtractedTemplate($newName))
+                $wt0 = $page->wikitext;
+                if (array_get($stuffToRemove, 'wikidata')) {
+                    $wt0 = $wt0->withoutCropForWikidataTemplate();
+                }
+                $page->setWikitext($wt0->appendImageExtractedTemplate($newName))
                     ->save('Added/updated {{Image extracted}} using [[Commons:CropTool|CropTool]]');
             }
+
+            if (array_get($stuffToRemove, 'wikidata')) {
+                $wdEntity = array_get($stuffToRemove, 'wikidata-item');
+                $item = $factory->make(Item::class, ['entity' => $wdEntity]);
+                $item->addClaim('P18', '"' . $newName . '"');
+            }
         }
+
+        $uploadResponse->elems = $elems;
 
         return $response->withJson($uploadResponse);
     }

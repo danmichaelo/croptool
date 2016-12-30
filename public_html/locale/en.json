@@ -47,6 +47,8 @@
     "previewform-removed-border-help": "Confirms removal of the 'remove border' template",
     "previewform-removed-watermark": "I've removed the watermark",
     "previewform-removed-watermark-help": "Confirms removal of the 'watermark' template",
+    "previewform-wikidata-crop": "Add image to Wikidata as an illustration of {{link}}",
+    "previewform-wikidata-crop-help": "Add the cropped image as an illustration (P18) of the Wikidata data element.",
     "previewform-overwrite": "Overwrite",
     "previewform-create-new": "Upload as new file",
     "previewform-new-title": "New filename",
@@ -56,6 +58,7 @@
     "previewform-upload-btn": "Upload",
     "upload-progress": "Please wait while uploading...",
     "results-success": "Cropped image uploaded successfully!",
-    "results-success-details": "<a href=\"{{url}}\">View the result<\/a>. Refreshing the page might be necessary.",
+    "results-success-details": "You can now <a href=\"{{url}}\">review the result<\/a> (Refresh the page if you see the uncropped image). If you've made a substantial crop, you might need to update the description, templates and/or categories.",
+    "results-success-wikidata": "The image was added to {{link}}. You might want to review the item.",
     "results-failure": "Cropped image upload failed: {{error}}"
 }

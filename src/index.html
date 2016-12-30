@@ -369,53 +369,64 @@
 
                     <form ng-submit="upload()" role="form">
 
-                        <div class="form-group">
-                            <label class="radio-inline">
-                                <input type="radio" name="overwrite" ng-disabled="!cropresults.page.allowOverwrite" ng-model="overwrite" value="overwrite" ng-disabled="ladda2 || currentUrlParams.page" ng-change="updateUploadComment()">
-                                <span translate>previewform-overwrite</span>
-                            </label>
-                            <label class="radio-inline">
-                                <input type="radio" name="overwrite" ng-model="overwrite" value="rename" ng-disabled="ladda2" ng-change="updateUploadComment()">
-                                <span translate>previewform-create-new</span>
-                            </label>
+                        <div>
+
+                            <div class="form-group">
+                                <label class="radio-inline">
+                                    <input type="radio" name="overwrite" ng-disabled="!cropresults.page.allowOverwrite" ng-model="overwrite" value="overwrite" ng-disabled="ladda2 || currentUrlParams.page" ng-change="updateUploadComment()">
+                                    <span translate>previewform-overwrite</span>
+                                </label>
+                                <label class="radio-inline">
+                                    <input type="radio" name="overwrite" ng-model="overwrite" value="rename" ng-disabled="ladda2" ng-change="updateUploadComment()">
+                                    <span translate>previewform-create-new</span>
+                                </label>
+                            </div>
+
+                            <p ng-show="!cropresults.page.allowOverwrite">
+                                <i class="fa fa-warning"></i>
+                                <span translate>previewform-overwrite-disabled</span>
+                            </p>
+
+                            <p ng-show="currentUrlParams.site == 'commons.wikimedia.org' && overwrite=='overwrite'">
+                                <i class="fa fa-warning"></i>
+                                <span translate translate-value-url="https://commons.wikimedia.org/wiki/Special:MyLanguage/Commons:Overwriting existing files">previewform-overwrite-policy</span>
+                            </p>
+
+                            <p ng-show="currentUrlParams.page">
+                                <i class="fa fa-warning"></i>
+                                <span translate>previewform-multipage-file</span>
+                            </p>
+
+                            <div class="form-group" ng-show="overwrite=='rename'" ng-class="{ 'has-error': exists[currentUrlParams.site + ':' + newTitle] === true, 'has-success': exists[currentUrlParams.site + ':' + newTitle] === false }">
+                                <label class="sr-only" for="newTitle">
+                                    <span translate>previewform-new-title</span>
+                                </label>
+                                <input id="newTitle" type="text" class="form-control" ng-model="newTitle" ng-disabled="ladda2">
+                                <span class="help-block" ng-show="exists[currentUrlParams.site + ':' + newTitle] === true">
+                                    <span translate translate-value-title="{{newTitle}}">previewform-new-title-exists</span>
+                                </span>
+                            </div>
+
                         </div>
 
-                        <p ng-show="!cropresults.page.allowOverwrite">
-                            <i class="fa fa-warning"></i>
-                            <span translate>previewform-overwrite-disabled</span>
-                        </p>
-
-                        <p ng-show="currentUrlParams.site == 'commons.wikimedia.org' && overwrite=='overwrite'">
-                            <i class="fa fa-warning"></i>
-                            <span translate translate-value-url="https://commons.wikimedia.org/wiki/Special:MyLanguage/Commons:Overwriting existing files">previewform-overwrite-policy</span>
-                        </p>
-
-                        <p ng-show="currentUrlParams.page">
-                            <i class="fa fa-warning"></i>
-                            <span translate>previewform-multipage-file</span>
-                        </p>
-
-                        <div class="form-group" ng-show="overwrite=='rename'" ng-class="{ 'has-error': exists[currentUrlParams.site + ':' + newTitle] === true, 'has-success': exists[currentUrlParams.site + ':' + newTitle] === false }">
-                            <label class="sr-only" for="newTitle">
-                                <span translate>previewform-new-title</span>
-                            </label>
-                            <input id="newTitle" type="text" class="form-control" ng-model="newTitle" ng-disabled="ladda2">
-                            <span class="help-block" ng-show="exists[currentUrlParams.site + ':' + newTitle] === true">
-                                <span translate translate-value-title="{{newTitle}}">previewform-new-title-exists</span>
-                            </span>
-                        </div>
-
-                        <div class="form-group" ng-show="cropresults.page.elems.border !== undefined">
+                        <div class="form-group" ng-if="cropresults.page.elems.border !== undefined">
                             <label title="{{'previewform-removed-border-help' | translate}}">
                                 <input type="checkbox" ng-model="cropresults.page.elems.border" ng-change="updateUploadComment()">
                                 <span translate>previewform-removed-border</span>
                             </label>
                         </div>
 
-                        <div class="form-group" ng-show="cropresults.page.elems.watermark !== undefined">
+                        <div class="form-group" ng-if="cropresults.page.elems.watermark !== undefined">
                             <label title="{{'previewform-removed-watermark-help' | translate}}">
                                 <input type="checkbox" ng-model="cropresults.page.elems.watermark" ng-change="updateUploadComment()">
                                 <span translate>previewform-removed-watermark</span>
+                            </label>
+                        </div>
+
+                        <div class="form-group" ng-if="cropresults.page.elems.wikidata !== undefined && overwrite=='rename'">
+                            <label title="{{'previewform-wikidata-crop-help' | translate}}">
+                                <input type="checkbox" ng-model="cropresults.page.elems.wikidata" ng-change="updateUploadCommnt()">
+                                <span translate translate-values="{ link: cropresults.wikidataLink }">previewform-wikidata-crop</span>
                             </label>
                         </div>
 
@@ -466,6 +477,9 @@
                     </p>
                     <p ng-show="uploadresults.result == 'Success'">
                         <span translate translate-value-url="{{uploadresults.imageinfo.descriptionurl}}?action=purge">results-success-details</span>
+                    </p>
+                    <p ng-show="uploadresults.result == 'Success' && uploadresults.elems.wikidata">
+                        <span translate translate-values="{ link: cropresults.wikidataLink }">results-success-wikidata</span>
                     </p>
 
                     <p ng-show="uploadresults.error" style="background: url(res/x_mark-24px.png) left no-repeat; padding: 5px 5px 5px 30px;">

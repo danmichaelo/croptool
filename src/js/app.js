@@ -450,8 +450,17 @@ controller('AppCtrl', ['$scope', '$http', '$timeout', '$q', '$window', '$httpPar
 
             // TODO: Add timestamps to invalidate cache!
 
-
             $scope.cropresults = response;
+            if (response.page.elems.wikidata) {
+                var entityId = response.page.elems['wikidata-item'];
+                var entityLabel = response.wikidata.labels.en;
+                if (entityLabel) {
+                    $scope.cropresults.wikidataLink = '<a target="_blank" href="https://www.wikidata.org/wiki/' + entityId + '">' + entityLabel + ' (' + entityId + ')</a>';
+                } else {
+                    $scope.cropresults.wikidataLink = '<a target="_blank" href="https://www.wikidata.org/wiki/' + entityId + '">' + entityId + '</a>';
+                }
+                $scope.overwrite = 'rename';
+            }
             $scope.updateUploadComment();
         }).
         error(function(response, status, headers) {
@@ -634,11 +643,16 @@ controller('AppCtrl', ['$scope', '$http', '$timeout', '$q', '$window', '$httpPar
         // Removed watermark from [[File:X]] by cropping {x % using CropTool}
 
         var s = '';
-        if ($scope.cropresults.page.elems.border || $scope.cropresults.page.elems.watermark) {
+        console.log($scope.cropresults);
+        if ($scope.cropresults.page.elems.border || $scope.cropresults.page.elems.watermark || $scope.cropresults.page.elems.wikidata) {
             if ($scope.cropresults.page.elems.border) {
                 s = 'Removed border';
             } else if ($scope.cropresults.page.elems.watermark) {
-                s = 'Removed watermark'
+                s = 'Removed watermark';
+            } else if ($scope.cropresults.page.elems.wikidata) {
+                s = 'Cropped for [[:wikidata:' + $scope.cropresults.page.elems['wikidata-item'] + '|Wikidata]]';
+            } else {
+                s = 'Cropped';
             }
             if ($scope.overwrite == 'rename') {
                 s += ' from [[File:' + $scope.currentUrlParams.title + ']]';

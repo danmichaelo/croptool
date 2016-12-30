@@ -106,6 +106,17 @@ class WikiText
         '(remove[ _])?water[ _]?m[ae]rk(ed)?',
     );
 
+    /*
+    |--------------------------------------------------------------------------
+    | Crop for Wikidata templates
+    |--------------------------------------------------------------------------
+    | Templates that indicate that the crop should be added to Wikidata and
+    | the template removed.
+    */
+    protected $cropForWikidataTemplates = array(
+        'Crop[ _]for[ _]Wikidata',
+    );
+
     protected $patterns = array(
         'templates' => '/{{\s*%NAMES%\s*%PARAMS%}}\s*/i',
         'categories' => '/\[\[category:%NAMES%\]\]\s*/i',
@@ -146,7 +157,7 @@ class WikiText
             ],
             [
                 '(' . implode('|', $templates) . ')',
-                ($withParams ? '(\|[^\}]+)?' : '')
+                ($withParams ? '(\|([^\}]+))?' : '')
             ],
             $this->patterns['templates']
         );
@@ -202,6 +213,10 @@ class WikiText
         if (preg_match($this->compileCategoryPattern($this->removeBorderCategories), $this->text)) {
             $data['border'] = true;
         }
+        if (preg_match($this->compileTemplatePattern($this->cropForWikidataTemplates), $this->text, $matches)) {
+            $data['wikidata'] = true;
+            $data['wikidata-item'] = trim($matches[3]);
+        }
 
         return $data;
     }
@@ -234,6 +249,18 @@ class WikiText
     public function withoutWatermarkTemplate()
     {
         $text = preg_replace($this->compileTemplatePattern($this->watermarkTemplates), '', $this->text);
+
+        return $this->cloneIfModified($text);
+    }
+
+    /**
+     * Remove {{Crop for Wikidata}} template
+     *
+     * @return WikiText
+     */
+    public function withoutCropForWikidataTemplate()
+    {
+        $text = preg_replace($this->compileTemplatePattern($this->cropForWikidataTemplates), '', $this->text);
 
         return $this->cloneIfModified($text);
     }

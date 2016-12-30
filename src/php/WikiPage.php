@@ -22,6 +22,7 @@ class WikiPage
     protected $logger;
     protected $_title;
     protected $dirty;
+    protected $namespace;
 
     /**
      * WikiPage constructor.
