@@ -42,6 +42,7 @@
     "previewform-precise": "A precise crop was performed.",
     "previewform-overwrite-policy": "Before overwriting, make sure you are familiar with <a href=\"{{url}}\">COM:CROP<\/a>.",
     "previewform-overwrite-disabled": "The overwrite option is disabled because the image has passed an assessment process.",
+    "previewform-rename-tip": "Update the filename below if no longer descriptive.",
     "previewform-multipage-file": "The overwrite option is disabled because this is a multipage file.",
     "previewform-removed-border": "I've removed the border",
     "previewform-removed-border-help": "Confirms removal of the 'remove border' template",

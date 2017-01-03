@@ -397,6 +397,11 @@
                                 <span translate>previewform-multipage-file</span>
                             </p>
 
+                            <p ng-show="overwrite=='rename'">
+                                <i class="fa fa-hand-o-down"></i>
+                                <span translate>previewform-rename-tip</span>
+                            </p>
+
                             <div class="form-group" ng-show="overwrite=='rename'" ng-class="{ 'has-error': exists[currentUrlParams.site + ':' + newTitle] === true, 'has-success': exists[currentUrlParams.site + ':' + newTitle] === false }">
                                 <label class="sr-only" for="newTitle">
                                     <span translate>previewform-new-title</span>
