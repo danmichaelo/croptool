@@ -17,11 +17,6 @@ echo "Installing Node.js and NPM"
 apt-get install -y build-essential nodejs npm
 ln -sf /usr/bin/nodejs /usr/bin/node
 
-echo "Installing NTP"
-apt-get install -y ntp > /dev/null
-ntpdate pool.ntp.org
-service ntp restart
-
 echo "Installing djvulibre"
 apt-get install -y djvulibre-bin > /dev/null
 
