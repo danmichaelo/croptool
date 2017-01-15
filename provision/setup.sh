@@ -69,6 +69,7 @@ else
 	mv composer.phar /usr/local/bin/composer
 
 	echo "Installing Composer packages"
+	rm composer.lock
 	composer install --no-progress --prefer-dist
 fi
 
