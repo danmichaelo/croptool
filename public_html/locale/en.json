@@ -1,5 +1,6 @@
 {
     "CropTool": "CropTool",
+    "initial-loading": "Just a moment...",
     "logged-in": "Authorized as {{user}}",
     "logout": "Logout",
     "loginform-header": "Authorization required",

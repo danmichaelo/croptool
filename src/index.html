@@ -79,6 +79,11 @@
         If not authorized, show "login form"
         **************************************************************************************************** -->
 
+    <div ng-controller="LoginCtrl" ng-show="!ready">
+        <span translate>initial-loading</span>
+        <div class="mainLoader" style="margin-top: 1em;"></div>
+    </div>
+
     <div ng-controller="LoginCtrl" ng-show="ready && !user">
 
         <div ng-show="oauthError" class="alert alert-danger" role="alert">
@@ -170,7 +175,7 @@
         Fetching image data and metadata
         **************************************************************************************************** -->
 
-    <div ng-show="!metadata && busy">
+    <div ng-show="user && !metadata && busy">
 
         <p translate>fetching-progress</p>
 
