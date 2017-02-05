@@ -2,6 +2,8 @@
 
 namespace CropTool;
 
+use Psr\Log\LoggerInterface;
+
 /**
  * @property null|string username
  */
@@ -11,11 +13,13 @@ class UserService
 
     protected $api;
     protected $auth;
+    protected $logger;
 
-    public function __construct(ApiService $api, AuthServiceInterface $auth)
+    public function __construct(ApiService $api, AuthServiceInterface $auth, LoggerInterface $logger)
     {
         $this->api = $api;
         $this->auth = $auth;
+	$this->logger = $logger;
     }
 
     public function loggedin()
