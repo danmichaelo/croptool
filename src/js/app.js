@@ -349,7 +349,6 @@ controller('AppCtrl', ['$scope', '$http', '$timeout', '$q', '$window', '$httpPar
             params.page = getParameterByName('page', qs);
         } else {
             params.site = params.site || 'commons.wikimedia.org';
-            params.title = params.title.split('?')[0];
             params.page = getParameterByName('page', qs) || params.page;
         }
 
