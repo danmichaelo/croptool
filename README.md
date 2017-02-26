@@ -44,6 +44,14 @@ If you then visit `https://tools.wmflabs.org/croptool` in your browser, the cont
 
 Of course you need to remember to remove the entry from `/etc/hosts` when you're done testing.
 
+### Setting up a lightweight development environment
+
+As a lightweight alternative for a development environment, we provide a `Caddyfile` which is meant to be used with [Caddy](https://caddyserver.com/). This allows to do frontend development without the need to boot a virtual machine.
+
+1. Run `caddy` in the source directory
+2. Add `127.0.0.1 tools.wmflabs.org` to your `/etc/hosts`
+3. Open https://tools.wmflabs.org:7890/croptool and accept the certificate warning (since we issue a self-signed certificate)
+
 ### Deployment notes
 
 To get `jpegtran`, we fetch the latest `jpegsrc.xxx.tar.gz` from the Independent JPEG Group. Note that the server returns "403 Forbidden" if you use the default curl user agent string.
