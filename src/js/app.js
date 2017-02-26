@@ -444,6 +444,7 @@ controller('AppCtrl', ['$scope', '$http', '$timeout', '$q', '$window', '$httpPar
             method: $scope.cropmethod,
             x: $scope.crop_dim.x,
             y: $scope.crop_dim.y,
+            rotate: $scope.crop_dim.rotate,
             width: $scope.crop_dim.w,
             height: $scope.crop_dim.h
         })).
