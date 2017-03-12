@@ -86,6 +86,7 @@ class FileController
         $y = intval($request->getQueryParam('y', 0));
         $width = intval($request->getQueryParam('width', 0));
         $height = intval($request->getQueryParam('height', 0));
+        $rotation = intval($request->getQueryParam('rotate', 0));
         $method = $request->getQueryParam('method', 'precise');
 
         $t0 = microtime(true) * 1000;
@@ -101,7 +102,7 @@ class FileController
         $thumbPath = $page->file->getAbsolutePathForPage($pageno, '_cropped_thumb');
 
         $original = $editor->open($srcPath);
-        $crop = $original->crop($destPath, $method, $x, $y, $width, $height);
+        $crop = $original->crop($destPath, $method, $x, $y, $width, $height, $rotation);
         $thumb = $crop->thumb($thumbPath);
 
         $logger->info('[{sha1}] Cropped using {method} mode', [
