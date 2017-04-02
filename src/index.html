@@ -23,8 +23,8 @@
 
   <script src="//tools-static.wmflabs.org/cdnjs/ajax/libs/jquery/2.2.4/jquery.min.js"></script>
   <script src="//tools-static.wmflabs.org/cdnjs/ajax/libs/twitter-bootstrap/3.3.7/js/bootstrap.min.js"></script>
-  <script src="//tools-static.wmflabs.org/cdnjs/ajax/libs/angular.js/1.4.9/angular.min.js"></script>
-  <script src="//tools-static.wmflabs.org/cdnjs/ajax/libs/angular.js/1.4.9/angular-sanitize.min.js"></script>
+  <script src="//tools-static.wmflabs.org/cdnjs/ajax/libs/angular.js/1.5.11/angular.min.js"></script>
+  <script src="//tools-static.wmflabs.org/cdnjs/ajax/libs/angular.js/1.5.11/angular-sanitize.min.js"></script>
   <script src="//tools-static.wmflabs.org/cdnjs/ajax/libs/angular-ui-bootstrap/2.0.1/ui-bootstrap-tpls.min.js"></script>
   <script src="//tools-static.wmflabs.org/cdnjs/ajax/libs/cropperjs/0.7.2/cropper.min.js"></script>
   <script src="//tools-static.wmflabs.org/cdnjs/ajax/libs/angular-local-storage/0.2.7/angular-local-storage.min.js"></script>
@@ -232,7 +232,7 @@
                      **************************************************************************************************** -->
                 <div ng-show="!cropresults" class="inner" ng-style="{'width': (metadata.thumb ? metadata.thumb.width : metadata.original.width) + 'px', 'margin-left': 'auto', 'margin-right': 'auto'}">
 
-                    <img id="cropbox" ng-class="{imageloading: busy}" ct-cropper aspect-ratio="{{aspectratio_cxy}}" rotation="{{rotation}}" on-crop="updateCoords($event.detail)" ng-src="{{metadata.thumb ? metadata.thumb.name : metadata.original.name}}">
+                    <img id="cropbox" ng-class="{imageloading: busy}" ct-cropper aspect-ratio="{{aspectratio_cxy}}" rotation="{{rotation.angle}}" on-crop="updateCoords($event.detail)" ng-src="{{metadata.thumb ? metadata.thumb.name : metadata.original.name}}">
 
                 </div>
 
@@ -293,7 +293,8 @@
                     <div style="margin-bottom:.8em;">
                         <label class="radio-inline">
                             <span translate>cropform-rotation</span>
-                            <input type="number" ng-model="rotation">
+                            <input ng-if="cropmethod === 'precise'" type="number" ng-model="rotation.angle">
+                            <input ng-if="cropmethod === 'lossless'" type="range" ng-input-range ng-model="rotation.angle" min="0" step="90" max="270">
                         </label>
                     </div>
 

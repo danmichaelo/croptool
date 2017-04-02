@@ -317,6 +317,10 @@ controller('AppCtrl', ['$scope', '$http', '$timeout', '$q', '$window', '$httpPar
 
     $scope.cropMethodChanged = function() {
         LocalStorageService.set('croptool-cropmethod', $scope.cropmethod);
+        while ($scope.rotation.angle < 0) {
+            $scope.rotation.angle += 360;
+        }
+        $scope.rotation.angle = Math.round($scope.rotation.angle / 90) * 90;
     };
 
     function getAspectRatio() {
@@ -564,6 +568,7 @@ controller('AppCtrl', ['$scope', '$http', '$timeout', '$q', '$window', '$httpPar
     $scope.aspectratio_cx = LocalStorageService.get('croptool-aspectratio-x') || '16';
     $scope.aspectratio_cy = LocalStorageService.get('croptool-aspectratio-y') || '9';;
     $scope.overwrite = LocalStorageService.get('croptool-overwrite') || 'overwrite';;
+    $scope.rotation = {angle: 0};
 
     // On filename change, check with the MediaWiki API if the file exists.
     // Delay 500 ms before checking in case the user is in the process of typing.
