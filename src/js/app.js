@@ -99,6 +99,7 @@ directive('ctCropper', function() {
             element.bind('$destroy', destroy);
             scope.$watch('aspectRatio', aspectRatioChanged);
             scope.$watch('rotation', rotationChanged);
+            scope.$on('crop-input-changed', cropInputChanged);
 
             function initCropper() {
                 destroy();
@@ -122,6 +123,11 @@ directive('ctCropper', function() {
             function rotationChanged(rotation) {
                 if (scope.cropper) {
                     scope.cropper.rotateTo(rotation);
+                }
+            }
+            function cropInputChanged(_event, data) {
+                if (data && typeof data === 'object') {
+                    scope.cropper.setCropBoxData(data);
                 }
             }
             function destroy() {
@@ -204,11 +210,12 @@ controller('AppCtrl', ['$scope', '$http', '$timeout', '$q', '$window', '$httpPar
         }
 
         setSelectCalled = true; // let onSelect know we did this
-        jcrop_api.setSelect([$scope.crop_dim.x / pixelratio[0],
-                             $scope.crop_dim.y / pixelratio[1],
-                             ($scope.crop_dim.x + $scope.crop_dim.w) / pixelratio[0],
-                             ($scope.crop_dim.y + $scope.crop_dim.h) / pixelratio[1]
-                             ]);
+        $scope.$broadcast('crop-input-changed', {
+            left: $scope.crop_dim.x / pixelratio[0],
+            top: $scope.crop_dim.y / pixelratio[1],
+            width: $scope.crop_dim.w / pixelratio[0],
+            height: $scope.crop_dim.h / pixelratio[1]
+        });
 
     };
 
@@ -294,16 +301,13 @@ controller('AppCtrl', ['$scope', '$http', '$timeout', '$q', '$window', '$httpPar
             .success(function(response) {
                 $scope.borderLocatorBusy = false;
                 console.log(response);
-                var area = [
-                    response['area'][0]/pixelratio[0],
-                    response['area'][1]/pixelratio[1],
-                    response['area'][2]/pixelratio[0],
-                    response['area'][3]/pixelratio[1]
-                ];
-                console.log(area);
-                setTimeout(function() {
-                    jcrop_api.setSelect(area);
-                }, 0); // update outside the digest cycle (TODO: Rewrite JCrop to be fully compatible with AngularJS)
+                var area = response['area'];
+                $scope.$broadcast('crop-input-changed', {
+                    left: area[0] / pixelratio[0],
+                    top: area[1] / pixelratio[1],
+                    width: (area[2] - area[0]) / pixelratio[0],
+                    height: (area[3] - area[1]) / pixelratio[1]
+                });
             })
             .error(function(response, status, headers) {
                 $scope.error = 'An error occured: ' + status + ' ' + response.error;
