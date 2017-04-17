@@ -125,9 +125,14 @@ directive('ctCropper', function() {
                     scope.cropper.rotateTo(rotation);
                 }
             }
-            function cropInputChanged(_event, data) {
-                if (data && typeof data === 'object') {
-                    scope.cropper.setCropBoxData(data);
+            function cropInputChanged(_event, inputData) {
+                if (inputData && typeof inputData === 'object') {
+                    var data = scope.cropper.getData();
+                    data.x = inputData.left;
+                    data.y = inputData.top;
+                    data.width = inputData.width;
+                    data.height = inputData.height;
+                    scope.cropper.setData(data);
                 }
             }
             function destroy() {
