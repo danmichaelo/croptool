@@ -189,8 +189,10 @@ class Image
         $image = new Imagick($this->path);
 
         $image->setImagePage(0, 0, 0, 0);  // Reset virtual canvas, like +repage
-        $image->rotateImage(new \ImagickPixel('#00000000'), $rotation);
-        $image->setImagePage(0, 0, 0, 0);  // Reset virtual canvas, like +repage
+        if ($rotation) {
+            $image->rotateImage(new \ImagickPixel('#00000000'), $rotation);
+            $image->setImagePage(0, 0, 0, 0);  // Reset virtual canvas, like +repage
+        }
         $image->cropImage($coords['width'], $coords['height'], $coords['x'], $coords['y']);
         $image->setImagePage(0, 0, 0, 0);  // Reset virtual canvas, like +repage
 
@@ -216,12 +218,15 @@ class Image
     public function losslessCrop($destPath, $coords, $rotation)
     {
         $dim = $coords['width'] . 'x' . $coords['height'] . '+' . $coords['x'] .'+' . $coords['y'];
+        $rotate = '';
+        if ($rotation) {
+            if (!in_array($rotation, [90, 180, 270])) {
+                throw new \RuntimeException('Rotation angle for lossless crop must be 90, 180 or 270.');
+            }
 
-        if (!in_array($rotation, [90, 180, 270])) {
-            throw new \RuntimeException('Rotation angle for lossless crop must be 90, 180 or 270.');
+            $rotate = '-rotate ' . $rotation;
         }
 
-        $rotate = $rotation ? '-rotate ' . $rotation : '';
 
         Command::exec($this->editor->getPathToJpegTran() . ' -copy all ' . $rotate . ' -crop {dim} {src} > {dest}', [
             'src' => $this->path,
