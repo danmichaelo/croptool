@@ -133,6 +133,31 @@ class Image
                 die('Unsupported EXIF orientation');
         }
 
+        // Make sure the selection is constrained by the image dimensions.
+        // x and y should not be < 0
+        if ($rect['x'] < 0) {
+            $rect['width'] = $rect['width'] + $rect['x'];
+            $rect['x'] = 0;
+        }
+        if ($rect['y'] < 0) {
+            $rect['height'] = $rect['height'] + $rect['y'];
+            $rect['y'] = 0;
+        }
+
+        // x + width and y + height should not be > image width and height respectively
+        if ($this->flipped()) {
+            $rect['width'] = min($h1 - $rect['x'], $rect['width']);
+            $rect['height'] = min($w1 - $rect['y'], $rect['height']);
+        } else {
+            $rect['width'] = min($w1 - $rect['x'], $rect['width']);
+            $rect['height'] = min($h1 - $rect['y'], $rect['height']);
+        }
+
+        // The whole selection is outside the image. No way to fix that
+        if ($rect['width'] < 0 || $rect['height'] < 0) {
+            throw new \RuntimeException('Invalid crop region');
+        }
+
         return $rect;
     }
 
