@@ -157,6 +157,14 @@ controller('AppCtrl', ['$scope', '$http', '$timeout', '$q', '$window', '$httpPar
     }
 
     $scope.updateCoords = function(c) {
+        if (setSelectCalled) {
+            // If this call was triggered by a change in scope.crop_dim (by the user),
+            // we should not update scope.crop_dim now, since we don't want to get into
+            // a recursive update loop!
+            setSelectCalled = false;
+            return;
+        }
+
         var new_size = [
             Math.round(c.width * pixelratio[0]),
             Math.round(c.height * pixelratio[1])
@@ -165,6 +173,8 @@ controller('AppCtrl', ['$scope', '$http', '$timeout', '$q', '$window', '$httpPar
             Math.round(c.x * pixelratio[0]),
             Math.round(c.y * pixelratio[1])
         ];
+
+        if (!$scope.metadata) { return; }
 
         $scope.crop_dim = {
             x: new_offset[0],
@@ -209,7 +219,7 @@ controller('AppCtrl', ['$scope', '$http', '$timeout', '$q', '$window', '$httpPar
             return;
         }
 
-        setSelectCalled = true; // let onSelect know we did this
+        setSelectCalled = true; // let updateCoords know we did this
         $scope.$broadcast('crop-input-changed', {
             left: $scope.crop_dim.x / pixelratio[0],
             top: $scope.crop_dim.y / pixelratio[1],
