@@ -73,8 +73,15 @@ class Image
         }
     }
 
-    protected function getCropCoordinates($x, $y, $width, $height)
+    protected function getCropCoordinates($x, $y, $width, $height, $rotation)
     {
+        // Find the size of the rectangle that can contain the rotated image
+        $h0 = $this->height;
+        $w0 = $this->width;
+        $t = deg2rad($rotation);
+        $w1 = abs($w0 * cos($t)) + abs($h0 * sin($t));
+        $h1 = abs($h0 * cos($t)) + abs($w0 * sin($t));
+
         // Remember:
         // - Origin is in the upper left corner
         // - Positive x is rightwards
@@ -95,8 +102,8 @@ class Image
             case Imagick::ORIENTATION_BOTTOMRIGHT:  // 3 : 180 deg
                 // Image rotated 180 deg
                 $rect = array(
-                    'x' => $this->width - $x - $width,
-                    'y' => $this->height - $y - $height,
+                    'x' => $w1 - $x - $width,
+                    'y' => $h1 - $y - $height,
                     'width' => $width,
                     'height' => $height
                 );
@@ -106,7 +113,7 @@ class Image
                 // Image rotated 90 deg CCW
                 $rect = array(
                     'x' => $y,
-                    'y' => $this->width - $x - $width,
+                    'y' => $w1 - $x - $width,
                     'width' => $height,
                     'height' => $width
                 );
@@ -115,7 +122,7 @@ class Image
             case Imagick::ORIENTATION_LEFTBOTTOM:   // 8 : 90 deg CCW
                 // Image rotated 90 deg CW
                 $rect = array(
-                    'x' => $this->height - $y - $height,
+                    'x' => $h1 - $y - $height,
                     'y' => $x,
                     'width' => $height,
                     'height' => $width
@@ -125,6 +132,7 @@ class Image
             default:
                 die('Unsupported EXIF orientation');
         }
+
         return $rect;
     }
 
@@ -167,7 +175,7 @@ class Image
         }
 
         // Get coords orientated in the same direction as the image:
-        $coords = $this->getCropCoordinates($x, $y, $width, $height);
+        $coords = $this->getCropCoordinates($x, $y, $width, $height, $rotation);
 
         if ($method == 'gif') {
             $this->gifCrop($destPath, $coords, $rotation);
