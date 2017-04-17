@@ -579,6 +579,7 @@ controller('AppCtrl', ['$scope', '$http', '$timeout', '$q', '$window', '$httpPar
     $scope.aspectratio_cy = LocalStorageService.get('croptool-aspectratio-y') || '9';;
     $scope.overwrite = LocalStorageService.get('croptool-overwrite') || 'overwrite';;
     $scope.rotation = {angle: 0};
+    $scope.aspectRatioChanged();
 
     // On filename change, check with the MediaWiki API if the file exists.
     // Delay 500 ms before checking in case the user is in the process of typing.
