@@ -249,9 +249,11 @@ controller('AppCtrl', ['$scope', '$http', '$timeout', '$q', '$window', '$httpPar
             return;
         }
 
+        // Reset
         $scope.error = '';
         $scope.busy = true;
         $scope.crop_dim = undefined;
+        $scope.rotation = {angle: 0};
 
         $http.get('./api/file/thumb?' + $httpParamSerializer({
             title: $scope.currentUrlParams.title,
