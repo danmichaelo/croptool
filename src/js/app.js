@@ -123,6 +123,10 @@ directive('ctCropper', function() {
             function rotationChanged(rotation) {
                 if (scope.cropper) {
                     scope.cropper.rotateTo(rotation);
+                    var imageData = scope.cropper.getImageData();
+                    var canvasData = scope.cropper.getCanvasData();
+                    var ratio = Math.min(imageData.width / canvasData.width, imageData.height / canvasData.height);
+                    scope.cropper.zoomTo(ratio);
                 }
             }
             function cropInputChanged(_event, inputData) {
