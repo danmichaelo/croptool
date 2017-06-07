@@ -105,6 +105,9 @@ directive('ctCropper', function() {
                 destroy();
                 scope.cropper = new Cropper(element[0], {
                     aspectRatio: scope.aspectRatio,
+                    // set min width/height to 50% of container height/width
+                    minContainerWidth: element.first().height() / 2,
+                    minContainerHeight: element.first().width() / 2,
                     crop: cropperCrop
                 });
             }
