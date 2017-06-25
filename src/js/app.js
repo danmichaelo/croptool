@@ -105,10 +105,17 @@ directive('ctCropper', function() {
                 destroy();
                 scope.cropper = new Cropper(element[0], {
                     aspectRatio: scope.aspectRatio,
-                    // set min width/height to 50% of container height/width
+                    crop: cropperCrop,
+
+                    // restrict cropbox to size of canvas, and restrict canvas
+                    // to fit within container
+                    viewMode: 2,
+
+                    // set min width/height to 50% of container height/width,
+                    // so there will some working area for images with very uneven
+                    // proportions, esp. when rotated.
                     minContainerWidth: element.first().height() / 2,
                     minContainerHeight: element.first().width() / 2,
-                    crop: cropperCrop
                 });
             }
             function cropperCrop($event) {
