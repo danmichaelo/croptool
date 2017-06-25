@@ -19,6 +19,8 @@ class WikiText
         'quality[_ ]?image',
         'picture[_ ]of[_ ]the[_ ]day',
         'assessments', 'featured[_ ]picture[_ ]mul',
+        'do[_ ]not[_ ]crop',
+        'border[_ ]is[_ ]intentional',
     );
 
     /*
