@@ -3,7 +3,7 @@
 }
 html, body {
     height: 100%;
-    background: #fcfcfc;
+    background: #F5F5F5;
 }
 
 h1 {
@@ -81,7 +81,7 @@ label {
     padding: 10px 10px 10px 0;
 }
 .leftcol .inner {
-    box-shadow: 3px 3px 10px #999;
+    box-shadow: 2px 2px 2px #ccc;
 }
 .rightcol {
     display: inline-block;
@@ -92,7 +92,7 @@ label {
     flex: 1 1 auto;
     padding: 15px;
     background: #fff;
-    box-shadow: 3px 3px 10px #999;
+    box-shadow: 2px 2px 2px #ccc;
 }
 
 form {
