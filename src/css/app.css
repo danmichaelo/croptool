@@ -94,15 +94,28 @@ form {
 }
 
 .cropdim {
-    display: flex; flex-wrap: wrap; align-items: center;
-justify-content: space-between;
+    font-size:90%;
+    display: flex;
+    flex-flow: row wrap;
+    justify-content: space-around;
+    /*
+        align-items: center;
+        justify-content: space-between;
+    */
 }
 .cropdim label {
-  flex-basis: 110px;
+/*  flex-basis: 125px;*/
+  flex: 1 1 105px;
   text-align: right;
 }
 .cropdim input {
-  width: 50px;
+  width: 60px;
+  border: 0;
+  border-bottom: 1px solid #ddd;
+  text-align: right;
+  padding: 0;
+  font-family: monospace;
+  display: inline-block;
 }
 
 .mainLoader {
