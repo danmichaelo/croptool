@@ -137,6 +137,8 @@ directive('ctCropper', function() {
                     var canvasData = scope.cropper.getCanvasData();
                     var ratio = Math.min(imageData.width / canvasData.width, imageData.height / canvasData.height);
                     scope.cropper.zoomTo(ratio);
+                    var data = scope.cropper.getData();
+                    scope.cropper.setData(data);
                 }
             }
             function cropInputChanged(_event, inputData) {
