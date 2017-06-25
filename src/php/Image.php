@@ -73,8 +73,15 @@ class Image
         }
     }
 
-    protected function getCropCoordinates($x, $y, $width, $height)
+    protected function getCropCoordinates($x, $y, $width, $height, $rotation)
     {
+        // Find the size of the rectangle that can contain the rotated image
+        $h0 = $this->height;
+        $w0 = $this->width;
+        $t = deg2rad($rotation);
+        $w1 = abs($w0 * cos($t)) + abs($h0 * sin($t));
+        $h1 = abs($h0 * cos($t)) + abs($w0 * sin($t));
+
         // Remember:
         // - Origin is in the upper left corner
         // - Positive x is rightwards
@@ -95,8 +102,8 @@ class Image
             case Imagick::ORIENTATION_BOTTOMRIGHT:  // 3 : 180 deg
                 // Image rotated 180 deg
                 $rect = array(
-                    'x' => $this->width - $x - $width,
-                    'y' => $this->height - $y - $height,
+                    'x' => $w1 - $x - $width,
+                    'y' => $h1 - $y - $height,
                     'width' => $width,
                     'height' => $height
                 );
@@ -106,7 +113,7 @@ class Image
                 // Image rotated 90 deg CCW
                 $rect = array(
                     'x' => $y,
-                    'y' => $this->width - $x - $width,
+                    'y' => $w1 - $x - $width,
                     'width' => $height,
                     'height' => $width
                 );
@@ -115,7 +122,7 @@ class Image
             case Imagick::ORIENTATION_LEFTBOTTOM:   // 8 : 90 deg CCW
                 // Image rotated 90 deg CW
                 $rect = array(
-                    'x' => $this->height - $y - $height,
+                    'x' => $h1 - $y - $height,
                     'y' => $x,
                     'width' => $height,
                     'height' => $width
@@ -125,6 +132,32 @@ class Image
             default:
                 die('Unsupported EXIF orientation');
         }
+
+        // Make sure the selection is constrained by the image dimensions.
+        // x and y should not be < 0
+        if ($rect['x'] < 0) {
+            $rect['width'] = $rect['width'] + $rect['x'];
+            $rect['x'] = 0;
+        }
+        if ($rect['y'] < 0) {
+            $rect['height'] = $rect['height'] + $rect['y'];
+            $rect['y'] = 0;
+        }
+
+        // x + width and y + height should not be > image width and height respectively
+        if ($this->flipped()) {
+            $rect['width'] = min($h1 - $rect['x'], $rect['width']);
+            $rect['height'] = min($w1 - $rect['y'], $rect['height']);
+        } else {
+            $rect['width'] = min($w1 - $rect['x'], $rect['width']);
+            $rect['height'] = min($h1 - $rect['y'], $rect['height']);
+        }
+
+        // The whole selection is outside the image. No way to fix that
+        if ($rect['width'] < 0 || $rect['height'] < 0) {
+            throw new \RuntimeException('Invalid crop region');
+        }
+
         return $rect;
     }
 
@@ -157,23 +190,24 @@ class Image
      * @param $y
      * @param $width
      * @param $height
+     * @param $rotation
      * @return Image
      */
-    public function crop($destPath, $method, $x, $y, $width, $height)
+    public function crop($destPath, $method, $x, $y, $width, $height, $rotation)
     {
         if (file_exists($destPath)) {
             unlink($destPath);
         }
 
         // Get coords orientated in the same direction as the image:
-        $coords = $this->getCropCoordinates($x, $y, $width, $height);
+        $coords = $this->getCropCoordinates($x, $y, $width, $height, $rotation);
 
         if ($method == 'gif') {
-            $this->gifCrop($destPath, $coords);
+            $this->gifCrop($destPath, $coords, $rotation);
         } elseif ($method == 'lossless') {
-            $this->losslessCrop($destPath, $coords);
+            $this->losslessCrop($destPath, $coords, $rotation);
         } elseif ($method == 'precise') {
-            $this->preciseCrop($destPath, $coords);
+            $this->preciseCrop($destPath, $coords, $rotation);
         } else {
             throw new \RuntimeException('Unknown crop method specified');
         }
@@ -183,11 +217,15 @@ class Image
         return new Image($this->editor, $destPath, $this->mime);
     }
 
-    public function preciseCrop($destPath, $coords)
+    public function preciseCrop($destPath, $coords, $rotation)
     {
         $image = new Imagick($this->path);
 
         $image->setImagePage(0, 0, 0, 0);  // Reset virtual canvas, like +repage
+        if ($rotation) {
+            $image->rotateImage(new \ImagickPixel('#00000000'), $rotation);
+            $image->setImagePage(0, 0, 0, 0);  // Reset virtual canvas, like +repage
+        }
         $image->cropImage($coords['width'], $coords['height'], $coords['x'], $coords['y']);
         $image->setImagePage(0, 0, 0, 0);  // Reset virtual canvas, like +repage
 
@@ -197,22 +235,33 @@ class Image
         $image->destroy();
     }
 
-    public function gifCrop($destPath, $coords)
+    public function gifCrop($destPath, $coords, $rotation)
     {
         $dim = $coords['width'] . 'x' . $coords['height'] . '+' . $coords['x'] .'+' . $coords['y'] . '!';
 
-        Command::exec('convert {src} -crop {dim} {dest}', [
+        $rotate = $rotation ? '-rotate ' . intval($rotation) . ' +repage' : '';
+
+        Command::exec('convert {src} ' . $rotate . ' -crop {dim} {dest}', [
             'src' => $this->path,
             'dest' => $destPath,
             'dim' => $dim,
         ]);
     }
 
-    public function losslessCrop($destPath, $coords)
+    public function losslessCrop($destPath, $coords, $rotation)
     {
         $dim = $coords['width'] . 'x' . $coords['height'] . '+' . $coords['x'] .'+' . $coords['y'];
+        $rotate = '';
+        if ($rotation) {
+            if (!in_array($rotation, [90, 180, 270])) {
+                throw new \RuntimeException('Rotation angle for lossless crop must be 90, 180 or 270.');
+            }
 
-        Command::exec($this->editor->getPathToJpegTran() . ' -copy all -crop {dim} {src} > {dest}', [
+            $rotate = '-rotate ' . $rotation;
+        }
+
+
+        Command::exec($this->editor->getPathToJpegTran() . ' -copy all ' . $rotate . ' -crop {dim} {src} > {dest}', [
             'src' => $this->path,
             'dest' => $destPath,
             'dim' => $dim,

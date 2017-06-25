@@ -87,10 +87,76 @@ controller('LoginCtrl', ['$scope', '$http', '$httpParamSerializer', 'LoginServic
 
 }]).
 
+directive('ctCropper', ['$timeout', function($timeout) {
+    return {
+        scope: {
+            onCrop: '&',
+            aspectRatio: '@',
+            rotation: '@'
+        },
+        link: function(scope, element) {
+            element.on('load', function() { $timeout(initCropper) });
+            element.bind('$destroy', destroy);
+            scope.$watch('aspectRatio', aspectRatioChanged);
+            scope.$watch('rotation', rotationChanged);
+            scope.$on('crop-input-changed', cropInputChanged);
+
+            function initCropper() {
+                destroy();
+                scope.cropper = new Cropper(element[0], {
+                    aspectRatio: scope.aspectRatio,
+                    crop: cropperCrop,
+
+                    // restrict cropbox to size of canvas, and restrict canvas
+                    // to fit within container
+                    viewMode: 2,
+                });
+            }
+            function cropperCrop($event) {
+                if (angular.isFunction(scope.onCrop)) {
+                    scope.$applyAsync(function() {
+                        scope.onCrop({$event: $event});
+                    });
+                }
+            }
+            function aspectRatioChanged(aspectRatio) {
+                if (scope.cropper) {
+                    scope.cropper.setAspectRatio(aspectRatio);
+                }
+            }
+            function rotationChanged(rotation) {
+                if (scope.cropper) {
+                    scope.cropper.rotateTo(rotation);
+                    var imageData = scope.cropper.getImageData();
+                    var canvasData = scope.cropper.getCanvasData();
+                    var ratio = Math.min(imageData.width / canvasData.width, imageData.height / canvasData.height);
+                    scope.cropper.zoomTo(ratio);
+                    var data = scope.cropper.getData();
+                    scope.cropper.setData(data);
+                }
+            }
+            function cropInputChanged(_event, inputData) {
+                if (inputData && typeof inputData === 'object') {
+                    var data = scope.cropper.getData();
+                    data.x = inputData.left;
+                    data.y = inputData.top;
+                    data.width = inputData.width;
+                    data.height = inputData.height;
+                    scope.cropper.setData(data);
+                }
+            }
+            function destroy() {
+                if (scope.cropper) {
+                    scope.cropper.destroy();
+                }
+            }
+        }
+    }
+}]).
+
 controller('AppCtrl', ['$scope', '$http', '$timeout', '$q', '$window', '$httpParamSerializer', 'LoginService', 'localStorageService', 'WindowService', function($scope, $http, $timeout, $q, $window, $httpParamSerializer, LoginService, LocalStorageService, WindowService) {
 
-    var jcrop_api,
-        everPushedSomething = false,
+    var everPushedSomething = false,
         pixelratio = [1,1],
         setSelectCalled = false;
 
@@ -105,15 +171,25 @@ controller('AppCtrl', ['$scope', '$http', '$timeout', '$q', '$window', '$httpPar
         return results == null ? "" : decodeURIComponent(results[1].replace(/\+/g, " "));
     }
 
-    function updateCoords(c) {
+    $scope.updateCoords = function(c) {
+        if (setSelectCalled) {
+            // If this call was triggered by a change in scope.crop_dim (by the user),
+            // we should not update scope.crop_dim now, since we don't want to get into
+            // a recursive update loop!
+            setSelectCalled = false;
+            return;
+        }
+
         var new_size = [
-            Math.round(c.w * pixelratio[0]),
-            Math.round(c.h * pixelratio[1])
+            Math.round(c.width * pixelratio[0]),
+            Math.round(c.height * pixelratio[1])
         ];
         var new_offset = [
             Math.round(c.x * pixelratio[0]),
             Math.round(c.y * pixelratio[1])
         ];
+
+        if (!$scope.metadata) { return; }
 
         $scope.crop_dim = {
             x: new_offset[0],
@@ -122,6 +198,7 @@ controller('AppCtrl', ['$scope', '$http', '$timeout', '$q', '$window', '$httpPar
             h: new_size[1],
             right: $scope.metadata.original.width - new_offset[0] - new_size[0],
             bottom: $scope.metadata.original.height - new_offset[1] - new_size[1],
+            rotate: c.rotate
         };
     }
 
@@ -157,12 +234,13 @@ controller('AppCtrl', ['$scope', '$http', '$timeout', '$q', '$window', '$httpPar
             return;
         }
 
-        setSelectCalled = true; // let onSelect know we did this
-        jcrop_api.setSelect([$scope.crop_dim.x / pixelratio[0],
-                             $scope.crop_dim.y / pixelratio[1],
-                             ($scope.crop_dim.x + $scope.crop_dim.w) / pixelratio[0],
-                             ($scope.crop_dim.y + $scope.crop_dim.h) / pixelratio[1]
-                             ]);
+        setSelectCalled = true; // let updateCoords know we did this
+        $scope.$broadcast('crop-input-changed', {
+            left: $scope.crop_dim.x / pixelratio[0],
+            top: $scope.crop_dim.y / pixelratio[1],
+            width: $scope.crop_dim.w / pixelratio[0],
+            height: $scope.crop_dim.h / pixelratio[1]
+        });
 
     };
 
@@ -186,9 +264,11 @@ controller('AppCtrl', ['$scope', '$http', '$timeout', '$q', '$window', '$httpPar
             return;
         }
 
+        // Reset
         $scope.error = '';
         $scope.busy = true;
         $scope.crop_dim = undefined;
+        $scope.rotation = {angle: 0};
 
         $http.get('./api/file/thumb?' + $httpParamSerializer({
             title: $scope.currentUrlParams.title,
@@ -231,34 +311,6 @@ controller('AppCtrl', ['$scope', '$http', '$timeout', '$q', '$window', '$httpPar
                 } else {
                     $scope.newTitle = $scope.currentUrlParams.title.substr(0, p) + ' (cropped)' + $scope.currentUrlParams.title.substr(p);
                 }
-
-                $timeout(function() {
-                    console.log('Enabling Jcrop');
-
-                    $('#cropbox').Jcrop({
-                        bgColor: 'transparent',
-                        addClass: 'transparentBg',
-                        aspectRatio: getAspectRatio(),
-                        onSelect: function(c) {
-                            if (setSelectCalled) {
-                                // The change was triggered by a manual setSelect() call
-                                setSelectCalled = false;
-                            } else {
-                                $scope.$apply(function() { updateCoords(c); });
-                            }
-                        },
-                        onRelease: function() {
-                            $scope.$apply(function() { $scope.crop_dim = undefined; });
-                        }
-                    }, function() {
-                        jcrop_api = this;
-                    });
-
-                    if (getParameterByName('action') == 'magic') {
-                        $scope.locateBorder();
-                    }
-
-                }, 200);
             }
 
         });
@@ -276,16 +328,13 @@ controller('AppCtrl', ['$scope', '$http', '$timeout', '$q', '$window', '$httpPar
             .success(function(response) {
                 $scope.borderLocatorBusy = false;
                 console.log(response);
-                var area = [
-                    response['area'][0]/pixelratio[0],
-                    response['area'][1]/pixelratio[1],
-                    response['area'][2]/pixelratio[0],
-                    response['area'][3]/pixelratio[1]
-                ];
-                console.log(area);
-                setTimeout(function() {
-                    jcrop_api.setSelect(area);
-                }, 0); // update outside the digest cycle (TODO: Rewrite JCrop to be fully compatible with AngularJS)
+                var area = response['area'];
+                $scope.$broadcast('crop-input-changed', {
+                    left: area[0] / pixelratio[0],
+                    top: area[1] / pixelratio[1],
+                    width: (area[2] - area[0]) / pixelratio[0],
+                    height: (area[3] - area[1]) / pixelratio[1]
+                });
             })
             .error(function(response, status, headers) {
                 $scope.error = 'An error occured: ' + status + ' ' + response.error;
@@ -295,6 +344,10 @@ controller('AppCtrl', ['$scope', '$http', '$timeout', '$q', '$window', '$httpPar
 
     $scope.cropMethodChanged = function() {
         LocalStorageService.set('croptool-cropmethod', $scope.cropmethod);
+        while ($scope.rotation.angle < 0) {
+            $scope.rotation.angle += 360;
+        }
+        $scope.rotation.angle = Math.round($scope.rotation.angle / 90) * 90;
     };
 
     function getAspectRatio() {
@@ -318,17 +371,11 @@ controller('AppCtrl', ['$scope', '$http', '$timeout', '$q', '$window', '$httpPar
         if (ratio === null) {
             return;
         }
+        $scope.aspectratio_cxy = ratio;
 
         LocalStorageService.set('croptool-aspectratio', $scope.aspectratio);
         LocalStorageService.set('croptool-aspectratio-x', $scope.aspectratio_cx);
         LocalStorageService.set('croptool-aspectratio-y', $scope.aspectratio_cy);
-
-        jcrop_api.setOptions({ aspectRatio: ratio });
-        if ($scope.crop_dim) {
-            var c = jcrop_api.tellSelect();
-            updateCoords(jcrop_api.tellSelect());
-            // jcrop_api.focus();
-        }
     };
 
     function parseImageUrlOrTitle( params ) {
@@ -387,12 +434,6 @@ controller('AppCtrl', ['$scope', '$http', '$timeout', '$q', '$window', '$httpPar
             everPushedSomething = true;
         }
 
-
-        if (jcrop_api) {
-            jcrop_api.destroy();
-            $('#cropbox').removeAttr('style');
-        }
-
         // Resetting state
         $scope.error = '';
         $scope.newTitle = '';
@@ -438,6 +479,7 @@ controller('AppCtrl', ['$scope', '$http', '$timeout', '$q', '$window', '$httpPar
             method: $scope.cropmethod,
             x: $scope.crop_dim.x,
             y: $scope.crop_dim.y,
+            rotate: $scope.crop_dim.rotate,
             width: $scope.crop_dim.w,
             height: $scope.crop_dim.h
         })).
@@ -553,6 +595,8 @@ controller('AppCtrl', ['$scope', '$http', '$timeout', '$q', '$window', '$httpPar
     $scope.aspectratio_cx = LocalStorageService.get('croptool-aspectratio-x') || '16';
     $scope.aspectratio_cy = LocalStorageService.get('croptool-aspectratio-y') || '9';;
     $scope.overwrite = LocalStorageService.get('croptool-overwrite') || 'overwrite';;
+    $scope.rotation = {angle: 0};
+    $scope.aspectRatioChanged();
 
     // On filename change, check with the MediaWiki API if the file exists.
     // Delay 500 ms before checking in case the user is in the process of typing.

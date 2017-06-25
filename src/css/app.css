@@ -3,7 +3,7 @@
 }
 html, body {
     height: 100%;
-    background: #fcfcfc;
+    background: #F5F5F5;
 }
 
 h1 {
@@ -58,6 +58,22 @@ label {
     flex-flow: row wrap;
     -ms-flex-flow: row wrap;
 }
+
+@media screen and (min-width: 600px) {
+    .cropboxContainer, .cropboxContainer img {
+        width:60vw;
+        min-height: 30vw;
+        max-height: 80vw;
+    }
+}
+@media screen and (max-width: 600px) {
+    .cropboxContainer, .cropboxContainer img {
+        width:90vw;
+        min-height: 30vw;
+        max-height: 80vw;
+    }
+}
+
 .leftcol {
     display: inline-block;
     -ms-flex: 0.5 0 auto;
@@ -65,7 +81,7 @@ label {
     padding: 10px 10px 10px 0;
 }
 .leftcol .inner {
-    box-shadow: 3px 3px 10px #999;
+    box-shadow: 2px 2px 2px #ccc;
 }
 .rightcol {
     display: inline-block;
@@ -76,7 +92,7 @@ label {
     flex: 1 1 auto;
     padding: 15px;
     background: #fff;
-    box-shadow: 3px 3px 10px #999;
+    box-shadow: 2px 2px 2px #ccc;
 }
 
 form {
@@ -94,15 +110,28 @@ form {
 }
 
 .cropdim {
-    display: flex; flex-wrap: wrap; align-items: center;
-justify-content: space-between;
+    font-size:90%;
+    display: flex;
+    flex-flow: row wrap;
+    justify-content: space-around;
+    /*
+        align-items: center;
+        justify-content: space-between;
+    */
 }
 .cropdim label {
-  flex-basis: 110px;
+/*  flex-basis: 125px;*/
+  flex: 1 1 105px;
   text-align: right;
 }
 .cropdim input {
-  width: 50px;
+  width: 60px;
+  border: 0;
+  border-bottom: 1px solid #ddd;
+  text-align: right;
+  padding: 0;
+  font-family: monospace;
+  display: inline-block;
 }
 
 .mainLoader {
