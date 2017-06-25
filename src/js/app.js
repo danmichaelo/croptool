@@ -87,7 +87,7 @@ controller('LoginCtrl', ['$scope', '$http', '$httpParamSerializer', 'LoginServic
 
 }]).
 
-directive('ctCropper', function() {
+directive('ctCropper', ['$timeout', function($timeout) {
     return {
         scope: {
             onCrop: '&',
@@ -95,7 +95,7 @@ directive('ctCropper', function() {
             rotation: '@'
         },
         link: function(scope, element) {
-            element.on('load', initCropper);
+            element.on('load', function() { $timeout(initCropper) });
             element.bind('$destroy', destroy);
             scope.$watch('aspectRatio', aspectRatioChanged);
             scope.$watch('rotation', rotationChanged);
@@ -158,7 +158,7 @@ directive('ctCropper', function() {
             }
         }
     }
-}).
+}]).
 
 controller('AppCtrl', ['$scope', '$http', '$timeout', '$q', '$window', '$httpParamSerializer', 'LoginService', 'localStorageService', 'WindowService', function($scope, $http, $timeout, $q, $window, $httpParamSerializer, LoginService, LocalStorageService, WindowService) {
 
