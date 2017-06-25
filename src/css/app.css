@@ -58,6 +58,22 @@ label {
     flex-flow: row wrap;
     -ms-flex-flow: row wrap;
 }
+
+@media screen and (min-width: 600px) {
+    .cropboxContainer, .cropboxContainer img {
+        width:60vw;
+        min-height: 30vw;
+        max-height: 80vw;
+    }
+}
+@media screen and (max-width: 600px) {
+    .cropboxContainer, .cropboxContainer img {
+        width:90vw;
+        min-height: 30vw;
+        max-height: 80vw;
+    }
+}
+
 .leftcol {
     display: inline-block;
     -ms-flex: 0.5 0 auto;

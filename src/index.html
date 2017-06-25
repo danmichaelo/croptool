@@ -224,13 +224,13 @@
             <!-- ********************************************************************************************************
                  Left column
                  **************************************************************************************************** -->
-            <div class="leftcol" style="min-width:600px;">
+            <div class="leftcol">
 
 
                 <!-- ********************************************************************************************************
                      Step 1
                      **************************************************************************************************** -->
-                <div ng-show="!cropresults" class="inner" ng-style="{'width': (metadata.thumb ? metadata.thumb.width : metadata.original.width) + 'px', 'margin-left': 'auto', 'margin-right': 'auto'}">
+                <div ng-show="!cropresults" class="inner cropboxContainer">
 
                     <img id="cropbox" ng-class="{imageloading: busy}" ct-cropper aspect-ratio="{{aspectratio_cxy}}" rotation="{{rotation.angle}}" on-crop="updateCoords($event.detail)" ng-src="{{metadata.thumb ? metadata.thumb.name : metadata.original.name}}">
 
