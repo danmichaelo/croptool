@@ -28,7 +28,7 @@ class FilePublishTest extends WebTestCase
                 $editSummary,
                 strval($wikitext),
                 true
-            )->andReturn(['success' => true]);
+            )->andReturn((object) ['success' => true]);
 
         $this->client->post('/api/file/publish', [
             'title' => $existingFile,
@@ -58,7 +58,7 @@ class FilePublishTest extends WebTestCase
                 $editSummary,
                 "/^$wikitext/",
                 false
-                )->andReturn(['success' => true])
+                )->andReturn((object) ['success' => true])
             ->shouldReceive('savePage')->once()->andReturn([]);
 
         $this->client->post('/api/file/publish', [
