@@ -158,7 +158,7 @@ class WikiText
             ],
             [
                 '(' . implode('|', $templates) . ')',
-                ($withParams ? '(\|([^\}]+))?' : '')
+                ($withParams ? '(\|([^\}\|]+)(?:\|[^\}]+)?)?' : '')
             ],
             $this->patterns['templates']
         );

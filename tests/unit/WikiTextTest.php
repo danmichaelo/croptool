@@ -311,4 +311,25 @@ Sault-S<sup>te</sup>-Marie, Ontario, Canada<br>
         $this->assertEquals($newText, $wikitext);
     }
 
+    public function testItRecognizesCropForWikidataTemplate()
+    {
+        $wt = new WikiText('abc {{Crop for Wikidata | Q16218635 }} def');
+        $stuff = $wt->possibleStuffToRemove();
+
+        $this->assertArraySubset([
+        	'wikidata' => true,
+        	'wikidata-item' => 'Q16218635'
+        ], $stuff);
+    }
+
+    public function testItRecognizesCropForWikidataTemplateWithExtraParam()
+    {
+        $wt = new WikiText('abc {{Crop for Wikidata|Q16218635|Person on left (silver medal)}} def');
+        $stuff = $wt->possibleStuffToRemove();
+
+        $this->assertArraySubset([
+        	'wikidata' => true,
+        	'wikidata-item' => 'Q16218635'
+        ], $stuff);
+    }
 }
