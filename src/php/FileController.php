@@ -142,7 +142,8 @@ class FileController
             'dim' => implode(' and ', $dim) . ' using [[Commons:CropTool|CropTool]] with ' . $method . ' mode.',
             'page' => [
                 'elems' => $options,
-                'allowOverwrite' => !$page->wikitext->hasAssessmentTemplates(),
+                'hasAssessmentTemplates' => $page->wikitext->hasAssessmentTemplates(),
+                'hasDoNotCropTemplate' => $page->wikitext->hasDoNotCropTemplate(),
             ],
             'crop' => $this->fileResponse($page->file, $crop, $pageno, '_cropped'),
             'thumb' => $this->fileResponse($page->file, $thumb, $pageno, '_cropped_thumb'),

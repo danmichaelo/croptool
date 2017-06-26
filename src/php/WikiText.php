@@ -19,6 +19,15 @@ class WikiText
         'quality[_ ]?image',
         'picture[_ ]of[_ ]the[_ ]day',
         'assessments', 'featured[_ ]picture[_ ]mul',
+    );
+
+    /*
+    |--------------------------------------------------------------------------
+    | Do not crop templates
+    |--------------------------------------------------------------------------
+    | Pages having these templates should not be overwritten.
+    */
+    protected $doNotCropTemplates = array(
         'do[_ ]not[_ ]crop',
         'border[_ ]is[_ ]intentional',
     );
@@ -196,6 +205,18 @@ class WikiText
     public function hasAssessmentTemplates()
     {
         $pattern = $this->compileTemplatePattern($this->assessmentTemplates);
+
+        return preg_match($pattern, $this->text) == true;
+    }
+
+    /**
+     * Test if the page has {{do not crop}}
+     *
+     * @return bool
+     */
+    public function hasDoNotCropTemplate()
+    {
+        $pattern = $this->compileTemplatePattern($this->doNotCropTemplates);
 
         return preg_match($pattern, $this->text) == true;
     }

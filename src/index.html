@@ -382,7 +382,7 @@
 
                             <div class="form-group">
                                 <label class="radio-inline">
-                                    <input type="radio" name="overwrite" ng-disabled="!cropresults.page.allowOverwrite" ng-model="overwrite" value="overwrite" ng-disabled="ladda2 || currentUrlParams.page" ng-change="updateUploadComment()">
+                                    <input type="radio" name="overwrite" ng-disabled="cropresults.page.hasAssessmentTemplates || cropresults.page.hasDoNotCropTemplate" ng-model="overwrite" value="overwrite" ng-disabled="ladda2 || currentUrlParams.page" ng-change="updateUploadComment()">
                                     <span translate>previewform-overwrite</span>
                                 </label>
                                 <label class="radio-inline">
@@ -391,9 +391,14 @@
                                 </label>
                             </div>
 
-                            <p ng-show="!cropresults.page.allowOverwrite">
+                            <p ng-show="cropresults.page.hasAssessmentTemplates" class="text-danger">
                                 <i class="fa fa-warning"></i>
-                                <span translate>previewform-overwrite-disabled</span>
+                                <span translate>previewform-assessment-template</span>
+                            </p>
+
+                            <p ng-show="cropresults.page.hasDoNotCropTemplate" class="text-danger">
+                                <i class="fa fa-warning"></i>
+                                <span translate>previewform-donotcrop-template</span>
                             </p>
 
                             <p ng-show="currentUrlParams.site == 'commons.wikimedia.org' && overwrite=='overwrite'">
