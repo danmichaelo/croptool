@@ -2,13 +2,6 @@
 
 class AuthTest extends WebTestCase
 {
-    public function testLoginRoute()
-    {
-        $this->client->get('/api/auth/login');
-
-        $this->assertEquals(302, $this->client->response->getStatusCode());
-    }
-
     public function authCallbackRoute()
     {
         $this->client->get('/api/auth/callback');
