@@ -111,13 +111,13 @@ class WebTestCase extends \There4\Slim\Test\WebTestCase
         return $service;
     }
 
-    protected function mockSession()
-    {
-        $service = m::mock(CropTool\Session::class)->shouldIgnoreMissing();
-        $this->app->getContainer()->set(CropTool\Session::class, $service);
+	protected function mockSession()
+	{
+		$service = new SessionMock();
+		$this->app->getContainer()->set(CropTool\SessionInterface::class, $service);
 
-        return $service;
-    }
+		return $service;
+	}
 
     protected function mockLogger()
     {

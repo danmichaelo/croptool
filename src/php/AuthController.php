@@ -15,7 +15,7 @@ class AuthController
         ]);
     }
 
-    public function login(Response $response, Request $request, AuthServiceInterface $auth, Session $session)
+    public function login(Response $response, Request $request, AuthServiceInterface $auth, SessionInterface $session)
     {
         // Store ['site', 'title', 'page'] in the callback url
         $state = $request->getUri()->getQuery();
@@ -24,7 +24,7 @@ class AuthController
         return $response->withStatus(302)->withHeader('Location', $url);
     }
 
-    public function authCallback(Response $response, Request $request, AuthServiceInterface $auth, Config $config, Session $session)
+    public function authCallback(Response $response, Request $request, AuthServiceInterface $auth, Config $config, SessionInterface $session)
     {
         $auth->handleCallbackRequest($request->getQueryParam('oauth_verifier'));
 
@@ -39,7 +39,7 @@ class AuthController
         return $response->withStatus(302)->withHeader('Location', $config->get('basepath') . '?' . $state);
     }
 
-    public function logout(Response $response, AuthServiceInterface $auth, Session $session)
+    public function logout(Response $response, AuthServiceInterface $auth, SessionInterface $session)
     {
         $auth->doLogout();
         $session->flush();

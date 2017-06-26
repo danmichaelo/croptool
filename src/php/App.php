@@ -83,6 +83,8 @@ class App extends \DI\Bridge\Slim\App
 
             AuthServiceInterface::class => \DI\object(OAuthConsumer::class),
 
+            SessionInterface::class => \DI\object(Session::class),
+
         ]);
     }
 

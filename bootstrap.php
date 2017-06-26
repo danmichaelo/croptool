@@ -74,7 +74,7 @@ $pageMiddleware = function (Request $request, Response $response, $next) {
  */
 
 $app = new CropTool\App();
-$app->add(CropTool\Session::class);
+$app->add(CropTool\SessionInterface::class);
 
 /**********************************************************************************
  * Auth routes

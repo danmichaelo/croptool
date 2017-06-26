@@ -60,7 +60,7 @@ class OAuthConsumer implements AuthServiceInterface
     public $warnings = [];
     const INVALID_COOKIE = 'INVALID_COOKIE';
 
-    public function __construct(Config $config, LoggerInterface $logger, Session $session, $keyFile, $callbackUrl)
+    public function __construct(Config $config, LoggerInterface $logger, SessionInterface $session, $keyFile, $callbackUrl)
     {
         $this->hostname = $config->get('hostname');
         $this->basepath = $config->get('basepath');

@@ -5,7 +5,7 @@ namespace CropTool;
 use Slim\Http\Request;
 use Slim\Http\Response;
 
-class Session
+class Session implements SessionInterface
 {
     protected $config;
 
