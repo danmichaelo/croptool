@@ -68,7 +68,8 @@ class WikiText
         'extractedfrom|extracted[_ ]image|ef|cropped|image extracted from',
         'FlickrVerifiedByUploadWizard',
         'User:FlickreviewR\/reviewed-[a-z]+',
-		'[Pp]icture[_ ]of[_ ]week',
+		'picture[_ ]of[_ ]week',
+		'(permission|Разрешение|ConfirmationImage)? ?OTRS[ -]?(ID|permission)?',
     );
 
     /*

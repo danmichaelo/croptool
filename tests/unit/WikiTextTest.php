@@ -332,4 +332,16 @@ Sault-S<sup>te</sup>-Marie, Ontario, Canada<br>
         	'wikidata-item' => 'Q16218635'
         ], $stuff);
     }
+
+    public function testItDoesntCopyOtrsTemplates()
+    {
+        $ex1 = new WikiText('abc {{PermissionOTRS|id=123}} def');
+        $ex2 = new WikiText('abc {{Разрешение OTRS|id=123}} def');
+        $ex3 = new WikiText('abc {{PermissionOTRS-ID|id=123}} def');
+
+        $this->assertEquals('abc def', (string) $ex1->withoutTemplatesNotToBeCopied());
+        $this->assertEquals('abc def', (string) $ex2->withoutTemplatesNotToBeCopied());
+        $this->assertEquals('abc def', (string) $ex3->withoutTemplatesNotToBeCopied());
+    }
+
 }
