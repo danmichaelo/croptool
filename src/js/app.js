@@ -292,6 +292,10 @@ controller('AppCtrl', ['$scope', '$http', '$timeout', '$q', '$window', '$httpPar
 
             $scope.metadata = response;
 
+            // If aspect ratio is "keep", we need to find that aspect ratio
+            // now that we have the coordinates of the image file.
+            $scope.aspectRatioChanged();
+
             $scope.availablePages = [];
             for (var i = 1; i <= $scope.metadata.pagecount; i++) {
                 $scope.availablePages.push(i);
@@ -353,7 +357,9 @@ controller('AppCtrl', ['$scope', '$http', '$timeout', '$q', '$window', '$httpPar
     function getAspectRatio() {
         var ratio = 0;
         if ($scope.aspectratio == 'keep') {
-            ratio = $scope.metadata.original.width / $scope.metadata.original.height;
+            if ($scope.metadata && $scope.metadata.original) {
+                ratio = $scope.metadata.original.width / $scope.metadata.original.height;
+            }
         } else if ($scope.aspectratio == 'fixed') {
             var cx = parseInt($scope.aspectratio_cx),
                 cy = parseInt($scope.aspectratio_cy);
