@@ -50,7 +50,7 @@ As a lightweight alternative for a development environment, we provide a `Caddyf
 
 1. Run `caddy` in the source directory
 2. Add `127.0.0.1 tools.wmflabs.org` to your `/etc/hosts`
-3. Open https://tools.wmflabs.org:7890/croptool and accept the certificate warning (since we issue a self-signed certificate)
+3. Open https://tools.wmflabs.org:7890/croptool/ and accept the certificate warning (since we issue a self-signed certificate)
 
 ### Deployment notes
 
