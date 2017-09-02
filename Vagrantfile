@@ -18,7 +18,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     # to sleep for instance, then some 3rd party services will reject requests.
     v.customize ["guestproperty", "set", :id, "/VirtualBox/GuestAdd/VBoxService/--timesync-set-threshold", 10000]
 
-    v.memory = 1024
+    v.memory = 2048
   end
 
   # Use a non-login shell to avoid stdin error messages
