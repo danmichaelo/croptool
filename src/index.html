@@ -421,9 +421,19 @@
                                     <span translate>previewform-new-title</span>
                                 </label>
                                 <input id="newTitle" type="text" class="form-control" ng-model="newTitle" ng-disabled="ladda2">
-                                <span class="help-block" ng-show="exists[currentUrlParams.site + ':' + newTitle] === true">
+                                <div class="help-block" ng-show="exists[currentUrlParams.site + ':' + newTitle] === true">
                                     <span translate translate-value-title="{{newTitle}}">previewform-new-title-exists</span>
-                                </span>
+                                    <div>
+                                        <label>
+                                            <input type="checkbox" ng-model="confirmOverwrite">
+                                            <span translate>previewform-new-title-exists-confirm-overwrite</span>
+                                        </label>
+                                        <p ng-show="currentUrlParams.site == 'commons.wikimedia.org' && confirmOverwrite">
+                                            <i class="fa fa-warning"></i>
+                                            <span translate translate-value-url="https://commons.wikimedia.org/wiki/Special:MyLanguage/Commons:Overwriting existing files">previewform-overwrite-policy</span>
+                                        </p>
+                                    </div>
+                                </div>
                             </div>
 
                         </div>

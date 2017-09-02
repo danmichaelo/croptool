@@ -57,6 +57,7 @@
     "previewform-create-new": "Upload as new file",
     "previewform-new-title": "New filename",
     "previewform-new-title-exists": "File \u00ab{{title}}\u00bb already exists.",
+    "previewform-new-title-exists-confirm-overwrite": "Overwrite existing file (Please, be careful!)",
     "previewform-upload-comment": "Upload comment",
     "previewform-back-btn": "Back",
     "previewform-upload-btn": "Upload",

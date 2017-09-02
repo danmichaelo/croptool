@@ -476,6 +476,7 @@ controller('AppCtrl', ['$scope', '$http', '$timeout', '$q', '$window', '$httpPar
         $scope.error = '';
         $scope.allowIgnoreWarnings = false;
         $scope.ignoreWarnings = false;
+        $scope.confirmOverwrite = false;
         $scope.ladda = true;
 
         $http.get('./api/file/crop?' + $httpParamSerializer({
@@ -535,7 +536,7 @@ controller('AppCtrl', ['$scope', '$http', '$timeout', '$q', '$window', '$httpPar
             store: true
         };
 
-        if ($scope.ignoreWarnings) {
+        if ($scope.ignoreWarnings || $scope.confirmOverwrite) {
             params.ignorewarnings = '1';
         }
 
