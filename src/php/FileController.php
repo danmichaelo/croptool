@@ -195,7 +195,9 @@ class FileController
                 ->save('Removed ' . (implode(' and ', array_keys($elems))) . ' using [[Commons:CropTool|CropTool]]');
         } else {
             $newPage = $factory->make(WikiPage::class, ['title' => $newName]);
-            $newPage->assertNotExists();
+            if (!$ignoreWarnings) {
+                $newPage->assertNotExists();
+            }
 
             // Remove templates before appending {{Extracted from}}
             $wikitext = $wikitext->withoutTemplatesNotToBeCopied();
