@@ -375,7 +375,7 @@ class WikiText
      */
     public function appendExtractedFromTemplate($name)
     {
-        $tpl = "{{Extracted from|" . $name . "}}";
+        $tpl = "{{Extracted from|1=" . $name . "}}";
 
         return $this->appendTemplate($tpl);
     }
@@ -392,13 +392,19 @@ class WikiText
         // If the page already contains a {{Image extracted}} template, append the file to it
         list($start, $length) = $this->search('{{\s*(extracted ?(images?|file|photo)?|image ?extracted|cropped version)\s*(\s*|\|[^\}]+)}}');
         if (!is_null($start)) {
+
+            // Find out how many existing arguments there are
+            $tplText = substr($this->text, $start, $length);
+            preg_match_all('/\|/', $tplText, $out);
+            $argNo = count($out) + 1;
+
             // Append |$name before the }} of the template
-            $text = substr($this->text, 0, $start + $length - 2) . "|" . $name . substr($this->text, $start + $length - 2);
+            $text = substr($this->text, 0, $start + $length - 2) . "|$argNo=" . $name . substr($this->text, $start + $length - 2);
             return new self($text);
         }
 
         // Otherwise, try adding the template
-        $tpl = '{{Image extracted|' . $name . '}}';
+        $tpl = '{{Image extracted|1=' . $name . '}}';
 
         return $this->appendTemplate($tpl);
     }

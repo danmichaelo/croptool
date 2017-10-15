@@ -115,7 +115,7 @@ class WikiTextTest extends PHPUnit_Framework_TestCase
 |source=http://forum.vgd.ru/1410/46846/20.htm?a=stdforum_view&o=
 |author=Шерер и Набгольц
 |permission=
-|other versions={{Extracted from|My new file.jpg}}
+|other versions={{Extracted from|1=My new file.jpg}}
 }}
 
 =={{int:license-header}}==
@@ -154,7 +154,7 @@ class WikiTextTest extends PHPUnit_Framework_TestCase
 
 ==License==
 {{self|cc-zero}}
-{{Extracted from|My old file.jpg}}
+{{Extracted from|1=My old file.jpg}}
 
 [[Category:Versus populum altars]]
 [[Category:Altar of Saint Peter\'s Basilica]]';
@@ -186,7 +186,7 @@ class WikiTextTest extends PHPUnit_Framework_TestCase
 |date=2016-05-24 12:54:22
 |source={{own}}
 |author=[[User:三猎|三猎]]
-|other_versions={{Image extracted|HoryujiYumedono0363 edit1.jpg|My new file.jpg}}
+|other_versions={{Image extracted|HoryujiYumedono0363 edit1.jpg|2=My new file.jpg}}
 |permission=public domain
 }}
 
@@ -233,7 +233,7 @@ class WikiTextTest extends PHPUnit_Framework_TestCase
 |source={{own}}
 |author=[[User:三猎|三猎]]
 |permission=
-|other versions={{Image extracted|My new file.jpg}}
+|other versions={{Image extracted|1=My new file.jpg}}
 }}
 
 =={{int:license-header}}==
@@ -297,7 +297,7 @@ Sault-S<sup>te</sup>-Marie, Ontario, Canada<br>
  |source = {{own assumed}}
  |author = {{Author assumed|[[User:Fungus Guy|Fungus Guy]]}}
  |permission = 
- |other_versions = {{Image extracted|My new file.jpg}}
+ |other_versions = {{Image extracted|1=My new file.jpg}}
 }}
 
 == {{int:license-header}} ==
