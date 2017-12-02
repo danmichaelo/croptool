@@ -396,7 +396,7 @@ class WikiText
             // Find out how many existing arguments there are
             $tplText = substr($this->text, $start, $length);
             preg_match_all('/\|/', $tplText, $out);
-            $argNo = count($out) + 1;
+			$argNo = (isset($out[0]) ? count($out[0]) : 0) + 1; // $out is an array of all matches in a multi-dimensional array
 
             // Append |$name before the }} of the template
             $text = substr($this->text, 0, $start + $length - 2) . "|$argNo=" . $name . substr($this->text, $start + $length - 2);

@@ -167,36 +167,51 @@ class WikiTextTest extends PHPUnit_Framework_TestCase
 
     public function testItAppendsToExistingImageExtractedTemplate()
     {
-        $oldText = '
+        $oldText1 = '
 {{Information
 |description={{zh|1=北师大启功像1。}}
-|date=2016-05-24 12:54:22
-|source={{own}}
-|author=[[User:三猎|三猎]]
 |other_versions={{Image extracted|HoryujiYumedono0363 edit1.jpg}}
-|permission=public domain
 }}
 
 {{PD-self}}
 ';
 
-        $newText = '
+        $newText1 = '
 {{Information
 |description={{zh|1=北师大启功像1。}}
-|date=2016-05-24 12:54:22
-|source={{own}}
-|author=[[User:三猎|三猎]]
 |other_versions={{Image extracted|HoryujiYumedono0363 edit1.jpg|2=My new file.jpg}}
-|permission=public domain
 }}
 
 {{PD-self}}
 ';
 
-        $wikitext = WikiText::make($oldText)
+        $oldText2 = '
+{{Information
+|description={{zh|1=北师大启功像1。}}
+|other_versions={{Image extracted|HoryujiYumedono0363 edit1.jpg|Crop 1.jpg}}
+}}
+
+{{PD-self}}
+';
+
+        $newText2 = '
+{{Information
+|description={{zh|1=北师大启功像1。}}
+|other_versions={{Image extracted|HoryujiYumedono0363 edit1.jpg|Crop 1.jpg|3=My new file.jpg}}
+}}
+
+{{PD-self}}
+';
+
+        $wikitext = WikiText::make($oldText1)
             ->appendImageExtractedTemplate('My new file.jpg');
 
-        $this->assertEquals($newText, $wikitext);
+        $this->assertEquals($newText1, $wikitext);
+
+        $wikitext = WikiText::make($oldText2)
+            ->appendImageExtractedTemplate('My new file.jpg');
+
+        $this->assertEquals($newText2, $wikitext);
     }
 
 
