@@ -290,7 +290,7 @@
                         </label>
                         <label>
                             {{ 'cropform-rotation' | translate }}
-                            <input ng-if="cropmethod === 'precise'" type="number" ng-model="rotation.angle">
+                            <input ng-if="cropmethod === 'precise'" type="number" ng-model="rotation.angle" step="0.01">
                             <input ng-if="cropmethod === 'lossless'" type="range" ng-input-range ng-model="rotation.angle" min="0" step="90" max="270">
                         </label>
                     </div>
