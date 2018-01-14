@@ -86,7 +86,7 @@ class FileController
         $y = intval($request->getQueryParam('y', 0));
         $width = intval($request->getQueryParam('width', 0));
         $height = intval($request->getQueryParam('height', 0));
-        $rotation = intval($request->getQueryParam('rotate', 0));
+        $rotation = floatval($request->getQueryParam('rotate', 0));
         $method = $request->getQueryParam('method', 'precise');
 
         $t0 = microtime(true) * 1000;
