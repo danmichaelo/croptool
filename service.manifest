@@ -1,5 +1,5 @@
 # This file is used by toollabs infrastructure.
 # Please do not edit manually at this time.
-backend: kubernetes
+backend: gridengine
 version: 2
-web: php5.6
+web: lighttpd
