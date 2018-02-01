@@ -16,6 +16,7 @@
     "titleform-file-found": "File \u00ab{{title}}\u00bb found on \u00ab{{site}}\u00bb.",
     "titleform-file-not-found": "File \u00ab{{title}}\u00bb not found on \u00ab{{site}}\u00bb.",
     "fetching-progress": "Please wait while fetching image data and metadata... This might take some time depending on the image size...",
+    "view-at-site": "View at {{site}}",
     "original-dimensions": "Original: {{width}}\u00d7{{height}} px.",
     "thumb-dimensions": "Thumbnail: {{width}}\u00d7{{height}} px.",
     "crop-dimensions": "Crop: {{width}}\u00d7{{height}} px.",
