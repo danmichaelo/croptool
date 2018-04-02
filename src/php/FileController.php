@@ -119,6 +119,9 @@ class FileController
             $cropPercentY = round(($original->height - $crop->height) / $original->height * 100);
             $dim[] = ($cropPercentY ?: ' < 1') . ' % vertically';
         }
+        if ($rotation) {
+            $dim[] = "rotated ${rotation}°";
+        }
 
         $options = $page->wikitext->possibleStuffToRemove();
         $wd = null;
@@ -139,7 +142,7 @@ class FileController
             'title' => $page->title,
             'pageno' => $pageno,
             'method' => $method,
-            'dim' => implode(' and ', $dim) . ' using [[Commons:CropTool|CropTool]] with ' . $method . ' mode.',
+            'dim' => implode(', ', $dim) . ' using [[Commons:CropTool|CropTool]] with ' . $method . ' mode.',
             'page' => [
                 'elems' => $options,
                 'hasAssessmentTemplates' => $page->wikitext->hasAssessmentTemplates(),

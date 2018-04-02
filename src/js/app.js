@@ -693,29 +693,24 @@ controller('AppCtrl', ['$scope', '$http', '$timeout', '$q', '$window', '$httpPar
         // Removed watermark from [[File:X]] by cropping {x % using CropTool}
 
         var s = '';
-        console.log($scope.cropresults);
-        if ($scope.cropresults.page.elems.border || $scope.cropresults.page.elems.watermark || $scope.cropresults.page.elems.wikidata) {
-            if ($scope.cropresults.page.elems.border) {
-                s = 'Removed border';
-            } else if ($scope.cropresults.page.elems.watermark) {
-                s = 'Removed watermark';
-            } else if ($scope.cropresults.page.elems.wikidata) {
-                s = 'Cropped for [[:wikidata:' + $scope.cropresults.page.elems['wikidata-item'] + '|Wikidata]]';
-            } else {
-                s = 'Cropped';
-            }
-            if ($scope.overwrite == 'rename') {
-                s += ' from [[File:' + $scope.currentUrlParams.title + ']]';
-            }
-            s += ' by cropping';
+        if ($scope.overwrite == 'rename') {
+            s += '[[:File:' + $scope.currentUrlParams.title + ']] cropped';
         } else {
-            if ($scope.overwrite == 'rename') {
-                s += '[[File:' + $scope.currentUrlParams.title + ']] cropped';
-            } else {
-                s += 'Cropped';
-            }
+            s += 'Cropped';
         }
+
+        // %s % horizontally, %s % vertically, rotated %s° using [[Commons:CropTool|CropTool]] with %s mode.
         s += ' ' + $scope.cropresults.dim;
+
+        if ($scope.cropresults.page.elems.border) {
+            s += ' Removed border.';
+        }
+        if ($scope.cropresults.page.elems.watermark) {
+            s += ' Removed watermark.';
+        }
+        if ($scope.cropresults.page.elems.wikidata) {
+            s += ' Crop for [[:wikidata:' + $scope.cropresults.page.elems['wikidata-item'] + '|Wikidata]].';
+        }
         $scope.uploadComment = s;
     };
 
