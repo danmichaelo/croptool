@@ -18,25 +18,25 @@ service('LoginService', ['$http', '$rootScope', function($http, $rootScope) {
 
     var that = this;
 
-    this.checkLogin = function(response, code) {
-        if (response.user) {
-            that.user = { name: response.user };
+    this.checkLogin = function(res) {
+        var data = res.data;
+        if (data.user) {
+            that.user = { name: data.user };
         } else {
             that.user = undefined;
         }
-        that.loginResponse = response;
+        that.loginResponse = data;
         if (typeof that.loginResponse != 'object') {
             that.loginResponse = {
                 error: 'The CropTool backend is currently having problems.',
             };
         }
-        that.loginResponse.code = code;
+        that.loginResponse.code = res.status;
         $rootScope.$broadcast('loginStatusChanged', that.loginResponse);
     };
 
     $http.get('./api/auth/user')
-      .success(this.checkLogin)
-      .error(this.checkLogin);
+      .then(this.checkLogin, this.checkLogin);
 
 }]).
 
@@ -62,9 +62,9 @@ controller('LoginCtrl', ['$scope', '$http', '$httpParamSerializer', 'LoginServic
     };
 
     $scope.logout = function() {
-        $http.get('./api/auth/logout').
-        success(function(response) {
-            LoginService.checkLogin(response);
+        $http.get('./api/auth/logout')
+        .then(function(response) {
+            LoginService.checkLogin(response.data);
             $scope.user = LoginService.user;
         });
     };
@@ -96,7 +96,7 @@ directive('ctCropper', ['$timeout', function($timeout) {
             rotation: '@'
         },
         link: function(scope, element) {
-            element.on('load', function() { $timeout(initCropper) });
+            element.on('load', function() { $timeout(initCropper); });
             element.bind('$destroy', destroy);
             scope.$watch('aspectRatio', aspectRatioChanged);
             scope.$watch('rotation', rotationChanged);
@@ -152,7 +152,7 @@ directive('ctCropper', ['$timeout', function($timeout) {
                 }
             }
         }
-    }
+    };
 }]).
 
 controller('AppCtrl', ['$scope', '$http', '$timeout', '$q', '$window', '$httpParamSerializer', 'LoginService', 'localStorageService', 'WindowService', function($scope, $http, $timeout, $q, $window, $httpParamSerializer, LoginService, LocalStorageService, WindowService) {
@@ -274,16 +274,13 @@ controller('AppCtrl', ['$scope', '$http', '$timeout', '$q', '$window', '$httpPar
         $http.get('./api/file/thumb?' + $httpParamSerializer({
             title: $scope.currentUrlParams.title,
             site: $scope.currentUrlParams.site,
-            page: $scope.currentUrlParams.page
-        })).
-        error(function(response, status, headers) {
-            $scope.metadata = null;
-            $scope.error = response.error;
-            $scope.busy = false;
-        }).
-        success(function(response) {
+            page: $scope.currentUrlParams.page,
+        }))
+        .then(function(res) {
 
             $scope.busy = false;
+
+            var response = res.data;
 
             if (response.error) {
                 $scope.error = response.error;
@@ -318,6 +315,10 @@ controller('AppCtrl', ['$scope', '$http', '$timeout', '$q', '$window', '$httpPar
                 }
             }
 
+        }, function(res) {
+            $scope.metadata = null;
+            $scope.error = res.data.error;
+            $scope.busy = false;
         });
     }
 
@@ -330,21 +331,21 @@ controller('AppCtrl', ['$scope', '$http', '$timeout', '$q', '$window', '$httpPar
             site: $scope.currentUrlParams.site,
             page: $scope.currentUrlParams.page
         }))
-            .success(function(response) {
-                $scope.borderLocatorBusy = false;
-                console.log(response);
-                var area = response['area'];
-                $scope.$broadcast('crop-input-changed', {
-                    left: area[0] / pixelratio[0],
-                    top: area[1] / pixelratio[1],
-                    width: (area[2] - area[0]) / pixelratio[0],
-                    height: (area[3] - area[1]) / pixelratio[1]
-                });
-            })
-            .error(function(response, status, headers) {
-                $scope.error = 'An error occured: ' + status + ' ' + response.error;
-                $scope.borderLocatorBusy = false;
+        .then(function(res) {
+            var response = res.data;
+            $scope.borderLocatorBusy = false;
+            console.log(response);
+            var area = response.area;
+            $scope.$broadcast('crop-input-changed', {
+                left: area[0] / pixelratio[0],
+                top: area[1] / pixelratio[1],
+                width: (area[2] - area[0]) / pixelratio[0],
+                height: (area[3] - area[1]) / pixelratio[1]
             });
+        }, function(res) {
+            $scope.error = 'An error occured: ' + res.status + ' ' + res.data.error;
+            $scope.borderLocatorBusy = false;
+        });
     };
 
     $scope.cropMethodChanged = function() {
@@ -490,8 +491,9 @@ controller('AppCtrl', ['$scope', '$http', '$timeout', '$q', '$window', '$httpPar
             rotate: $scope.crop_dim.rotate,
             width: $scope.crop_dim.w,
             height: $scope.crop_dim.h
-        })).
-        success(function(response) {
+        }))
+        .then(function(res) {
+            var response = res.data;
             $scope.ladda = false;
             if (!response.page.allowOverwrite) {
                 $scope.overwrite = "rename";
@@ -511,9 +513,8 @@ controller('AppCtrl', ['$scope', '$http', '$timeout', '$q', '$window', '$httpPar
                 $scope.overwrite = 'rename';
             }
             $scope.updateUploadComment();
-        }).
-        error(function(response, status, headers) {
-            $scope.error = '[Error] ' + response.error;
+        }, function(res) {
+            $scope.error = '[Error] ' + res.data.error;
             $scope.ladda = false;
         });
 
@@ -541,8 +542,9 @@ controller('AppCtrl', ['$scope', '$http', '$timeout', '$q', '$window', '$httpPar
             params.ignorewarnings = '1';
         }
 
-        $http.post('./api/file/publish', params).
-        success(function(response) {
+        $http.post('./api/file/publish', params)
+        .then(function(res) {
+            var response = res.data;
 
             console.log(response);
 
@@ -573,10 +575,9 @@ controller('AppCtrl', ['$scope', '$http', '$timeout', '$q', '$window', '$httpPar
                 }
             }
 
-        }).
-        error(function(response, status, headers) {
+        }, function(res) {
             $scope.ladda2 = false;
-            $scope.error = 'Upload failed! ' + response.error;
+            $scope.error = 'Upload failed! ' + res.data.error;
         });
 
     };
@@ -644,7 +645,8 @@ controller('AppCtrl', ['$scope', '$http', '$timeout', '$q', '$window', '$httpPar
                 title: title
             }), {
                 timeout: canceler.promise,
-            }).success(function(response) {
+            }).then(function(res) {
+                var response = res.data;
                 var key = site + ':' + title;
 
                 $scope.error = response.error;
@@ -682,6 +684,7 @@ controller('AppCtrl', ['$scope', '$http', '$timeout', '$q', '$window', '$httpPar
     });
 
     $scope.updateUploadComment = function() {
+        console.log('UPDATE UPLAOD COMM', $scope.cropresults.page.elems);
 
         LocalStorageService.set('croptool-overwrite', $scope.overwrite);
 
