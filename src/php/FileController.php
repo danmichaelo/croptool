@@ -26,7 +26,7 @@ class FileController
         }
 
         return [
-            'name' => $file->getRelativePathForPage($pageno, $suffix),
+            'name' => substr($img->path, strlen($file->getPublicDir())),
             'width' => $img->width,
             'height' => $img->height,
         ];
@@ -51,6 +51,9 @@ class FileController
 
         $srcPath = $page->file->getAbsolutePathForPage($pageno);
         $thumbPath = $page->file->getAbsolutePathForPage($pageno, '_thumb');
+
+        // If tiff file, then create jpg thumb, since most browsers don't support tiff
+        $thumbPath = preg_replace('/\.tiff?$/', '.jpg', $thumbPath);
 
         $original = $editor->open($srcPath);     // instance of Image
         $thumb = $original->thumb($thumbPath);   // instance of Image or null
@@ -100,6 +103,9 @@ class FileController
         $srcPath = $page->file->getAbsolutePathForPage($pageno);
         $destPath = $page->file->getAbsolutePathForPage($pageno, '_cropped');
         $thumbPath = $page->file->getAbsolutePathForPage($pageno, '_cropped_thumb');
+
+        // If tiff file, then create jpg thumb, since most browsers don't support tiff
+        $thumbPath = preg_replace('/\.tiff?$/', '.jpg', $thumbPath);
 
         $original = $editor->open($srcPath);
         $crop = $original->crop($destPath, $method, $x, $y, $width, $height, $rotation);

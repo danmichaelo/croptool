@@ -343,21 +343,24 @@ class Image
             unlink($thumbPath);
         }
 
-        if ($this->mime == 'image/gif') {
+        $mime = $this->editor->mimeFromPath($thumbPath);
+
+        if ($mime == 'image/gif') {
+            // We never create thumbnails for GIFs
             return null;
-        }
-        /* We always create a thumbnail if orientation > 1 because
-            not all browsers respects EXIF orientation. The thumbnail
-            will be "hard oriented".
-        */
-        if ($this->orientation <= 1 && $this->width <= $this->thumbWidth && $this->height <= $this->thumbHeight) {
+        } else if ($this->mime == 'image/tiff' or $this->orientation > 0) {
+            // We always create a thumbnail
+            // - if orientation > 1 because not all browsers respects EXIF orientation,
+            // - or if the file is a tiff file, since most browser don't support tiff.
+        } else if ($this->width <= $this->thumbWidth && $this->height <= $this->thumbHeight) {
+            // Otherwise, we check if the dimensions exceeds the thumb dimensions.
             return null;
         }
 
         $this->genThumb($thumbPath, $this->thumbWidth, $this->thumbHeight);
         chmod($thumbPath, $this->filePermission);
 
-        return new Image($this->editor, $thumbPath, $this->mime);
+        return new Image($this->editor, $thumbPath, $mime);
     }
 
     /**

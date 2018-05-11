@@ -9,6 +9,8 @@ class ImageEditor
     protected $supportedFileTypes = [
         '.jpg' => 'image/jpeg',
         '.png' => 'image/png',
+        '.tif' => 'image/tiff',
+        '.tiff' => 'image/tiff',
         '.gif' => 'image/gif',
         '.djvu' => 'image/vnd.djvu',
         '.pdf' => 'application/pdf',
@@ -24,7 +26,7 @@ class ImageEditor
         return $this->pathToJpegTran;
     }
 
-    protected function mimeFromPath($path)
+    public function mimeFromPath($path)
     {
         $fileExt = substr($path, strrpos($path, '.'));
         if (!isset($this->supportedFileTypes[$fileExt])) {

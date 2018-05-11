@@ -19,6 +19,7 @@ class File implements FileInterface
         'image/jpeg' => '.jpg',
         'image/png' => '.png',
         'image/gif' => '.gif',
+        'image/tiff' => '.tiff',
         'image/vnd.djvu' => '.djvu',
         'application/pdf' => '.pdf',
     ];
@@ -33,6 +34,11 @@ class File implements FileInterface
         $this->logger = $logger;
 
         $this->fileExt = $this->getFileExt($this->mime);
+    }
+
+    public function getPublicDir()
+    {
+        return $this->publicDir;
     }
 
     protected function getFileExt($mime)
