@@ -7,7 +7,7 @@ html, body {
 }
 
 h1 {
-    margin-top: 20px;
+    margin-top: 0;
     margin-bottom: 15px;
     padding: 0;
     font-size: 30px;
@@ -21,7 +21,8 @@ h2 {
 }
 
 .container2 {
-    padding: 0 2vw;
+    padding: 2vw 2vw;
+    box-sizing: border-box;
     min-height: 100%;
     height: auto !important;
     height: 100%;
@@ -32,10 +33,11 @@ footer, .push {
     height: 35px; /* .push must be the same height as .footer */
 }
 footer {
-    text-align: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     background: #333;
     color: white;
-    font-size: 85%;
     padding: 4px;
     line-height: 110%;
 }
