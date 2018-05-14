@@ -308,7 +308,7 @@ controller('AppCtrl', ['$scope', '$http', '$timeout', '$q', '$window', '$httpPar
             if (!response.error) {
 
                 var p = $scope.currentUrlParams.title.lastIndexOf('.');
-                if ($scope.currentUrlParams.page) {
+                if ($scope.currentUrlParams.page && $scope.metadata.pagecount > 1) {
                     $scope.newTitle = $scope.currentUrlParams.title.substr(0, p) + ' (page ' + $scope.currentUrlParams.page + ' crop).jpg';
                 } else {
                     $scope.newTitle = $scope.currentUrlParams.title.substr(0, p) + ' (cropped)' + $scope.currentUrlParams.title.substr(p);
@@ -417,7 +417,7 @@ controller('AppCtrl', ['$scope', '$http', '$timeout', '$q', '$window', '$httpPar
             .replace(/_/g, ' ')
             .replace(/^[^:]+:/, '');  // Strip off File:, Fil:, etc.
 
-        if (params.title.match(/\.(pdf|djvu)$/) && !params.page) {
+        if (params.title.match(/\.(pdf|djvu|tiff?)$/) && !params.page) {
             params.page = 1;
         }
 
