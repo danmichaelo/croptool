@@ -4,15 +4,28 @@ use CropTool\WikiText;
 
 class WikiTextTest extends PHPUnit_Framework_TestCase
 {
+
+	public function setUp()
+	{
+		$samples = [
+	        'abc [[Category:SomeCategory]] {{flickrreview}} def',
+	        'abc [[Category:SomeCategory]] {{flickrreview|Dodo|November 30th, 2006}} def',
+	        'abc [[Category:SomeCategory]] {{User:FlickreviewR/reviewed-fail-recent|Inmediahk|....|}} def',
+	        '{{FlickreviewR|status=passed|author=dummy|sourceurl=https://flickr.com/photos/123|reviewdate=2018-05-18 12:48:33|reviewlicense=United States Government Work|reviewer=FlickreviewR 2}}',
+	    ];
+
+	    $this->samples = array_map(function ($x) {
+	    	return new WikiText($x);
+	    }, $samples);
+	}
+
     public function testItRecognizesTheLicenseReviewTemplate()
     {
-        $wt1 = new WikiText('abc [[Category:SomeCategory]] {{flickrreview}} def');
-        $wt2 = new WikiText('abc [[Category:SomeCategory]] {{flickrreview|Dodo|November 30th, 2006}} def');
-        $wt3 = new WikiText('abc [[Category:SomeCategory]] {{User:FlickreviewR/reviewed-fail-recent|Inmediahk|....|}} def');
 
-        $this->assertTrue($wt1->waitingForReview());
-        $this->assertFalse($wt2->waitingForReview());
-        $this->assertTrue($wt3->waitingForReview());
+        $this->assertTrue($this->samples[0]->waitingForReview());
+        $this->assertFalse($this->samples[1]->waitingForReview());
+        $this->assertTrue($this->samples[2]->waitingForReview());
+        $this->assertFalse($this->samples[3]->waitingForReview());
     }
 
     public function testItRecognizesQualityAssessmentTemplates()
@@ -69,7 +82,7 @@ class WikiTextTest extends PHPUnit_Framework_TestCase
 
     public function testItRemovesQualityAssessmentTemplatesIfRequested()
     {
-        $wikitext = WikiText::make('abc {{Valued_image|example}} ghi {{vi|example}} {{quality image | example}} {{license review}} {{watermark}} def [[Category:Quality images by Abc]] ]]')
+        $wikitext = WikiText::make('abc {{Valued_image|example}} ghi {{vi|example}} {{quality image | example}} {{license review}} {{watermark}} def [[Category:Quality images by Abc]]  {{FlickreviewR|status=passed|author=dummy|sourceurl=https://flickr.com/photos/123|reviewdate=2018-05-18 12:48:33|reviewlicense=United States Government Work|reviewer=FlickreviewR 2}} ]]')
             ->withoutTemplatesNotToBeCopied();
 
         $this->assertEquals('abc ghi {{watermark}} def ]]', strval($wikitext));
@@ -285,8 +298,8 @@ Sault-S<sup>te</sup>-Marie, Ontario, Canada<br>
  |date = {{According to EXIF data|2006-07-30}}
  |source = {{own assumed}}
  |author = {{Author assumed|[[User:Fungus Guy|Fungus Guy]]}}
- |permission = 
- |other_versions = 
+ |permission =
+ |other_versions =
 }}
 
 == {{int:license-header}} ==
@@ -311,8 +324,8 @@ Sault-S<sup>te</sup>-Marie, Ontario, Canada<br>
  |date = {{According to EXIF data|2006-07-30}}
  |source = {{own assumed}}
  |author = {{Author assumed|[[User:Fungus Guy|Fungus Guy]]}}
- |permission = 
- |other_versions = {{Image extracted|1=My new file.jpg}}
+ |permission =
+ |other_versions ={{Image extracted|1=My new file.jpg}}
 }}
 
 == {{int:license-header}} ==
