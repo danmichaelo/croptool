@@ -76,6 +76,10 @@ $pageMiddleware = function (Request $request, Response $response, $next) {
 $app = new CropTool\App();
 $app->add(CropTool\SessionInterface::class);
 
+$app->get('/api/ping', function ($request, $response) {
+    return $response->write('pong');
+});
+
 /**********************************************************************************
  * Auth routes
  */
