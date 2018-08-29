@@ -14,8 +14,9 @@ echo "Installing Lighttpd"
 apt-get install -y lighttpd > /dev/null
 
 echo "Installing Node.js and NPM"
-apt-get install -y build-essential nodejs npm
-ln -sf /usr/bin/nodejs /usr/bin/node
+apt-get install -y build-essential
+curl -sL https://deb.nodesource.com/setup_8.x | bash -
+apt-get install -y nodejs
 
 echo "Installing djvulibre"
 apt-get install -y djvulibre-bin > /dev/null
@@ -36,6 +37,7 @@ if [[ ! -e /etc/lighttpd/certs/lighttpd.pem ]]; then
 	chmod 400 lighttpd.pem
 fi
 sed -i 's/;cgi.fix_pathinfo=1/cgi.fix_pathinfo=1/g' /etc/php5/fpm/php.ini
+sed -i 's/memory_limit = .*/memory_limit = 512M/g' /etc/php5/fpm/php.ini
 sed -i 's/www-data/vagrant/g' /etc/php5/fpm/pool.d/www.conf
 cp /vagrant/provision/15-php-fpm.conf /etc/lighttpd/conf-available/15-php-fpm.conf
 cp /vagrant/provision/lighttpd.conf /etc/lighttpd/lighttpd.conf
