@@ -4,6 +4,9 @@ namespace CropTool;
 
 class WikiText
 {
+    const TEMPLATES = 'templates';
+    const CATEGORIES = 'categories';
+
     protected $text;
 
     /*
@@ -131,8 +134,8 @@ class WikiText
     );
 
     protected $patterns = array(
-        'templates' => '/{{\s*%NAMES%\s*%PARAMS%}}\s*/i',
-        'categories' => '/\[\[category:%NAMES%\]\]\s*/i',
+        'templates' => '{{\s*%NAMES%\s*%PARAMS%}} *',
+        'categories' => '\[\[category:%NAMES%\]\] *',
     );
 
     /**
@@ -161,28 +164,60 @@ class WikiText
         return $this->text;
     }
 
-    protected function compileTemplatePattern($templates, $withParams=true)
+    /**
+     * Generate a regular expression pattern that matches given templates or categories.
+     *
+     * @param string $type What to match (templates or categories).
+     * @param string[] $names The names of the templates/categories to match.
+     * @param bool $withParams If true, the pattern will match templates with parameters,
+     *     otherwise only templates with no parameters will be matched.
+     *     For categories, this option has no effect.
+     * @param bool $surroundingLinebreaks Only match templates/categories surrounded by linebreaks
+     *     (having linebreaks both before and after the template/category).
+     * @return string
+     */
+    protected function compilePattern($type, $names, $withParams=true, $surroundingLinebreaks=false)
     {
-        return str_replace(
+        $withParams = ($type == self::CATEGORIES) ? false : $withParams;
+
+        $out = str_replace(
             [
                 '%NAMES%',
                 '%PARAMS%'
             ],
             [
-                '(' . implode('|', $templates) . ')',
+                '(' . implode('|', $names) . ')',
                 ($withParams ? '(\|([^\}\|]+)(?:\|[^\}]+)?)?' : '')
             ],
-            $this->patterns['templates']
+            $this->patterns[$type]
         );
+
+        if ($surroundingLinebreaks) {
+            return "/\n *$out *\n/i";
+        }
+        return "/$out/i";
     }
 
-    protected function compileCategoryPattern($categories)
+    /**
+     * Remove text that matches a given pattern. If the pattern is surrounded by linebreaks,
+     * one linebreak will be removed to avoid double linebreaks in the result.
+     *
+     * @param $type
+     * @param $pattern
+     * @param bool $withParams
+     * @return WikiText
+     */
+    protected function removePattern($type, $pattern, $withParams=true)
     {
-        return str_replace(
-            '%NAMES%',
-            '(' . implode('|', $categories) . ')',
-            $this->patterns['categories']
-        );
+        $text = $this->text;
+
+        // If linebreaks on both sides of the pattern, remove one of them.
+        $text = preg_replace($this->compilePattern($type, $pattern, $withParams, true), "\n", $text);
+
+        // Otherwise, preserve linebreaks.
+        $text = preg_replace($this->compilePattern($type, $pattern, $withParams), '', $text);
+
+        return $this->cloneIfModified($text);
     }
 
     /**
@@ -192,8 +227,8 @@ class WikiText
      */
     public function waitingForReview()
     {
-        $pattern1 = $this->compileTemplatePattern($this->licenseReviewTemplates, false);
-        $pattern2 = $this->compileTemplatePattern($this->licenseReviewProblemTemplates, true);
+        $pattern1 = $this->compilePattern(self::TEMPLATES, $this->licenseReviewTemplates, false);
+        $pattern2 = $this->compilePattern(self::TEMPLATES, $this->licenseReviewProblemTemplates, true);
 
         return preg_match($pattern1, $this->text) == true || preg_match($pattern2, $this->text) == true;
     }
@@ -205,7 +240,7 @@ class WikiText
      */
     public function hasAssessmentTemplates()
     {
-        $pattern = $this->compileTemplatePattern($this->assessmentTemplates);
+        $pattern = $this->compilePattern(self::TEMPLATES, $this->assessmentTemplates);
 
         return preg_match($pattern, $this->text) == true;
     }
@@ -217,7 +252,7 @@ class WikiText
      */
     public function hasDoNotCropTemplate()
     {
-        $pattern = $this->compileTemplatePattern($this->doNotCropTemplates);
+        $pattern = $this->compilePattern(self::TEMPLATES, $this->doNotCropTemplates);
 
         return preg_match($pattern, $this->text) == true;
     }
@@ -229,16 +264,16 @@ class WikiText
     {
         $data = array();
 
-        if (preg_match($this->compileTemplatePattern($this->removeBorderTemplates), $this->text)) {
+        if (preg_match($this->compilePattern(self::TEMPLATES, $this->removeBorderTemplates), $this->text)) {
             $data['border'] = true;
         }
-        if (preg_match($this->compileTemplatePattern($this->watermarkTemplates), $this->text)) {
+        if (preg_match($this->compilePattern(self::TEMPLATES, $this->watermarkTemplates), $this->text)) {
             $data['watermark'] = true;
         }
-        if (preg_match($this->compileCategoryPattern($this->removeBorderCategories), $this->text)) {
+        if (preg_match($this->compilePattern(self::CATEGORIES, $this->removeBorderCategories), $this->text)) {
             $data['border'] = true;
         }
-        if (preg_match($this->compileTemplatePattern($this->cropForWikidataTemplates), $this->text, $matches)) {
+        if (preg_match($this->compilePattern(self::TEMPLATES, $this->cropForWikidataTemplates), $this->text, $matches)) {
             $data['wikidata'] = true;
             $data['wikidata-item'] = trim($matches[3]);
         }
@@ -258,12 +293,8 @@ class WikiText
      */
     public function withoutBorderTemplate()
     {
-        $text = preg_replace(array(
-            $this->compileTemplatePattern($this->removeBorderTemplates),
-            $this->compileCategoryPattern($this->removeBorderCategories),
-        ), array('', ''), $this->text);
-
-        return $this->cloneIfModified($text);
+        return $this->removePattern(self::TEMPLATES, $this->removeBorderTemplates)
+            ->removePattern(self::CATEGORIES, $this->removeBorderCategories);
     }
 
     /**
@@ -273,9 +304,7 @@ class WikiText
      */
     public function withoutWatermarkTemplate()
     {
-        $text = preg_replace($this->compileTemplatePattern($this->watermarkTemplates), '', $this->text);
-
-        return $this->cloneIfModified($text);
+        return $this->removePattern(self::TEMPLATES, $this->watermarkTemplates);
     }
 
     /**
@@ -285,9 +314,7 @@ class WikiText
      */
     public function withoutCropForWikidataTemplate()
     {
-        $text = preg_replace($this->compileTemplatePattern($this->cropForWikidataTemplates), '', $this->text);
-
-        return $this->cloneIfModified($text);
+        return $this->removePattern(self::TEMPLATES, $this->cropForWikidataTemplates);
     }
 
     /**
@@ -298,16 +325,18 @@ class WikiText
      */
     public function withoutTemplatesNotToBeCopied()
     {
-        $templatePattern = $this->compileTemplatePattern(array_merge(
-            $this->assessmentTemplates,
-            $this->licenseReviewTemplates,
-            $this->otherTemplatesNotToBeCopied
-        ), true);
-
-        $categoryPattern = $this->compileCategoryPattern($this->categoriesNotToBeCopied);
-        $text = preg_replace([$templatePattern, $categoryPattern], ['', ''], $this->text);
-
-        return $this->cloneIfModified($text);
+        return $this->removePattern(
+            self::TEMPLATES,
+            array_merge(
+                $this->assessmentTemplates,
+                $this->licenseReviewTemplates,
+                $this->otherTemplatesNotToBeCopied
+            ),
+            true
+        )->removePattern(
+            self::CATEGORIES,
+            $this->categoriesNotToBeCopied
+        );
     }
 
     /**

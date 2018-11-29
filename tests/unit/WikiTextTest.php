@@ -372,4 +372,38 @@ Sault-S<sup>te</sup>-Marie, Ontario, Canada<br>
         $this->assertEquals('abc def', (string) $ex3->withoutTemplatesNotToBeCopied());
     }
 
+    public function testItPreservesNewLines()
+    {
+        $oldText = '
+=={{int:filedesc}}==
+{{Information
+|Source={{own}}
+|Date={{According to EXIF data|2009-02-09}}
+|Permission={{OTRS|2010080710005378}}
+|other_versions=
+}}
+
+[[Category:A]]
+[[Category:Images with borders]]
+[[Category:B]]
+';
+        $newText = '
+=={{int:filedesc}}==
+{{Information
+|Source={{own}}
+|Date={{According to EXIF data|2009-02-09}}
+|Permission=
+|other_versions={{Image extracted|1=My new file.jpg}}
+}}
+
+[[Category:A]]
+[[Category:B]]
+';
+        $wikitext = WikiText::make($oldText)
+            ->withoutTemplatesNotToBeCopied()
+            ->appendImageExtractedTemplate('My new file.jpg')
+            ->withoutBorderTemplate();
+
+        $this->assertEquals($newText, (string) $wikitext);
+    }
 }
