@@ -1,35 +1,36 @@
-/* Dependencies
-------------------------------------- */
-var gulp = require('gulp-help')(require('gulp'));
-var jshint = require('gulp-jshint');
-var stylish = require('jshint-stylish');
-var uglify = require('gulp-uglify');
-var csso = require('gulp-csso');
-var sourcemaps = require('gulp-sourcemaps');
-var rev = require('gulp-rev');
-var revReplace = require('gulp-rev-replace');
-var filter = require('gulp-filter');
-var useref = require('gulp-useref');
+import gulp from 'gulp';
+import jshint from 'gulp-jshint';
+import stylish from 'jshint-stylish';
+import uglify from 'gulp-uglify';
+import csso from 'gulp-csso';
+import sourcemaps from 'gulp-sourcemaps';
+import rev from 'gulp-rev';
+import revReplace from 'gulp-rev-replace';
+import filter from 'gulp-filter';
+import useref from 'gulp-useref';
 
 /* Variables and paths
 ------------------------------------- */
 
-var paths = {
+const paths = {
   build: 'public_html/',
   index: 'src/index.html',
+  scripts: 'src/js/*.js',
 };
 
 /* Tasks
 ------------------------------------- */
 
-gulp.task('jshint', 'Lints all javascript files', [], function() {
+// 'Lints all javascript files'
+export function lint () {
   return gulp.src(paths.scripts)
     .pipe(jshint())
     .pipe(jshint.reporter(stylish))
     ;
-});
+}
 
-gulp.task('build', 'Builds the app', [], function() {
+//  'Builds the app'
+export function build () {
   var jsFilter = filter('**/*.js', { restore: true });
   var cssFilter = filter('**/*.css', { restore: true });
   var notIndexHtmlFilter = filter(['**/*', '!**/index.html'], { restore: true });
@@ -48,8 +49,19 @@ gulp.task('build', 'Builds the app', [], function() {
     .pipe(revReplace())         // Substitute in new filenames
     .pipe(gulp.dest(paths.build))
     ;
-});
+}
 
-gulp.task('watch', 'Re-builds the app on changes', ['build'], function () {
-  gulp.watch(['src/js/**/*.js', 'src/css/**/*.css', 'src/index.html'], ['build']);
-});
+// 'Re-builds the app on changes'
+export function watch () {
+  gulp.watch(
+    ['src/js/**/*.js', 'src/css/**/*.css', 'src/index.html'],
+    { ignoreInitial: false },
+    build
+  );
+}
+
+/*
+ * Export a default task
+ */
+export default build;
+
