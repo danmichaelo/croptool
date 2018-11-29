@@ -274,8 +274,12 @@ class WikiText
             $data['border'] = true;
         }
         if (preg_match($this->compilePattern(self::TEMPLATES, $this->cropForWikidataTemplates), $this->text, $matches)) {
-            $data['wikidata'] = true;
-            $data['wikidata-item'] = trim($matches[3]);
+            if (isset($matches[3])) {
+                $data['wikidata'] = true;
+                $data['wikidata-item'] = trim($matches[3]);
+            } else {
+                // No Q ID was given to the template.. We should perhaps warn the user, but just ignore the template for now.
+            }
         }
 
         return $data;
