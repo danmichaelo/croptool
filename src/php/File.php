@@ -135,7 +135,14 @@ class File implements FileInterface
         $this->logMsg("Fetched {$fsize} of {$contentLength} bytes from {$this->url}");
 
         if (!$fsize || $fsize < $contentLength) {
-            throw new \RuntimeException('Failed to fetch url: ' . $this->url);
+            if (file_exists($path)) {
+                // Remove the partial download
+                unlink($path);
+            }
+            throw new \RuntimeException(
+                "Failed to fetch {$this->url}. " .
+                "This could be due to intermittent network issues, feel free to retry in a moment."
+            );
         }
 
         if (chmod($path, 0664) === false) {
