@@ -248,7 +248,7 @@ controller('AppCtrl', ['$scope', '$http', '$timeout', '$q', '$window', '$httpPar
     $scope.$on('loginStatusChanged', function() {
 
         if (LoginService.user) {
-            console.log('[AppCtrl] Logged in as ' + LoginService.user.name);
+            // console.log('[AppCtrl] Logged in as ' + LoginService.user.name);
         }
 
         $scope.status = '';
@@ -258,10 +258,10 @@ controller('AppCtrl', ['$scope', '$http', '$timeout', '$q', '$window', '$httpPar
 
     function fetchImage() {
 
-        console.log('[fetchImage] Site: ' + $scope.currentUrlParams.site + ', title: ' + $scope.currentUrlParams.title + ', page: ' + $scope.currentUrlParams.page);
+        // console.log('[fetchImage] Site: ' + $scope.currentUrlParams.site + ', title: ' + $scope.currentUrlParams.title + ', page: ' + $scope.currentUrlParams.page);
 
         if (!$scope.currentUrlParams.title) {
-            console.log('[fetchImage] No title given, nothing to fetch');
+            // console.log('[fetchImage] No title given, nothing to fetch');
             return;
         }
 
@@ -454,9 +454,9 @@ controller('AppCtrl', ['$scope', '$http', '$timeout', '$q', '$window', '$httpPar
             return;
         }
 
-        console.log('   params before parse: ',$scope.currentUrlParams);
+        // console.log('   params before parse: ',$scope.currentUrlParams);
         $scope.currentUrlParams = parseImageUrlOrTitle($scope.currentUrlParams);
-        console.log('    params after parse: ',$scope.currentUrlParams);
+        // console.log('    params after parse: ',$scope.currentUrlParams);
         if ($scope.currentUrlParams.page) {
             $scope.overwrite = 'rename';  // Force rename
         }
@@ -546,7 +546,7 @@ controller('AppCtrl', ['$scope', '$http', '$timeout', '$q', '$window', '$httpPar
         .then(function(res) {
             var response = res.data;
 
-            console.log(response);
+            // console.log(response);
 
             $scope.ladda2 = false;
             if (response.result === 'Success') {
@@ -638,7 +638,7 @@ controller('AppCtrl', ['$scope', '$http', '$timeout', '$q', '$window', '$httpPar
 
             canceler = $q.defer();
 
-            console.log('Check existence of site:' + site + ', title:' + title);
+            // console.log('Check existence of site:' + site + ', title:' + title);
 
             $http.get('./api/file/exists?' + $httpParamSerializer({
                 site: site,

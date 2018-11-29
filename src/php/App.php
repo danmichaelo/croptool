@@ -11,6 +11,7 @@ use Monolog\Processor\PsrLogMessageProcessor;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Log\LoggerInterface;
+use Rollbar\Rollbar;
 use Slim\Http\Request;
 use Slim\Http\Response;
 
@@ -91,7 +92,7 @@ class App extends \DI\Bridge\Slim\App
     protected function configureRollbar(Config $config)
     {
         if ($config->has('rollbarToken')) {
-            \Rollbar::init([
+            Rollbar::init([
                 'access_token' => $config->get('rollbarToken'),
                 'environment' => $config->get('rollbarEnv'),
             ]);
