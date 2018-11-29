@@ -64,14 +64,29 @@ make
 make test
 ```
 
-Download deps and configure croptool:
+#### Download deps and configure croptool:
 
 1. `composer install --optimize-autoloader`
 2. `cp config.dist.ini config.ini` and insert OAuth info and the path to jpegtran.
 3. Check that the server can write to `logs` and `public_html/files`.
 4. `vendor/bin/phpunit`
 5. `crontab crontab.tools` to setup cronjobs.
-6. `npm install`
-7. `gulp build`
-8. `php generate-key.php`
+6. `php generate-key.php`
+
+#### Frontend build:
+
+
+The Node version on ToolForge is dead old (v0.10.25).
+Luckily, they provide a kubernetes package with a slightly more decent version (v6.9.1):
+
+    webservice --backend=kubernetes nodejs shell
+
+The npm version (1.4.21) is broken though, so we need to do a local npm install:
+
+    npm install npm
+    node_modules/.bin/npm install
+
+Finally, the gulp build:
+
+    gulp build
 
