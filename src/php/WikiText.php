@@ -71,8 +71,8 @@ class WikiText
         'extractedfrom|extracted[_ ]image|ef|cropped|image extracted from',
         'FlickrVerifiedByUploadWizard',
         'User:FlickreviewR\/reviewed-[a-z]+',
-		'picture[_ ]of[_ ]week',
-		'(permission|Разрешение|ConfirmationImage)? ?OTRS[ -]?(ID|permission)?',
+        'picture[_ ]of[_ ]week',
+        '(permission|Разрешение|ConfirmationImage)? ?OTRS[ -]?(ID|permission)?',
     );
 
     /*
@@ -429,7 +429,7 @@ class WikiText
             // Find out how many existing arguments there are
             $tplText = substr($this->text, $start, $length);
             preg_match_all('/\|/', $tplText, $out);
-			$argNo = (isset($out[0]) ? count($out[0]) : 0) + 1; // $out is an array of all matches in a multi-dimensional array
+            $argNo = (isset($out[0]) ? count($out[0]) : 0) + 1; // $out is an array of all matches in a multi-dimensional array
 
             // Append |$name before the }} of the template
             $text = substr($this->text, 0, $start + $length - 2) . "|$argNo=" . $name . substr($this->text, $start + $length - 2);

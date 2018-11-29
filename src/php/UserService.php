@@ -19,7 +19,7 @@ class UserService
     {
         $this->api = $api;
         $this->auth = $auth;
-	$this->logger = $logger;
+        $this->logger = $logger;
     }
 
     public function loggedin()
