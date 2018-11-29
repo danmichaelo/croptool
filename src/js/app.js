@@ -4,6 +4,7 @@
 angular.module('croptool', ['LocalStorageModule', 'ngSanitize', 'ui.bootstrap', 'angular-ladda', 'pascalprecht.translate']).
 
 config(['$translateProvider', function($translateProvider) {
+    $translateProvider.useSanitizeValueStrategy('escapeParameters');
     $translateProvider.useStaticFilesLoader({
         prefix: 'locale/',
         suffix: '.json'
