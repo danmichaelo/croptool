@@ -20,8 +20,7 @@
         "phpunit/phpunit": "^4.8|5.*",
         "there4/slim-test-helpers": "^2.1",
         "mockery/mockery": "^0.9.5",
-        "fzaninotto/faker": "^1.6",
-        "codeclimate/php-test-reporter": "^0.3.2"
+        "fzaninotto/faker": "^1.6"
     },
     "autoload": {
         "psr-4": { "CropTool\\": "src/php/" }
