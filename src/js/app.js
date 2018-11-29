@@ -496,7 +496,7 @@ controller('AppCtrl', ['$scope', '$http', '$timeout', '$q', '$window', '$httpPar
         .then(function(res) {
             var response = res.data;
             $scope.ladda = false;
-            if (!response.page.allowOverwrite) {
+            if (response.page.hasAssessmentTemplates || response.page.hasDoNotCropTemplate) {
                 $scope.overwrite = "rename";
             }
 
