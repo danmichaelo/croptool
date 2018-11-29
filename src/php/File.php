@@ -126,10 +126,6 @@ class File implements FileInterface
         curl_close($ch);
         fclose($fp);
 
-        // if (file_put_contents($path, fopen($this->url, 'b')) === false) {
-        //     throw new \RuntimeException('Failed to store ' . $this->url .' to ' . $path . '. Connectivity or permission problem?');
-        // }
-
         $fsize = filesize($path);
 
         $this->logMsg("Fetched {$fsize} of {$contentLength} bytes from {$this->url}");
@@ -140,8 +136,8 @@ class File implements FileInterface
                 unlink($path);
             }
             throw new \RuntimeException(
-                "Failed to fetch {$this->url}. " .
-                "This could be due to intermittent network issues, feel free to retry in a moment."
+                "Received only $fsize of $contentLength bytes from {$this->url} before the server closed the connection. " .
+                "Please retry in a moment."
             );
         }
 
