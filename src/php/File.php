@@ -94,19 +94,53 @@ class File implements FileInterface
 
         $path = $this->getAbsolutePath();
 
-        if (file_put_contents($path, fopen($this->url, 'b')) === false) {
-            throw new \RuntimeException('Failed to store ' . $this->url .' to ' . $path . '. Connectivity or permission problem?');
-        }
+        // Init
+        $contentLength = -1;
+        $fp = fopen($path, 'w');
+        $ch = curl_init($this->url);
+        curl_setopt($ch, CURLOPT_TIMEOUT, 60);  // seconds
+        curl_setopt($ch, CURLOPT_FILE, $fp);
+        curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
 
-        if (!filesize($path)) {
+        // this function is called by curl for each header received
+        curl_setopt($ch, CURLOPT_HEADERFUNCTION,
+            function($curl, $header) use (&$contentLength) {
+                $len = strlen($header);
+                $header = explode(':', $header, 2);
+                if (count($header) < 2) {
+                    // ignore invalid headers
+                    return $len;
+                }
+                $name = strtolower(trim($header[0]));
+                if ($name == 'content-length') {
+                    $contentLength = intval(trim($header[1]));
+                }
+                return $len;
+            }
+        );
+
+        // Download file
+        curl_exec($ch);
+
+        // Tidy up
+        curl_close($ch);
+        fclose($fp);
+
+        // if (file_put_contents($path, fopen($this->url, 'b')) === false) {
+        //     throw new \RuntimeException('Failed to store ' . $this->url .' to ' . $path . '. Connectivity or permission problem?');
+        // }
+
+        $fsize = filesize($path);
+
+        $this->logMsg("Fetched {$fsize} of {$contentLength} bytes from {$this->url}");
+
+        if (!$fsize || $fsize < $contentLength) {
             throw new \RuntimeException('Failed to fetch url: ' . $this->url);
         }
 
         if (chmod($path, 0664) === false) {
             throw new \RuntimeException('Failed to change permissions for file.');
         }
-
-        $this->logMsg('Fetched ' . $this->url);
     }
 
     protected function logMsg($msg)
