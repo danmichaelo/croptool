@@ -3,7 +3,6 @@
 namespace CropTool;
 
 use Psr\Log\LoggerInterface as Logger;
-use pastuhov\Command\Command;
 
 class File implements FileInterface
 {
@@ -95,22 +94,49 @@ class File implements FileInterface
 
         $path = $this->getAbsolutePath();
 
-        Command::exec('wget -O {out} {url}', [
-           'out' => $path,
-           'url' => $this->url,
-        ]);
+        // Init
+        $contentLength = -1;
+        $fp = fopen($path, 'w');
+        $ch = curl_init($this->url);
+        curl_setopt($ch, CURLOPT_TIMEOUT, 60);  // seconds
+        curl_setopt($ch, CURLOPT_FILE, $fp);
+        curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
+
+        // this function is called by curl for each header received
+        curl_setopt($ch, CURLOPT_HEADERFUNCTION,
+            function($curl, $header) use (&$contentLength) {
+                $len = strlen($header);
+                $header = explode(':', $header, 2);
+                if (count($header) < 2) {
+                    // ignore invalid headers
+                    return $len;
+                }
+                $name = strtolower(trim($header[0]));
+                if ($name == 'content-length') {
+                    $contentLength = intval(trim($header[1]));
+                }
+                return $len;
+            }
+        );
+
+        // Download file
+        curl_exec($ch);
+
+        // Tidy up
+        curl_close($ch);
+        fclose($fp);
 
         $fsize = filesize($path);
 
-        $this->logMsg("Fetched {$fsize} bytes from {$this->url}");
+        $this->logMsg("Fetched {$fsize} of {$contentLength} bytes from {$this->url}");
 
-        if (!$fsize) {
+        if (!$fsize || $fsize < $contentLength) {
             if (file_exists($path)) {
                 // Remove the partial download
                 unlink($path);
             }
             throw new \RuntimeException(
-                "Could not fetch {$this->url} before the server closed the connection. " .
+                "Received only $fsize of $contentLength bytes from {$this->url} before the server closed the connection. " .
                 "Please retry in a moment."
             );
         }

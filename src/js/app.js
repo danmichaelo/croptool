@@ -205,10 +205,10 @@ controller('AppCtrl', ['$scope', '$http', '$timeout', '$q', '$window', '$httpPar
     }
 
     //LocalStorageService.setPrefix('croptool');
-    $scope.showNotice = !LocalStorageService.get('croptool-notice-5');
+    $scope.showNotice = !LocalStorageService.get('croptool-notice-4');
 
     $scope.dismissNotice = function() {
-        LocalStorageService.add('croptool-notice-5','hide');
+        LocalStorageService.add('croptool-notice-4','hide');
         $scope.showNotice = false;
     }
 
