@@ -27,6 +27,6 @@ class Config
 
     public function has($key)
     {
-        return isset($this->data[$key]);
+        return isset($this->data[$key]) && !empty($this->data[$key]);
     }
 }
