@@ -372,6 +372,13 @@ Sault-S<sup>te</sup>-Marie, Ontario, Canada<br>
         $this->assertEquals('abc def', (string) $ex3->withoutTemplatesNotToBeCopied());
     }
 
+    public function testItDoesntCopyExtractTemplate()
+    {
+        $ex1 = new WikiText('abc {{ExtractImage}} def');
+
+        $this->assertEquals('abc def', (string) $ex1->withoutTemplatesNotToBeCopied());
+    }
+
     public function testItPreservesNewLines()
     {
         $oldText = '

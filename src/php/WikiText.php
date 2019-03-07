@@ -67,6 +67,7 @@ class WikiText
     | to a new page on Wikimedia Commons.
     */
     protected $otherTemplatesNotToBeCopied = array(
+        'extract( ?images?)?',
         'image[_ ]extracted|extracted|extracted[_ ](images?|file|photo)|cropped[_ ]version',
         'extractedfrom|extracted[_ ]image|ef|cropped|image extracted from',
         'FlickrVerifiedByUploadWizard',
