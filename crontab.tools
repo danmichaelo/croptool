@@ -1,5 +1,5 @@
 MAILTO=""
 
 # Min Hour Day Month Weekday Command
-   0  */4  *   *     *       jsub -l release=trusty -j y -once -o ./logs/cleanup.log      ./scripts/cleanup.sh
+   0    *  *   *     *       jsub -l release=trusty -j y -once -o ./logs/cleanup.log      ./scripts/cleanup.sh
 */15    *  *   *     *       jsub -l release=trusty -j y -once -o ./logs/check-server.log      ./scripts/check-server.sh
