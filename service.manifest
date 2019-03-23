@@ -1,5 +1,6 @@
 # This file is used by toollabs infrastructure.
 # Please do not edit manually at this time.
 backend: gridengine
+distribution: debian
 version: 2
 web: lighttpd
