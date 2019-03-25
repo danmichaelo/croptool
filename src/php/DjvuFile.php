@@ -8,7 +8,7 @@ class DjvuFile extends File implements FileInterface
 {
     protected $multipage = true;
 
-    public function fetchPage($pageno)
+    public function fetchPage($pageno = 0)
     {
         if ($pageno == 0) {
             throw new \RuntimeException('A "page" parameter must be specified.');
