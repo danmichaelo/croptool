@@ -80,4 +80,9 @@ npm install -g gulp --silent
 npm install --silent
 gulp build
 
+if [[ ! -f croptool-secret-key.txt/ ]]; then
+	echo "Creating key"
+	php generate-key.php
+fi
+
 # chmod ug+x ./vendor/phpexiftool/exiftool/exiftool
