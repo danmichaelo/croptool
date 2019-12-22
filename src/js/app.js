@@ -13,7 +13,7 @@ config(['$translateProvider', function($translateProvider) {
     $translateProvider.preferredLanguage('en');
 }]).
 
-service('LoginService', ['$http', '$rootScope', function($http, $rootScope) {
+service('LoginService', ['$http', '$rootScope', '$q', function($http, $rootScope, $q) {
 
     // console.log('Init LoginService');
 
@@ -347,6 +347,135 @@ controller('AppCtrl', ['$scope', '$http', '$timeout', '$q', '$window', '$httpPar
             $scope.error = 'An error occured: ' + res.status + ' ' + res.data.error;
             $scope.borderLocatorBusy = false;
         });
+    };
+
+    $scope.loadStructuredDataRegions = function() {
+        // load page ID
+        $http.get('https://' + $scope.currentUrlParams.site + '/w/api.php?' + $httpParamSerializer({
+            action: 'query',
+            titles: 'File:' + $scope.currentUrlParams.title,
+            format: 'json',
+            formatversion: 2,
+            origin: '*'
+        })) // TODO perhaps we can already get the page ID in fetchImage()?
+        .then(function(res) {
+            // load entity
+            var pageId = res.data.query.pages[0].pageid;
+            var entityId = 'M' + pageId;
+            return $http.get('https://' + $scope.currentUrlParams.site + '/w/api.php?' + $httpParamSerializer({
+                action: 'wbgetentities',
+                ids: entityId,
+                props: 'claims',
+                format: 'json',
+                formatversion: 2,
+                origin: '*'
+            })).then(function(res) {
+                return res.data.entities[entityId];
+            });
+        })
+        .then(function(entity) {
+            // find "depicts" statements with region qualifiers
+            var depictsStatements = (entity.statements || {})['P180'] || [];
+            var depictsStatementsHavingRegionQualifiers = depictsStatements.filter(function(statement) {
+                if (statement.mainsnak.snaktype !== 'value') {
+                    return false;
+                }
+                var regionQualifiers = (statement.qualifiers || {})['P2677'] || [];
+                if (regionQualifiers.length !== 1) {
+                    return false;
+                }
+                var regionQualifier = regionQualifiers[0];
+                if (regionQualifier.snaktype !== 'value') {
+                    return false;
+                }
+                var region = regionQualifier.datavalue.value;
+                if (!/^pct:(?:(?:100|[1-9]?\d(?:\.\d+)?),){3}(?:100|[1-9]?\d(?:\.\d+)?)$/.test(region)) {
+                    return false;
+                }
+                return true;
+            });
+            var depictedItemIdsWithRegions = depictsStatementsHavingRegionQualifiers.map(function(statement) {
+                return [statement.mainsnak.datavalue.value.id, statement.qualifiers['P2677'][0].datavalue.value];
+            });
+            // load labels of the values
+            var itemIds = depictedItemIdsWithRegions.map(function(pair) {
+                return pair[0];
+            });
+            itemIds = itemIds.filter(function(itemId, index) {
+                return itemIds.indexOf(itemId) === index;
+            });
+            var itemLabelsDeferred = $q.defer();
+            itemLabelsDeferred.resolve({});
+            var itemLabelsPromise = itemLabelsDeferred.promise;
+            var itemIdsChunk;
+            var language = 'en'; // TODO which language?
+            while ((itemIdsChunk = itemIds.splice(0, 50)).length > 0) { // we can get up to 50 entities at once
+                (function(ids) { // IIFE ensures that the below function always sees the correct itemIdsChunk, not the last (empty) one
+                    itemLabelsPromise = itemLabelsPromise.then(function(labels) {
+                        return $http.get('https://www.wikidata.org/w/api.php?' + $httpParamSerializer({
+                            action: 'wbgetentities',
+                            ids: ids,
+                            props: 'labels',
+                            languages: language,
+                            languagefallback: 1,
+                            format: 'json',
+                            formatversion: 2,
+                            origin: '*'
+                        }))
+                       .then(function(res) {
+                           for (var itemId in res.data.entities) {
+                               try {
+                                   labels[itemId] = res.data.entities[itemId].labels[language].value;
+                               } catch (e) { // entity missing, or no label in this language or any fallback language
+                                   labels[itemId] = itemId;
+                               }
+                           }
+                           return labels;
+                       });
+                    });
+                }(itemIdsChunk.join('|')));
+            }
+            // return regions with labels
+            return itemLabelsPromise.then(function(labels) {
+                return depictedItemIdsWithRegions.map(function(pair) {
+                    var itemId = pair[0];
+                    var region = pair[1];
+                    return [itemId, region, labels[itemId]];
+                });
+            });
+        })
+        .then(function(triples) {
+            if (triples.length === 0) {
+                alert('No structured data regions available.'); // TODO better alert
+                return;
+            }
+            // select one of the regions
+            var message = 'Which region?';
+            for (var i in triples) {
+                message += '\n' + i + ': ' + triples[i][2];
+            }
+            var tripleIndex = prompt(message); // TODO better prompt
+            if (tripleIndex === null) {
+                return; // user selected "cancel"
+            }
+            if (!(tripleIndex in triples)) {
+                throw new Error('Invalid index ' + tripleIndex);
+            }
+            // apply it
+            var triple = triples[tripleIndex];
+            var itemId = triple[0];
+            var region = triple[1];
+            var label = triple[2];
+            var match = region.match(/^pct:(100|[1-9]?\d(?:\.\d+)?),(100|[1-9]?\d(?:\.\d+)?),(100|[1-9]?\d(?:\.\d+)?),(100|[1-9]?\d(?:\.\d+)?)$/);
+            $scope.$broadcast('crop-input-changed', {
+                left: parseFloat(match[1]) * $scope.metadata.original.width / (100 * pixelratio[0]),
+                top: parseFloat(match[2]) * $scope.metadata.original.height / (100 * pixelratio[1]),
+                width: parseFloat(match[3]) * $scope.metadata.original.width / (100 * pixelratio[0]),
+                height: parseFloat(match[4]) * $scope.metadata.original.height / (100 * pixelratio[1])
+            });
+            // TODO add a prominent "depicts" statement for itemId to the cropped image?
+        })
+        .catch(console.error); // TODO better error handling
     };
 
     $scope.cropMethodChanged = function() {
