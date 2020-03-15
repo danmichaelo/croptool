@@ -24,7 +24,7 @@ class File implements FileInterface
         'application/pdf' => '.pdf',
     ];
 
-    public function __construct($publicDir, $filesDir, ImageInfoResponse $imageinfo, Logger $logger)
+    public function __construct($publicDir, $filesDir, QueryResponse $imageinfo, Logger $logger)
     {
         $this->publicDir = $publicDir;
         $this->filesDir = $filesDir;

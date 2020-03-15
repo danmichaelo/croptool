@@ -48,6 +48,16 @@ class WebTestCase extends \There4\Slim\Test\WebTestCase
                                 'height' => array_get($data, 'width', 600),
                                 'descriptionurl' => 'http://dummy2',
                             ]
+                        ],
+                        'categories' => [
+                            (object)[
+                                'ns' => 14,
+                                'title' => 'Category:Test Category 1',
+                            ],
+                            (object)[
+                                'ns' => 14,
+                                'title' => 'Category:Test Category 2',
+                            ],
                         ]
                     ]
                 ]
@@ -62,7 +72,7 @@ class WebTestCase extends \There4\Slim\Test\WebTestCase
             ];
         }
 
-        return new CropTool\ImageInfoResponse($resp);
+        return new CropTool\QueryResponse($resp);
     }
 
     protected function getWikiTextMock($text)

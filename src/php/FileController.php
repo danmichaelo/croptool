@@ -68,6 +68,7 @@ class FileController
             'thumb' => $this->fileResponse($page->file, $thumb, $pageno, '_thumb'),
             'samplingFactor' => $original->samplingFactor,
             'orientation' => $original->orientation,
+            'categories' => $page->imageinfo->categories,
         ]);
     }
 
@@ -199,6 +200,10 @@ class FileController
             // ignoreWarnings=true is necessary for overwrite
             $uploadResponse = $page->upload($cropPath, $editComment, true);
             $logger->info('Uploaded new version of "' . $page->title . '".');
+
+            if ($page->inCategory('All non-free media')) {
+                $wikitext = $wikitext->addOrfurrev();
+            }
 
             $page->setWikitext($wikitext)
                 ->save('Removed ' . (implode(' and ', array_keys($elems))) . ' using [[Commons:CropTool|CropTool]]');

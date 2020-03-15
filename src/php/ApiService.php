@@ -102,20 +102,20 @@ class ApiService
 
     /**
      * @param $title
-     * @return ImageInfoResponse
+     * @return QueryResponse
      */
     public function getImageinfo($title, $namespace='File:')
     {
         $response = $this->request([
             'action' => 'query',
-            'prop' => 'imageinfo',
+            'prop' => 'imageinfo|categories',
             'format' => 'json',
             'iiprop' => 'url|size|sha1|mime',
             'iilimit' => '1',
             'titles' => $namespace . $title
         ]);
 
-        return $this->factory->make(ImageInfoResponse::class, [
+        return $this->factory->make(QueryResponse::class, [
             'response' => $response->query
         ]);
     }

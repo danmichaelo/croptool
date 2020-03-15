@@ -8,7 +8,7 @@ use Psr\Log\LoggerInterface;
  * @property bool exists
  * @property string site
  * @property string title
- * @property ImageInfoResponse imageinfo
+ * @property QueryResponse imageinfo
  * @property WikiText wikitext
  * @property FileInterface file
  */
@@ -143,5 +143,10 @@ class WikiPage
     public function __clone()
     {
         $this->cache['wikitext'] = clone $this->cache['wikitext'];
+    }
+
+    public function inCategory($name)
+    {
+        return in_array($name, $this->imageinfo->categories);
     }
 }

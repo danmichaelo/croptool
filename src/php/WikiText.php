@@ -442,4 +442,18 @@ class WikiText
 
         return $this->appendTemplate($tpl);
     }
+
+    protected function prepend($line)
+    {
+        return new self($line . '\n' . $this->text);
+    }
+
+    /**
+     * Prepends {{subst:orfurrev}} to crops of non-free media on English Wikipedia.
+     * @see https://github.com/danmichaelo/croptool/issues/146
+     */
+    public function addOrfurrev()
+    {
+        return $this->prepend('{{subst:orfurrev}}');
+    }
 }

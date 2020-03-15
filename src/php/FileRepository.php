@@ -30,7 +30,7 @@ class FileRepository
         }
     }
 
-    public function get(ImageInfoResponse $imageinfo)
+    public function get(QueryResponse $imageinfo)
     {
         $fileClass = $this->getFileClass($imageinfo->mime);
         return $this->factory->make($fileClass, [

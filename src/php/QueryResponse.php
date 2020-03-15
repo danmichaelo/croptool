@@ -2,7 +2,7 @@
 
 namespace CropTool;
 
-class ImageInfoResponse
+class QueryResponse
 {
     public $exists = false;
     public $sha1;
@@ -12,6 +12,7 @@ class ImageInfoResponse
     public $height;
     public $descriptionurl;
     public $pagecount;
+    public $categories;
 
     public function __construct($response=null)
     {
@@ -24,11 +25,12 @@ class ImageInfoResponse
                 return;
             }
             $this->exists = true;
-            $this->parse($page->imageinfo[0]);
+            $this->parseImageInfo($page->imageinfo[0]);
+            $this->parseCategories($page->categories);
         }
     }
 
-    protected function parse($data)
+    protected function parseImageInfo($data)
     {
         $this->sha1 = $data->sha1;
         $this->mime = $data->mime;
@@ -37,6 +39,14 @@ class ImageInfoResponse
         $this->height = $data->height;
         $this->descriptionurl = $data->descriptionurl;
         $this->pagecount = isset($data->pagecount) ? $data->pagecount : 1;
+    }
+
+    protected function parseCategories($data)
+    {
+        $this->categories = array_map(function($x) {
+            $value = explode(':', $x->title, 2);
+            return $value[1];
+        }, $data);
     }
 
     public function getShortSha1()
