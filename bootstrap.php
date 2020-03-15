@@ -100,7 +100,7 @@ $app->group('/api/auth', function () use ($authMiddleware) {
 $app->group('/api/file', function () use ($authMiddleware) {
 
     $this->get('/exists', [FileController::class, 'exists']);
-    $this->get('/thumb', [FileController::class, 'thumb']);
+    $this->get('/info', [FileController::class, 'info']);
     $this->get('/autodetect', [FileController::class, 'autodetect']);
     $this->get('/crop', [FileController::class, 'crop']);
     $this->post('/publish', [FileController::class, 'publish']);

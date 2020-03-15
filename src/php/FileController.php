@@ -41,7 +41,7 @@ class FileController
         ]);
     }
 
-    public function thumb(Response $response, Request $request, WikiPage $page, ImageEditor $editor)
+    public function info(Response $response, Request $request, WikiPage $page, ImageEditor $editor)
     {
         $pageno = intval($request->getQueryParam('page', 0));
 

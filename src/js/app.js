@@ -272,7 +272,7 @@ controller('AppCtrl', ['$scope', '$http', '$timeout', '$q', '$window', '$httpPar
         $scope.crop_dim = undefined;
         $scope.rotation = {angle: 0};
 
-        $http.get('./api/file/thumb?' + $httpParamSerializer({
+        $http.get('./api/file/info?' + $httpParamSerializer({
             title: $scope.currentUrlParams.title,
             site: $scope.currentUrlParams.site,
             page: $scope.currentUrlParams.page,
