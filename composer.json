@@ -8,7 +8,6 @@
         "ext-curl": "*",
         "ext-mbstring": "*",
         "danmichaelo/coma": "dev-master",
-        "rollbar/rollbar": "^1.3",
         "monolog/monolog": "~1.13",
         "defuse/php-encryption": "^2.0",
         "php-di/php-di": "^5.3",

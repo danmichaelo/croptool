@@ -11,23 +11,11 @@ use Monolog\Processor\PsrLogMessageProcessor;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Log\LoggerInterface;
-use Rollbar\Rollbar;
 use Slim\Http\Request;
 use Slim\Http\Response;
 
 class App extends \DI\Bridge\Slim\App
 {
-
-    public function __construct()
-    {
-        parent::__construct();
-
-        $container = $this->getContainer();
-
-        $config = $container->get(Config::class);
-        $this->configureRollbar($config);
-    }
-
     protected function configureContainer(ContainerBuilder $builder)
     {
         $builder->addDefinitions([
@@ -87,15 +75,5 @@ class App extends \DI\Bridge\Slim\App
             SessionInterface::class => \DI\object(Session::class),
 
         ]);
-    }
-
-    protected function configureRollbar(Config $config)
-    {
-        if ($config->has('rollbarToken')) {
-            Rollbar::init([
-                'access_token' => $config->get('rollbarToken'),
-                'environment' => $config->get('rollbarEnv'),
-            ]);
-        }
     }
 }
