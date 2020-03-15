@@ -764,6 +764,9 @@ controller('AppCtrl', ['$scope', '$http', '$timeout', '$q', '$window', '$httpPar
         if ($scope.cropresults.page.elems.border) {
             s += ' Removed border.';
         }
+        if ($scope.cropresults.page.elems.trimming) {
+            s += ' Image was trimmed.';
+        }
         if ($scope.cropresults.page.elems.watermark) {
             s += ' Removed watermark.';
         }

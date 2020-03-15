@@ -414,4 +414,12 @@ Sault-S<sup>te</sup>-Marie, Ontario, Canada<br>
 
         $this->assertEquals($newText, (string) $wikitext);
     }
+
+    public function testItRemovesTheTrimmingTemplateIfRequested()
+    {
+        $wikitext = WikiText::make('abc {{trimming|date=2020-03-15|comment=suggestion}} {{watermark}} def')
+            ->withoutTrimmingTemplate();
+
+        $this->assertEquals('abc {{watermark}} def', $wikitext);
+    }
 }

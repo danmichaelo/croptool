@@ -445,6 +445,13 @@
                             </label>
                         </div>
 
+                        <div class="form-group" ng-if="cropresults.page.elems.trimming !== undefined">
+                            <label title="{{'previewform-trimmed-help' | translate}}">
+                                <input type="checkbox" ng-model="cropresults.page.elems.trimming" ng-change="updateUploadComment()">
+                                <span translate>previewform-trimmed</span>
+                            </label>
+                        </div>
+
                         <div class="form-group" ng-if="cropresults.page.elems.watermark !== undefined">
                             <label title="{{'previewform-removed-watermark-help' | translate}}">
                                 <input type="checkbox" ng-model="cropresults.page.elems.watermark" ng-change="updateUploadComment()">
@@ -526,7 +533,7 @@
 <footer>
   <span>
     <a href="https://commons.wikimedia.org/wiki/CropTool">Tutorial</a>
-    • 
+    •
     <a href="//github.com/danmichaelo/croptool">Report issues</a>
   </span>
 </footer>

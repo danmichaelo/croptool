@@ -89,6 +89,17 @@ class WikiText
 
     /*
     |--------------------------------------------------------------------------
+    | Trimming templates
+    |--------------------------------------------------------------------------
+    | Templates, with or without parameters, that should be removed from the
+    | cropped image page if the user confirms that the image has been trimmed.
+    */
+    protected $trimmingTemplates = array(
+        'trimming',
+    );
+
+    /*
+    |--------------------------------------------------------------------------
     | Remove border templates
     |--------------------------------------------------------------------------
     | Templates, with or without parameters, that should be removed from the
@@ -268,6 +279,9 @@ class WikiText
         if (preg_match($this->compilePattern(self::TEMPLATES, $this->removeBorderTemplates), $this->text)) {
             $data['border'] = true;
         }
+        if (preg_match($this->compilePattern(self::TEMPLATES, $this->trimmingTemplates), $this->text)) {
+            $data['trimming'] = true;
+        }
         if (preg_match($this->compilePattern(self::TEMPLATES, $this->watermarkTemplates), $this->text)) {
             $data['watermark'] = true;
         }
@@ -300,6 +314,16 @@ class WikiText
     {
         return $this->removePattern(self::TEMPLATES, $this->removeBorderTemplates)
             ->removePattern(self::CATEGORIES, $this->removeBorderCategories);
+    }
+
+    /**
+     * Remove {{trimming}} template and category
+     *
+     * @return WikiText
+     */
+    public function withoutTrimmingTemplate()
+    {
+        return $this->removePattern(self::TEMPLATES, $this->trimmingTemplates);
     }
 
     /**

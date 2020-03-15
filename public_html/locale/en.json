@@ -50,6 +50,8 @@
     "previewform-multipage-file": "The overwrite option is disabled because this is a multipage file.",
     "previewform-removed-border": "I've removed the border",
     "previewform-removed-border-help": "Confirms removal of the 'remove border' template",
+    "previewform-trimmed": "I've trimmed the image",
+    "previewform-trimmed-help": "Confirms removal of the 'trimming' template",
     "previewform-removed-watermark": "I've removed the watermark",
     "previewform-removed-watermark-help": "Confirms removal of the 'watermark' template",
     "previewform-wikidata-crop": "Add image to Wikidata as an illustration of {{link}}",

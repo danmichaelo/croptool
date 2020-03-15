@@ -190,6 +190,10 @@ class FileController
             $wikitext = $wikitext->withoutBorderTemplate();
             $elems['border'] = 1;
         }
+        if (array_get($stuffToRemove, 'trimming')) {
+            $wikitext = $wikitext->withoutTrimmingTemplate();
+            $elems['trimming'] = 1;
+        }
         if (array_get($stuffToRemove, 'watermark')) {
             $wikitext = $wikitext->withoutWatermarkTemplate();
             $elems['watermark'] = 1;
