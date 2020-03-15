@@ -2,7 +2,7 @@ VAGRANTFILE_API_VERSION = "2"
 
 Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
 
-  config.vm.box = "ubuntu/trusty64"
+  config.vm.box = "debian/stretch64"
   config.vm.network "private_network", ip: "172.28.128.4"
 
   # Use the NAT hosts DNS resolver as it's faster
