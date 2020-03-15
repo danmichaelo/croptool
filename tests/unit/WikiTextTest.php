@@ -1,8 +1,9 @@
 <?php
 
 use CropTool\WikiText;
+use PHPUnit\Framework\TestCase;
 
-class WikiTextTest extends PHPUnit_Framework_TestCase
+class WikiTextTest extends TestCase
 {
 
 	public function setUp()

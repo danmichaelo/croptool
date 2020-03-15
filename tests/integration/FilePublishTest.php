@@ -24,7 +24,7 @@ class FilePublishTest extends WebTestCase
             ->shouldReceive('getWikitext')->once()->andReturn($wikitext)
             ->shouldReceive('upload')->once()->with(
                 $existingFile,
-                '/_cropped.jpg$/',
+                m::pattern('/_cropped.jpg$/'),
                 $editSummary,
                 strval($wikitext),
                 true
@@ -54,9 +54,9 @@ class FilePublishTest extends WebTestCase
             ->shouldReceive('getWikitext')->once()->andReturn($wikitext)
             ->shouldReceive('upload')->once()->with(
                 $newFile,
-                '/_cropped.jpg$/',
+                m::pattern('/_cropped.jpg$/'),
                 $editSummary,
-                "/^$wikitext/",
+                m::pattern("/^$wikitext/"),
                 false
                 )->andReturn((object) ['success' => true])
             ->shouldReceive('savePage')->once()->andReturn([]);
