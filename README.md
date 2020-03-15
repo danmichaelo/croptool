@@ -82,18 +82,12 @@ make test
 
 #### Frontend build:
 
+On Toolforge, to use an up-to-date version of Node for installing dependencies, run:
 
-The Node version on ToolForge is dead old (v0.10.25).
-Luckily, they provide a kubernetes package with a slightly more decent version (v6.9.1):
+    $ webservice --backend=kubernetes node10 shell
 
-    webservice --backend=kubernetes nodejs shell
+This should start a new shell, from which you can run:
 
-The npm version (1.4.21) is broken though, so we need to do a local npm install:
-
-    npm install npm
-    node_modules/.bin/npm install
-
-Finally, the gulp build:
-
-    gulp build
+    $ npm install npm
+    $ gulp build
 
