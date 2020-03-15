@@ -469,7 +469,7 @@ class WikiText
 
     protected function prepend($line)
     {
-        return new self($line . '\n' . $this->text);
+        return new self($line . "\n" . $this->text);
     }
 
     /**
