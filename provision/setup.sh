@@ -20,9 +20,6 @@ apt-get install -y vim \
 echo "Installing jpegtran"
 apt-get install -y libjpeg-progs > /dev/null
 
-echo "Installing Lighttpd"
-apt-get install -y lighttpd > /dev/null
-
 echo "Installing Node.js and NPM"
 curl -sL https://deb.nodesource.com/setup_10.x | bash - > /dev/null
 apt-get install -y nodejs  > /dev/null
@@ -53,6 +50,9 @@ apt install -y php7.4 \
 	php7.4-imagick \
 	> /dev/null
 
+echo "Installing Lighttpd"
+apt-get install -y lighttpd > /dev/null
+
 echo "Configuring Lighttpd"
 chown -R vagrant:vagrant /var/www
 chown -R vagrant:vagrant /var/log/lighttpd
@@ -64,24 +64,23 @@ if [[ ! -e /etc/lighttpd/certs/lighttpd.pem ]]; then
 	   -keyout lighttpd.pem -out lighttpd.pem 2>/dev/null
 	chmod 400 lighttpd.pem
 fi
+
 sed -i 's/;cgi.fix_pathinfo=1/cgi.fix_pathinfo=1/g' /etc/php/7.4/fpm/php.ini
 sed -i 's/memory_limit = .*/memory_limit = 512M/g' /etc/php/7.4/fpm/php.ini
 sed -i 's/www-data/vagrant/g' /etc/php/7.4/fpm/pool.d/www.conf
 cp /vagrant/provision/15-php-fpm.conf /etc/lighttpd/conf-available/15-php-fpm.conf
 cp /vagrant/provision/lighttpd.conf /etc/lighttpd/lighttpd.conf
-lighttpd-enable-mod fastcgi > /dev/null
-lighttpd-enable-mod php-fpm > /dev/null
+lighttpd-enable-mod fastcgi
+lighttpd-enable-mod php-fpm
 
-if [[ ! -d /var/www/ ]]; then
-	mkdir -p /var/www/
-fi
+mkdir -p /var/www/
 echo "Hello world. Looking for <a href='/croptool/'>CropTool</a>?" >| /var/www/index.html
 ln -sf /vagrant/public_html /var/www/croptool
 
-service php7.4-fpm restart > /dev/null
-service lighttpd restart > /dev/null
+service php7.4-fpm restart
+service lighttpd restart
 
-# Composer
+# # Composer
 
 cd /vagrant
 
@@ -112,5 +111,3 @@ if [[ ! -f croptool-secret-key.txt/ ]]; then
 	echo "Creating key"
 	php generate-key.php
 fi
-
-# chmod ug+x ./vendor/phpexiftool/exiftool/exiftool
