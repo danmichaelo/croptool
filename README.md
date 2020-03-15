@@ -9,9 +9,14 @@ at Wikimedia Commons and other Wikimedia sites using the MediaWiki API with OAut
   DJVU and PDF files.
 * JPEGs can be cropped either losslessly using [jpegtran](http://jpegclub.org/jpegtran/)
   or pixel perfect using [ImageMagick](https://www.imagemagick.org/).
+* Crop preview can be initialized from query string parameters:
+  `?title=Example.jpg&left=10&top=10&width=150&height=100`
+  or
+  `?title=Example.jpg&left=10&top=10&right=10&bottom=10`
 * Detects [`{{Remove border}}`](https://commons.wikimedia.org/wiki/Template:Remove_border),
-  [Category:Images with borders](https://commons.wikimedia.org/wiki/Category:Images_with_borders)
-  and [`{{Watermark}}`](https://commons.wikimedia.org/wiki/Template:Watermark), and
+  [Category:Images with borders](https://commons.wikimedia.org/wiki/Category:Images_with_borders),
+  [`{{Watermark}}`](https://commons.wikimedia.org/wiki/Template:Watermark) and
+  [`{{Trimming}}`](https://commons.wikimedia.org/wiki/Template:Trimming), and
   provides check boxes for optional removal of these upon cropping.
 * The result can replace the original file or be uploaded as a new one.
 * If the result is uploaded as a new file on Wikimedia Commons,
@@ -29,6 +34,8 @@ at Wikimedia Commons and other Wikimedia sites using the MediaWiki API with OAut
   [`{{Flickrreview}}`](https://commons.wikimedia.org/wiki/Template:Flickrreview)
   without any parameters, or some of the `User:FlickreviewR` subtemplates),
   since images should be reviewed before being altered.
+* Adds [`{{Orphaned non-free revisions}}`](http://en.wikipedia.org/wiki/Template:orfurrev)
+  when cropping non-free media on English Wikipedia.
 
 ### Setting up a development environment
 
