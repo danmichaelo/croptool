@@ -291,6 +291,53 @@ controller('AppCtrl', ['$scope', '$http', '$timeout', '$q', '$window', '$httpPar
 
             $scope.metadata = response;
 
+            if ($scope.currentUrlParams.left !== '' || $scope.currentUrlParams.right !== '' || $scope.currentUrlParams.ratio !== '') {
+                setTimeout(function () {
+                    var crop_dim = {
+                        x: 0,
+                        y: 0,
+                        w: 100,
+                        h: 100,
+                    };
+                    if ($scope.currentUrlParams.left !== '' && $scope.currentUrlParams.right !== '') {
+                        crop_dim.x = + $scope.currentUrlParams.left;
+                        crop_dim.w = + response.original.width - $scope.currentUrlParams.right - $scope.currentUrlParams.left;
+                    } else if ($scope.currentUrlParams.left !== '') {
+                        crop_dim.x = + $scope.currentUrlParams.left;
+                        crop_dim.w = + $scope.currentUrlParams.width;
+                    } else if ($scope.currentUrlParams.right !== '') {
+                        crop_dim.x = + response.original.width - $scope.currentUrlParams.right - $scope.currentUrlParams.width;
+                        crop_dim.w = + $scope.currentUrlParams.width;
+                    }
+                    if ($scope.currentUrlParams.top !== '' && $scope.currentUrlParams.bottom !== '') {
+                        crop_dim.y = + $scope.currentUrlParams.top;
+                        crop_dim.h = + response.original.height - $scope.currentUrlParams.bottom - $scope.currentUrlParams.top;
+                    } else if ($scope.currentUrlParams.top !== '') {
+                        crop_dim.y = + $scope.currentUrlParams.top;
+                        crop_dim.h = + $scope.currentUrlParams.height;
+                    } else if ($scope.currentUrlParams.bottom !== '') {
+                        crop_dim.y = + response.original.height - $scope.currentUrlParams.bottom - $scope.currentUrlParams.top;
+                        crop_dim.h = + $scope.currentUrlParams.height;
+                    }
+
+                    $scope.crop_dim = crop_dim;
+                    if ($scope.currentUrlParams.ratio !== '' && $scope.currentUrlParams.ratio.split(':').length == 2) {
+                        var parts = $scope.currentUrlParams.ratio.split(':');
+                        $scope.aspectratio = 'fixed';
+                        $scope.aspectratio_cx = parts[0];
+                        $scope.aspectratio_cy = parts[1];
+                    } else {
+                        $scope.aspectratio = $scope.currentUrlParams.ratio || 'free';
+                    }
+                    $scope.onCropDimChange();
+
+                    // If aspect ratio is "keep", we need to find that aspect ratio
+                    // now that we have the coordinates of the image file.
+                    $scope.aspectRatioChanged();
+
+                }, 300);
+            }
+
             // If aspect ratio is "keep", we need to find that aspect ratio
             // now that we have the coordinates of the image file.
             $scope.aspectRatioChanged();
@@ -433,6 +480,13 @@ controller('AppCtrl', ['$scope', '$http', '$timeout', '$q', '$window', '$httpPar
                 site: getParameterByName('site'),
                 title: getParameterByName('title'),
                 page: getParameterByName('page'),
+                left: getParameterByName('left'),
+                top: getParameterByName('top'),
+                right: getParameterByName('right'),
+                bottom: getParameterByName('bottom'),
+                width: getParameterByName('width'),
+                height: getParameterByName('height'),
+                ratio: getParameterByName('ratio'),
             };
         }
 
