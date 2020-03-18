@@ -205,12 +205,19 @@ class FileController
             $uploadResponse = $page->upload($cropPath, $editComment, true);
             $logger->info('Uploaded new version of "' . $page->title . '".');
 
+            $editSummary = new EditSummary();
+
+            if (count($elems)) {
+                $editSummary->add('removing ' . implode(' and ', array_keys($elems)));
+            }
+
             if ($page->inCategory('All non-free media')) {
                 $wikitext = $wikitext->addOrfurrev();
+                $editSummary->add('tagging with {{Orphaned non-free revisions}}');
             }
 
             $page->setWikitext($wikitext)
-                ->save('Removed ' . (implode(' and ', array_keys($elems))) . ' using [[Commons:CropTool|CropTool]]');
+                ->save($editSummary->build());
         } else {
             $newPage = $factory->make(WikiPage::class, ['title' => $newName]);
             if (!$ignoreWarnings) {
@@ -233,13 +240,16 @@ class FileController
             $uploadResponse = $newPage->upload($cropPath, $editComment, $ignoreWarnings);
             $logger->info('Uploaded new version of "' . $page->title . '" as "' . $newPage->title . '".');
 
+            $editSummary = new EditSummary();
+
             if (in_array($page->site, $sitesSupportingImageExtractedTemplate)) {
                 $wt0 = $page->wikitext;
                 if (array_get($stuffToRemove, 'wikidata')) {
                     $wt0 = $wt0->withoutCropForWikidataTemplate();
                 }
+                $editSummary->add('adding/updating {{Image extracted}}');
                 $page->setWikitext($wt0->appendImageExtractedTemplate($newName))
-                    ->save('Added/updated {{Image extracted}} using [[Commons:CropTool|CropTool]]');
+                    ->save($editSummary->build());
             }
 
             if (array_get($stuffToRemove, 'wikidata')) {
