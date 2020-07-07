@@ -417,9 +417,24 @@ Sault-S<sup>te</sup>-Marie, Ontario, Canada<br>
 
     public function testItRemovesTheTrimmingTemplateIfRequested()
     {
-        $wikitext = WikiText::make('abc {{trimming|date=2020-03-15|comment=suggestion}} {{watermark}} def')
-            ->withoutTrimmingTemplate();
+        $oldText = WikiText::make('abc {{trimming|date=2020-03-15|comment=suggestion}} {{watermark}} def');
+        $newText = $oldText->withoutTrimmingTemplate();
 
-        $this->assertEquals('abc {{watermark}} def', $wikitext);
+        $this->assertEquals([
+            'trimming' => true,
+            'watermark' => true,
+        ], $oldText->possibleStuffToRemove());
+        $this->assertEquals('abc {{watermark}} def', $newText);
+        $this->assertEquals([
+            'watermark' => true,
+        ], $newText->possibleStuffToRemove());
+    }
+
+    public function testItRemovesRemoveFrameIfRequested()
+    {
+        $oldText = WikiText::make('abc {{remove frame}} def');
+        $newText = $oldText->withoutBorderTemplate();
+
+        $this->assertEquals('abc def', $newText);
     }
 }

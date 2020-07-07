@@ -108,6 +108,8 @@ class WikiText
     protected $removeBorderTemplates = array(
         'crop',
         'remove[ _]?borders?',
+        'remove frame',
+        'images? with borders',
     );
 
     /*
