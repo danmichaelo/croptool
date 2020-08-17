@@ -154,9 +154,7 @@ class ApiService
             'filename' => $title,
             'token' => $token,
             'comment' => $summary,
-            'file' => (version_compare(PHP_VERSION, '5.5.0') >= 0)
-                ? new \CURLFile($filename)
-                : '@' . $filename
+            'file' => new \CURLFile($filename),
         ];
         if ($ignoreWarnings) {
             $args['ignorewarnings'] = '1';
