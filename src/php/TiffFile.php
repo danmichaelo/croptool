@@ -13,7 +13,7 @@ class TiffFile extends File implements FileInterface
         return '.page' . $pageno . '.tiff';
     }
 
-    public function fetchPage($pageno)
+    public function fetchPage($pageno = 0)
     {
         if ($pageno == 0) {
             throw new \RuntimeException('A "page" parameter must be specified.');
