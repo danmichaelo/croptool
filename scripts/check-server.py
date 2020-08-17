@@ -14,7 +14,7 @@ def restart_server():
     subprocess.call(['/usr/local/bin/webservice', 'restart'])
 
 try:
-    res = requests.get('https://tools.wmflabs.org/croptool/server-statistics', timeout=10)
+    res = requests.get('https://croptool.toolforge.org/server-statistics', timeout=10)
 except requests.exceptions.Timeout:
     print('Timeout when checking server-statistics. Restarting')
     gitter.messages.send('croptool/Lobby', 'Timeout when checking server-statistics. @danmichaelo')

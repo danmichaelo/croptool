@@ -1,11 +1,11 @@
-# Add `127.0.0.1 tools.wmflabs.org` to your /etc/hosts
+# Add `127.0.0.1 croptool.toolforge.org` to your /etc/hosts
 
-https://tools.wmflabs.org:7890/croptool/
+https://croptool.toolforge.org:7890/
 tls self_signed
 root public_html
-proxy /api http://208.80.155.131/croptool/ {
-    header_upstream Host https://tools.wmflabs.org/
+proxy /api http://208.80.155.131/ {
+    header_upstream Host https://croptool.toolforge.org/
 }
-proxy /files http://208.80.155.131/croptool/ {
-    header_upstream Host https://tools.wmflabs.org/
+proxy /files http://208.80.155.131/ {
+    header_upstream Host https://croptool.toolforge.org/
 }

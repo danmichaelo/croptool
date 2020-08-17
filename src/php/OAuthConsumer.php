@@ -19,7 +19,7 @@ class OAuthConsumer implements AuthServiceInterface
      */
     protected $mwOAuthUrl = 'https://www.mediawiki.org/w/index.php?title=Special:OAuth';
 
-    protected $callbackUrl; // = 'https://tools.wmflabs.org/croptool/api/auth/callback';
+    protected $callbackUrl; // = 'https://croptool.toolforge.org/api/auth/callback';
 
     /**
      * The interwiki prefix for the OAuth central wiki.
@@ -44,7 +44,7 @@ class OAuthConsumer implements AuthServiceInterface
     protected $rsaPublicKeyFile = '../mykey.public';
 
     /**
-     * The hostname, most likely 'tools.wmflabs.org'
+     * The hostname, most likely 'croptool.toolforge.org'
      */
     protected $hostname;
 

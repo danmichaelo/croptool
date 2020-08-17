@@ -1,6 +1,6 @@
 ## CropTool
 
-[CropTool](https://tools.wmflabs.org/croptool/) is a tool for cropping image files
+[CropTool](https://croptool.toolforge.org/) is a tool for cropping image files
 at Wikimedia Commons and other Wikimedia sites using the MediaWiki API with OAuth.
 [Help page on Commons](https://commons.wikimedia.org/wiki/Commons:CropTool).
 
@@ -43,11 +43,11 @@ The easiest way to setup a development environment is by using Vagrant. If you h
 ```
 vagrant up
 ```
-This will create a virtual machine with the static IP 172.28.128.4 (you can change this in the `Vagrantfile` if needed). To test the MediaWiki OAuth authentication, you can redirect `tools.wmflabs.org` to your newly created virtualbox machine by adding an entry to your `/etc/hosts` file:
+This will create a virtual machine with the static IP 172.28.128.4 (you can change this in the `Vagrantfile` if needed). To test the MediaWiki OAuth authentication, you can redirect `croptool.toolforge.org` to your newly created virtualbox machine by adding an entry to your `/etc/hosts` file:
 
-    172.28.128.4 tools.wmflabs.org
+    172.28.128.4 croptool.toolforge.org
 
-If you then visit `https://tools.wmflabs.org/croptool` in your browser, the content will be fetched from your virtualbox machine. The Vagrant provisioner has generated a self-signed certificate, so https will work, but the browser will of course warn you about the certificate being self-signed.
+If you then visit `https://croptool.toolforge.org` in your browser, the content will be fetched from your virtualbox machine. The Vagrant provisioner has generated a self-signed certificate, so https will work, but the browser will of course warn you about the certificate being self-signed.
 
 Of course you need to remember to remove the entry from `/etc/hosts` when you're done testing.
 
@@ -56,15 +56,15 @@ Of course you need to remember to remove the entry from `/etc/hosts` when you're
 As a lightweight alternative for a development environment, we provide a `Caddyfile` which is meant to be used with [Caddy](https://caddyserver.com/). This allows to do frontend development without the need to boot a virtual machine.
 
 1. Run `caddy` in the source directory
-2. Add `127.0.0.1 tools.wmflabs.org` to your `/etc/hosts`
-3. Open https://tools.wmflabs.org:7890/croptool/ and accept the certificate warning (since we issue a self-signed certificate)
+2. Add `127.0.0.1 croptool.toolforge.org` to your `/etc/hosts`
+3. Open https://croptool.toolforge.org:7890/ and accept the certificate warning (since we issue a self-signed certificate)
 
 ### Deployment notes
 
 To get `jpegtran`, we fetch the latest `jpegsrc.xxx.tar.gz` from the Independent JPEG Group. Note that the server returns "403 Forbidden" if you use the default curl user agent string.
 
 ```bash
-curl -A "CropTool/0.1 (http://tools.wmflabs.org/croptool)" "http://www.ijg.org/files/jpegsrc.v9a.tar.gz" | tar -xz
+curl -A "CropTool/0.1 (https://croptool.toolforge.org)" "http://www.ijg.org/files/jpegsrc.v9a.tar.gz" | tar -xz
 cd jpeg-*
 ./configure
 make

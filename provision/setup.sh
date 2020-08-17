@@ -60,7 +60,7 @@ if [[ ! -e /etc/lighttpd/certs/lighttpd.pem ]]; then
 	echo "Generating SSL key"
 	mkdir -p /etc/lighttpd/certs
 	cd /etc/lighttpd/certs
-	openssl req -new -batch -x509 -days 365 -nodes -subj "/CN=tools.wmflabs.org" \
+	openssl req -new -batch -x509 -days 365 -nodes -subj "/CN=croptool.toolforge.org" \
 	   -keyout lighttpd.pem -out lighttpd.pem 2>/dev/null
 	chmod 400 lighttpd.pem
 fi
@@ -73,9 +73,9 @@ cp /vagrant/provision/lighttpd.conf /etc/lighttpd/lighttpd.conf
 lighttpd-enable-mod fastcgi
 lighttpd-enable-mod php-fpm
 
-mkdir -p /var/www/
-echo "Hello world. Looking for <a href='/croptool/'>CropTool</a>?" >| /var/www/index.html
-ln -sf /vagrant/public_html /var/www/croptool
+#mkdir -p /var/www/
+# echo "Hello world. Looking for <a href='/croptool/'>CropTool</a>?" >| /var/www/index.html
+ln -sf /vagrant/public_html /var/www/public_html
 
 service php7.4-fpm restart
 service lighttpd restart
