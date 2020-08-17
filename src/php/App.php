@@ -68,7 +68,7 @@ class App extends \DI\Bridge\Slim\App
 
             OAuthConsumer::class => \DI\object()
                 ->constructorParameter('keyFile', \DI\string('{root_directory}/croptool-secret-key.txt'))
-                ->constructorParameter('callbackUrl', 'https://tools.wmflabs.org/croptool/api/auth/callback'),
+                ->constructorParameter('callbackUrl', 'https://croptool.toolforge.org/api/auth/callback'),  // https://tools.wmflabs.org/croptool/api/auth/callback'),
 
             AuthServiceInterface::class => \DI\object(OAuthConsumer::class),
 

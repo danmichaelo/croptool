@@ -1,6 +1,8 @@
-# This file is used by toollabs infrastructure.
+# This file is used by Toolforge infrastructure.
 # Please do not edit manually at this time.
+# Tue Jul  7 19:20:01 2020
 backend: gridengine
+canonical: true
 distribution: debian
-version: 2
+version: 4
 web: lighttpd

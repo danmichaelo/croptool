@@ -1,7 +1,7 @@
 {
         "name" : "CropTool",
         "description" : "Tool for cropping images at Wikimedia Commons or other Wikimedia wikis.",
-        "url" : "https://tools.wmflabs.org/croptool/",
+        "url" : "https://croptool.toolforge.org/",
         "keywords" : "commons, media editors",
         "author" : "Dan Michael O. Heggø"
 }
