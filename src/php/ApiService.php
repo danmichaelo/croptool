@@ -39,7 +39,7 @@ class ApiService
      *
      * @param array $args
      * @param bool $multipart
-     * @return array
+     * @return stdClass
      */
     public function request($args, $multipart = false, $signed = true)
     {
