@@ -6,6 +6,7 @@ use DI\ContainerBuilder;
 use Interop\Container\ContainerInterface;
 use Monolog\Formatter\LineFormatter;
 use Monolog\Logger;
+use Monolog\ErrorHandler;
 use Monolog\Handler\RotatingFileHandler;
 use Monolog\Processor\PsrLogMessageProcessor;
 use Psr\Http\Message\ServerRequestInterface;
@@ -57,7 +58,9 @@ class App extends \DI\Bridge\Slim\App
                 $streamHandler->setFormatter($formatter);
                 $handlers = [$streamHandler];
                 $processors = [new PsrLogMessageProcessor()];
-                return new Logger('croptool', $handlers, $processors);
+                $logger = new Logger('croptool', $handlers, $processors);
+                ErrorHandler::register($logger);
+                return $logger;
             }),
 
             Config::class => \DI\object()
