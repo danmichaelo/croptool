@@ -4,7 +4,6 @@ namespace CropTool\File;
 
 interface FileInterface
 {
-
     public function fetchPage($pageno);
 
     public function getAbsolutePathForPage($pageno, $suffix = '');
@@ -15,5 +14,9 @@ interface FileInterface
 
     public function getShortSha1();
 
-    // TODO
+    static public function readMetadata($path);
+
+    static public function crop($srcPath, $destPath, $method, $coords, $rotation);
+
+    static public function saveImage($im, $destPath, $srcPath);
 }

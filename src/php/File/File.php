@@ -4,6 +4,7 @@ namespace CropTool\File;
 
 use CropTool\Errors\InvalidMimeTypeException;
 use CropTool\QueryResponse;
+use Imagick;
 use Psr\Log\LoggerInterface as Logger;
 
 class File implements FileInterface
@@ -159,5 +160,34 @@ class File implements FileInterface
         }
 
         return $this->getAbsolutePathForPage($pageno);
+    }
+
+    static public function readMetadata($path) {
+        $sz = getimagesize($path);
+
+        return [
+            'width' => $sz[0],
+            'height' => $sz[1],
+        ];
+    }
+
+    static public function crop($srcPath, $destPath, $method, $coords, $rotation)
+    {
+        $image = new Imagick($srcPath);
+
+        $image->setImagePage(0, 0, 0, 0);  // Reset virtual canvas, like +repage
+        if ($rotation) {
+            $image->rotateImage(new \ImagickPixel('#00000000'), $rotation);
+            $image->setImagePage(0, 0, 0, 0);  // Reset virtual canvas, like +repage
+        }
+        $image->cropImage($coords['width'], $coords['height'], $coords['x'], $coords['y']);
+        $image->setImagePage(0, 0, 0, 0);  // Reset virtual canvas, like +repage
+        static::saveImage($image, $destPath, $srcPath);
+        $image->destroy();
+    }
+
+    static public function saveImage($im, $destPath, $srcPath)
+    {
+        return $im->writeImage($destPath);
     }
 }

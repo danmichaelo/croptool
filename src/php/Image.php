@@ -4,7 +4,6 @@ namespace CropTool;
 
 use Imagick;
 use ImagickPixel;
-use pastuhov\Command\Command;
 
 class Image
 {
@@ -19,10 +18,12 @@ class Image
     public $samplingFactor;
     public $width;
     public $height;
+    protected $fileClass;
 
-    public function __construct(ImageEditor $editor, $path, $mime)
+    public function __construct(ImageEditor $editor, string $fileClass, $path, $mime)
     {
         $this->editor = $editor;
+        $this->fileClass = $fileClass;
         $this->path = $path;
         $this->mime = $mime;
         $this->load();
@@ -30,67 +31,22 @@ class Image
 
     protected function load()
     {
-        if ($this->mime != 'image/jpeg') {
-            $this->orientation = 0;
-            $sz = getimagesize($this->path);
-            $this->width = $sz[0];
-            $this->height = $sz[1];
-        } else {
-            $exif = @exif_read_data($this->path, 'IFD0');
-            $this->orientation = (isset($exif) && isset($exif['Orientation'])) ? intval($exif['Orientation']) : 0;
+        $metadata = $this->fileClass::readMetadata($this->path);
 
-            $image = new Imagick($this->path);
-            $sf = explode(',', $image->getImageProperty('jpeg:sampling-factor'));
-            $this->samplingFactor = $sf[0];
-
-            switch ($this->orientation) {
-                case Imagick::ORIENTATION_UNDEFINED:    // 0
-                case Imagick::ORIENTATION_TOPLEFT:      // 1 : no rotation
-                case Imagick::ORIENTATION_BOTTOMRIGHT:  // 3 : 180 deg
-                    $this->width = $image->getImageWidth();
-                    $this->height = $image->getImageHeight();
-                    break;
-
-                case Imagick::ORIENTATION_RIGHTTOP:     // 6 : 90 deg CW
-                case Imagick::ORIENTATION_LEFTBOTTOM:   // 8 : 90 deg CCW
-                    $this->width = $image->getImageHeight();
-                    $this->height = $image->getImageWidth();
-                    break;
-
-                default:
-                    throw new \RuntimeException('Unsupported EXIF orientation "' . $this->orientation . '"');
-            }
-
-            $image->destroy();
-        }
-
-        if (!$this->width || !$this->height) {
-
+        if (!$metadata['width'] || !$metadata['height']) {
             // @TODO: This should move to a safer place:
             // unlink($this->path);
 
-            throw new \RuntimeException('Invalid image file ' . $this->path . '. Refreshing the page might help in some cases.');
+            throw new \RuntimeException(
+                'Invalid image? Could not read image dimensions for file: ' . $this->path . '. ' .
+                'Refreshing the page might help in some cases.'
+            );
         }
-    }
 
-    public function saveImage($im, $destPath)
-    {
-        // Imagick will copy metadata to the destination file.
-        if ($this->mime == 'image/png') {
-            // ImageMagick will sometimes optimize PNG files with unfortunate results:
-            // https://github.com/danmichaelo/croptool/issues/111
-            // To avoid this, we try to preserve the original PNG color space
-            // (https://en.wikipedia.org/wiki/Portable_Network_Graphics#Pixel_format)
-            $pngInfo = $this->get_png_imageinfo($this->path);
-            if (is_array($pngInfo) && isset($pngInfo['color'])) {
-                if ($pngInfo['color'] == 2) {
-                    return $im->writeImage('png24:' . $destPath);
-                } else if ($pngInfo['color'] == 6) {
-                    return $im->writeImage('png32:' . $destPath);
-                }
-            }
-        }
-        return $im->writeImage($destPath);
+        $this->width = $metadata['width'];
+        $this->height = $metadata['height'];
+        $this->orientation = array_get($metadata, 'orientation', 0);
+        $this->samplingFactor = array_get($metadata, 'samplingFactor', 0);
     }
 
     protected function getCropCoordinates($x, $y, $width, $height, $rotation)
@@ -153,6 +109,7 @@ class Image
                 die('Unsupported EXIF orientation');
         }
 
+
         // Make sure the selection is constrained by the image dimensions.
         // x and y should not be < 0
         if ($rect['x'] < 0) {
@@ -191,7 +148,6 @@ class Image
             case Imagick::ORIENTATION_BOTTOMRIGHT:  // 3 : 180 deg
                 return false;
 
-
             case Imagick::ORIENTATION_RIGHTTOP:     // 6 : 90 deg CW
                 return true;
 
@@ -222,68 +178,13 @@ class Image
         // Get coords orientated in the same direction as the image:
         $coords = $this->getCropCoordinates($x, $y, $width, $height, $rotation);
 
-        if ($method == 'gif') {
-            $this->gifCrop($destPath, $coords, $rotation);
-        } elseif ($method == 'lossless') {
-            $this->losslessCrop($destPath, $coords, $rotation);
-        } elseif ($method == 'precise') {
-            $this->preciseCrop($destPath, $coords, $rotation);
-        } else {
-            throw new \RuntimeException('Unknown crop method specified');
-        }
+        $this->fileClass::crop($this->path, $destPath, $method, $coords, $rotation);
 
         chmod($destPath, $this->filePermission);
 
-        return new Image($this->editor, $destPath, $this->mime);
+        return new Image($this->editor, $this->fileClass, $destPath, $this->mime);
     }
 
-    public function preciseCrop($destPath, $coords, $rotation)
-    {
-        $image = new Imagick($this->path);
-
-        $image->setImagePage(0, 0, 0, 0);  // Reset virtual canvas, like +repage
-        if ($rotation) {
-            $image->rotateImage(new \ImagickPixel('#00000000'), $rotation);
-            $image->setImagePage(0, 0, 0, 0);  // Reset virtual canvas, like +repage
-        }
-        $image->cropImage($coords['width'], $coords['height'], $coords['x'], $coords['y']);
-        $image->setImagePage(0, 0, 0, 0);  // Reset virtual canvas, like +repage
-        $this->saveImage($image, $destPath);
-        $image->destroy();
-    }
-
-    public function gifCrop($destPath, $coords, $rotation)
-    {
-        $dim = $coords['width'] . 'x' . $coords['height'] . '+' . $coords['x'] .'+' . $coords['y'] . '!';
-
-        $rotate = $rotation ? '-rotate ' . intval($rotation) . ' +repage' : '';
-
-        Command::exec('convert {src} ' . $rotate . ' -crop {dim} {dest}', [
-            'src' => $this->path,
-            'dest' => $destPath,
-            'dim' => $dim,
-        ]);
-    }
-
-    public function losslessCrop($destPath, $coords, $rotation)
-    {
-        $dim = $coords['width'] . 'x' . $coords['height'] . '+' . $coords['x'] .'+' . $coords['y'];
-        $rotate = '';
-        if ($rotation) {
-            if (!in_array($rotation, [90, 180, 270])) {
-                throw new \RuntimeException('Rotation angle for lossless crop must be 90, 180 or 270.');
-            }
-
-            $rotate = '-rotate ' . $rotation;
-        }
-
-
-        Command::exec($this->editor->getPathToJpegTran() . ' -copy all ' . $rotate . ' -crop {dim} {src} > {dest}', [
-            'src' => $this->path,
-            'dest' => $destPath,
-            'dim' => $dim,
-        ]);
-    }
 
     protected function genThumb($thumbPath, $maxWidth, $maxHeight)
     {
@@ -326,7 +227,7 @@ class Image
         $im->setImageCompressionQuality(75);
         $im->stripImage();
 
-        $this->saveImage($im, $thumbPath);
+        $this->fileClass::saveImage($im, $thumbPath, $this->path);
         $im->destroy();
 
         return array($w, $h);
@@ -360,60 +261,6 @@ class Image
         $this->genThumb($thumbPath, $this->thumbWidth, $this->thumbHeight);
         chmod($thumbPath, $this->filePermission);
 
-        return new Image($this->editor, $thumbPath, $mime);
-    }
-
-    /**
-     * Get image-information from PNG file
-     *
-     * php's getimagesize does not support additional image information
-     * from PNG files like channels or bits.
-     *
-     * get_png_imageinfo() can be used to obtain this information
-     * from PNG files.
-     *
-     * @author Tom Klingenberg <lastflood.net>
-     * @license Apache 2.0
-     * @version 0.1.0
-     * @link http://www.libpng.org/pub/png/spec/iso/index-object.html#11IHDR
-     *
-     * @param string $file filename
-     * @return array|bool image information, FALSE on error
-     */
-    function get_png_imageinfo($file) {
-        if (empty($file)) return false;
-
-        $info = unpack('a8sig/Nchunksize/A4chunktype/Nwidth/Nheight/Cbit-depth/'.
-            'Ccolor/Ccompression/Cfilter/Cinterface',
-            file_get_contents($file,0,null,0,29))
-        ;
-
-        if (empty($info)) return false;
-
-        if ("\x89\x50\x4E\x47\x0D\x0A\x1A\x0A"!=array_shift($info))
-            return false; // no PNG signature.
-
-        if (13 != array_shift($info))
-            return false; // wrong length for IHDR chunk.
-
-        if ('IHDR'!==array_shift($info))
-            return false; // a non-IHDR chunk singals invalid data.
-
-        $color = $info['color'];
-
-        $type = array(0=>'Greyscale', 2=>'Truecolour', 3=>'Indexed-colour',
-            4=>'Greyscale with alpha', 6=>'Truecolour with alpha');
-
-        if (empty($type[$color]))
-            return false; // invalid color value
-
-        $info['color-type'] = $type[$color];
-
-        $samples = ((($color%4)%3)?3:1)+($color>3);
-
-        $info['channels'] = $samples;
-        $info['bits'] = $info['bit-depth'];
-
-        return $info;
+        return new Image($this->editor, $this->fileClass, $thumbPath, $mime);
     }
 }

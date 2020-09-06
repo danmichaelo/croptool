@@ -11,6 +11,7 @@ use Monolog\Formatter\LineFormatter;
 use Monolog\Logger;
 use Monolog\ErrorHandler;
 use Monolog\Handler\RotatingFileHandler;
+use Monolog\Processor\IntrospectionProcessor;
 use Monolog\Processor\PsrLogMessageProcessor;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Message\ResponseInterface;
@@ -36,13 +37,15 @@ class App extends \DI\Bridge\Slim\App
             },
 
             'errorHandler' => function (ContainerInterface $container) {
-                return function (Request $request, Response $response, \Exception $exception) use ($container) {
+                return function (Request $request, Response $response, \Exception $exc) use ($container) {
                     $logger = $container->get(LoggerInterface::class);
-                    $logger->error($exception->getMessage());
+                    $logger->error(
+                        "Exception \"{$exc->getMessage()}\" at \"{$exc->getFile()}\", line {$exc->getLine()}"
+                    );
                     return $container->get('response')
                         ->withStatus(500)
                         ->withHeader('Content-Type', 'application/json')
-                        ->withJson(['error' => $exception->getMessage()]);
+                        ->withJson(['error' => $exc->getMessage()]);
                 };
             },
 
@@ -56,12 +59,16 @@ class App extends \DI\Bridge\Slim\App
                 ->constructorParameter('site', \DI\get('site')),
 
             LoggerInterface::class => \DI\factory(function () {
-                $formatter = new LineFormatter("[%datetime%] %channel%.%level_name%: %message%\n", null, false, true);
+                $formatter = new LineFormatter("[%datetime%] %channel%.%level_name%: %message% %extra%\n", null, false, true);
                 $streamHandler = new RotatingFileHandler(ROOT_PATH . '/logs/croptool.log', 30, Logger::INFO);
                 $streamHandler->setFormatter($formatter);
                 $handlers = [$streamHandler];
                 $processors = [new PsrLogMessageProcessor()];
                 $logger = new Logger('croptool', $handlers, $processors);
+
+                // IntrospectionProcessor adds filename, class, line to %extra%
+                // $streamHandler->pushProcessor(new IntrospectionProcessor(Logger::ERROR));
+
                 ErrorHandler::register($logger);
                 return $logger;
             }),

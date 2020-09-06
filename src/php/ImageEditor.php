@@ -3,11 +3,10 @@
 namespace CropTool;
 
 use CropTool\Errors\FileNotFoundException;
+use CropTool\File\FileInterface;
 
 class ImageEditor
 {
-    protected $pathToJpegTran = '/usr/local/bin/jpegtran';
-
     protected $supportedFileTypes = [
         '.jpg' => 'image/jpeg',
         '.png' => 'image/png',
@@ -18,16 +17,6 @@ class ImageEditor
         '.pdf' => 'application/pdf',
     ];
 
-    public function __construct(Config $config)
-    {
-        $this->pathToJpegTran = $config->get('jpegtranPath');
-    }
-
-    public function getPathToJpegTran()
-    {
-        return $this->pathToJpegTran;
-    }
-
     public function mimeFromPath($path)
     {
         $fileExt = substr($path, strrpos($path, '.'));
@@ -37,14 +26,16 @@ class ImageEditor
         return $this->supportedFileTypes[$fileExt];
     }
 
-    public function open($path)
+    public function open(FileInterface $file, int $pageno)
     {
+        $path = $file->getAbsolutePathForPage($pageno);
+
         if (!file_exists($path)) {
             throw new FileNotFoundException(null, 0, null, $path);
         }
 
         $mime = $this->mimeFromPath($path);
 
-        return new Image($this, $path, $mime);
+        return new Image($this, get_class($file), $path, $mime);
     }
 }

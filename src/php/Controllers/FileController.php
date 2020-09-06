@@ -63,13 +63,12 @@ class FileController
         $page->assertNotWaitingForLicenseReview();
         $page->file->fetchPage($pageno);
 
-        $srcPath = $page->file->getAbsolutePathForPage($pageno);
         $thumbPath = $page->file->getAbsolutePathForPage($pageno, '_thumb');
 
         // If tiff file, then create jpg thumb, since most browsers don't support tiff
         $thumbPath = preg_replace('/\.tiff?$/', '.jpg', $thumbPath);
 
-        $original = $editor->open($srcPath);     // instance of Image
+        $original = $editor->open($page->file, $pageno);     // instance of Image
         $thumb = $original->thumb($thumbPath);   // instance of Image or null
 
         return $response->withJson([
@@ -105,30 +104,27 @@ class FileController
         $width = intval($request->getQueryParam('width', 0));
         $height = intval($request->getQueryParam('height', 0));
         $rotation = floatval($request->getQueryParam('rotate', 0));
-        $method = $request->getQueryParam('method', 'precise');
+        $cropMethod = $request->getQueryParam('method', 'precise');
 
         $t0 = microtime(true) * 1000;
 
-        if ($page->imageinfo->mime == 'image/gif') {
-            $method = 'gif';
-        } elseif ($page->imageinfo->mime != 'image/jpeg') {
-            $method = 'precise';
-        }
-
-        $srcPath = $page->file->getAbsolutePathForPage($pageno);
         $destPath = $page->file->getAbsolutePathForPage($pageno, '_cropped');
         $thumbPath = $page->file->getAbsolutePathForPage($pageno, '_cropped_thumb');
 
         // If tiff file, then create jpg thumb, since most browsers don't support tiff
         $thumbPath = preg_replace('/\.tiff?$/', '.jpg', $thumbPath);
 
-        $original = $editor->open($srcPath);
-        $crop = $original->crop($destPath, $method, $x, $y, $width, $height, $rotation);
+        if (!in_array($cropMethod, ['lossless', 'precise'])) {
+            throw new \RuntimeException('Unknown crop method specified');
+        }
+
+        $original = $editor->open($page->file, $pageno);
+        $crop = $original->crop($destPath, $cropMethod, $x, $y, $width, $height, $rotation);
         $thumb = $crop->thumb($thumbPath);
 
         $logger->info('[{sha1}] Cropped using {method} mode', [
             'sha1' => $page->file->getShortSha1(),
-            'method' => $method,
+            'method' => $cropMethod,
         ]);
 
         $dim = array();
@@ -162,8 +158,8 @@ class FileController
             'site' => $page->site,
             'title' => $page->title,
             'pageno' => $pageno,
-            'method' => $method,
-            'dim' => implode(', ', $dim) . ' using [[Commons:CropTool|CropTool]] with ' . $method . ' mode.',
+            'method' => $cropMethod,
+            'dim' => implode(', ', $dim) . ' using [[Commons:CropTool|CropTool]] with ' . $cropMethod . ' mode.',
             'page' => [
                 'elems' => $options,
                 'hasAssessmentTemplates' => $page->wikitext->hasAssessmentTemplates(),
