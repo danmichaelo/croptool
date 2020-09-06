@@ -1,6 +1,6 @@
 <?php
 
-namespace CropTool;
+namespace CropTool\Errors;
 
 class ApiError extends \RuntimeException
 {

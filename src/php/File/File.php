@@ -1,7 +1,9 @@
 <?php
 
-namespace CropTool;
+namespace CropTool\File;
 
+use CropTool\Errors\InvalidMimeTypeException;
+use CropTool\QueryResponse;
 use Psr\Log\LoggerInterface as Logger;
 
 class File implements FileInterface
@@ -19,9 +21,6 @@ class File implements FileInterface
         'image/jpeg' => '.jpg',
         'image/png' => '.png',
         'image/gif' => '.gif',
-        'image/tiff' => '.tiff',
-        'image/vnd.djvu' => '.djvu',
-        'application/pdf' => '.pdf',
     ];
 
     public function __construct($publicDir, $filesDir, QueryResponse $imageinfo, Logger $logger)

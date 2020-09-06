@@ -1,6 +1,6 @@
 <?php
 
-namespace CropTool;
+namespace CropTool\Auth;
 
 interface AuthServiceInterface
 {

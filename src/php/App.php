@@ -2,6 +2,9 @@
 
 namespace CropTool;
 
+use CropTool\Auth\AuthServiceInterface;
+use CropTool\Auth\OAuthConsumer;
+use CropTool\File\FileRepository;
 use DI\ContainerBuilder;
 use Interop\Container\ContainerInterface;
 use Monolog\Formatter\LineFormatter;

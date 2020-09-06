@@ -1,7 +1,7 @@
 <?php
 
-use CropTool\AuthController;
-use CropTool\FileController;
+use CropTool\Controllers\AuthController;
+use CropTool\Controllers\FileController;
 use Slim\Http\Request;
 use Slim\Http\Response;
 
@@ -43,8 +43,8 @@ if (! function_exists('array_get')) {
  */
 
 $authMiddleware = function (Request $request, Response $response, $next) {
-    $user = $this->get(CropTool\UserService::class);
-    $auth = $this->get(CropTool\AuthServiceInterface::class);
+    $user = $this->get(\CropTool\Auth\UserService::class);
+    $auth = $this->get(\CropTool\Auth\AuthServiceInterface::class);
     if (!$user->loggedin()) {
         return $response->withStatus(401)->withJson([
             'error' => 'Unauthorized',

@@ -2,6 +2,8 @@
 
 namespace CropTool;
 
+use CropTool\Auth\AuthServiceInterface;
+use CropTool\Errors\ApiError;
 use DI\FactoryInterface;
 use Psr\Log\LoggerInterface;
 

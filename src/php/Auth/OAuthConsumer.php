@@ -1,7 +1,10 @@
 <?php
 
-namespace CropTool;
+namespace CropTool\Auth;
 
+use CropTool\Auth\AuthServiceInterface;
+use CropTool\Config;
+use CropTool\SessionInterface;
 use Defuse\Crypto\Crypto;
 use Defuse\Crypto\Exception\WrongKeyOrModifiedCiphertextException;
 use Defuse\Crypto\Key;

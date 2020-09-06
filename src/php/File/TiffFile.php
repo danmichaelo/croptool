@@ -1,12 +1,16 @@
 <?php
 
-namespace CropTool;
+namespace CropTool\File;
 
 use pastuhov\Command\Command;
 
 class TiffFile extends File implements FileInterface
 {
     protected $multipage = true;
+
+    protected $supportedMimeTypes = [
+        'image/tiff' => '.tiff',
+    ];
 
     protected function pageSuffix($pageno=0)
     {

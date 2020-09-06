@@ -1,12 +1,16 @@
 <?php
 
-namespace CropTool;
+namespace CropTool\File;
 
 use pastuhov\Command\Command;
 
 class DjvuFile extends File implements FileInterface
 {
     protected $multipage = true;
+
+    protected $supportedMimeTypes = [
+        'image/vnd.djvu' => '.djvu',
+    ];
 
     public function fetchPage($pageno = 0)
     {

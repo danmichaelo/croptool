@@ -1,12 +1,16 @@
 <?php
 
-namespace CropTool;
+namespace CropTool\File;
 
 use pastuhov\Command\Command;
 
 class PdfFile extends File implements FileInterface
 {
     protected $multipage = true;
+
+    protected $supportedMimeTypes = [
+        'application/pdf' => '.pdf',
+    ];
 
     public function fetchPage($pageno = 0)
     {

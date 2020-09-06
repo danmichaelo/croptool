@@ -2,6 +2,8 @@
 
 namespace CropTool;
 
+use CropTool\File\FileInterface;
+use CropTool\File\FileRepository;
 use Psr\Log\LoggerInterface;
 
 /**

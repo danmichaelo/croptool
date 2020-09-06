@@ -1,7 +1,10 @@
 <?php
 
-namespace CropTool;
+namespace CropTool\Auth;
 
+use CropTool\ApiService;
+use CropTool\Auth\AuthServiceInterface;
+use CropTool\MagicParameterTrait;
 use Psr\Log\LoggerInterface;
 
 /**

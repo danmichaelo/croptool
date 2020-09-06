@@ -1,7 +1,11 @@
 <?php
 
-namespace CropTool;
+namespace CropTool\Controllers;
 
+use CropTool\Auth\AuthServiceInterface;
+use CropTool\Config;
+use CropTool\SessionInterface;
+use CropTool\Auth\UserService;
 use Slim\Http\Request as Request;
 use Slim\Http\Response as Response;
 

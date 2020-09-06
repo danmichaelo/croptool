@@ -102,21 +102,21 @@ class WebTestCase extends \There4\Slim\Test\WebTestCase
 
     protected function mockUserService($username = 'Test User')
     {
-        $service = m::mock(CropTool\UserService::class, [
+        $service = m::mock(\CropTool\Auth\UserService::class, [
             'loggedin' => true,
         ]);
         $service->username = $username;
-        $this->app->getContainer()->set(CropTool\UserService::class, $service);
+        $this->app->getContainer()->set(\CropTool\Auth\UserService::class, $service);
 
         return $service;
     }
 
     protected function mockAuthService()
     {
-        $service = m::mock(CropTool\AuthServiceInterface::class, [
+        $service = m::mock(\CropTool\Auth\AuthServiceInterface::class, [
             'isAuthorized' => true,
         ])->shouldIgnoreMissing();
-        $this->app->getContainer()->set(CropTool\AuthServiceInterface::class, $service);
+        $this->app->getContainer()->set(\CropTool\Auth\AuthServiceInterface::class, $service);
 
         return $service;
     }

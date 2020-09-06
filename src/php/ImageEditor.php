@@ -2,6 +2,8 @@
 
 namespace CropTool;
 
+use CropTool\Errors\FileNotFoundException;
+
 class ImageEditor
 {
     protected $pathToJpegTran = '/usr/local/bin/jpegtran';

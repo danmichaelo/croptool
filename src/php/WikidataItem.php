@@ -5,14 +5,14 @@ namespace CropTool;
 use DI\FactoryInterface;
 use Psr\Log\LoggerInterface;
 
-class Item
+class WikidataItem
 {
     protected $repo;
     protected $logger;
     protected $entity;
 
     /**
-     * Item constructor.
+     * WikidataItem constructor.
      *
      * @param FactoryInterface $factory
      * @param LoggerInterface $logger

@@ -1,7 +1,15 @@
 <?php
 
-namespace CropTool;
+namespace CropTool\Controllers;
 
+use CropTool\BorderLocator;
+use CropTool\EditSummary;
+use CropTool\File\FileInterface;
+use CropTool\Image;
+use CropTool\ImageEditor;
+use CropTool\WikidataItem;
+use CropTool\NoSuchEntity;
+use CropTool\WikiPage;
 use DI\FactoryInterface;
 use Psr\Log\LoggerInterface;
 use Slim\Http\Request;
@@ -9,6 +17,12 @@ use Slim\Http\Response;
 
 class FileController
 {
+    protected $logger;
+
+    public function __construct(LoggerInterface $logger)
+    {
+        $this->logger = $logger;
+    }
 
     /**
      * Utility method to return an array with the relative path + file dimensions
@@ -134,7 +148,7 @@ class FileController
         $wd = null;
         if (isset($options['wikidata-item'])) {
             try {
-                $item = $factory->make(Item::class, ['entity' => $options['wikidata-item']]);
+                $item = $factory->make(WikidataItem::class, ['entity' => $options['wikidata-item']]);
                 $el = $item->get();
                 $wd = ['labels' => []];
                 foreach ($el->labels as $k => $v) {
@@ -254,7 +268,7 @@ class FileController
 
             if (array_get($stuffToRemove, 'wikidata')) {
                 $wdEntity = array_get($stuffToRemove, 'wikidata-item');
-                $item = $factory->make(Item::class, ['entity' => $wdEntity]);
+                $item = $factory->make(WikidataItem::class, ['entity' => $wdEntity]);
                 $item->addClaim('P18', '"' . $newName . '"');
             }
         }
