@@ -44,7 +44,7 @@ class WikiText
     | is waiting for review and the user should not be allowed to crop it yet.
     */
     protected $licenseReviewTemplates = array(
-        '(license|flickr?|panoramio|openstreetmap|openphoto)[_ -]?reviewr?', // See #41 and #117
+        '(license|flickr?|panoramio|openstreetmap|openphoto|inaturalist)[_ -]?reviewr?', // See #41 and #117
     );
 
     /*
