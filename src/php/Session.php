@@ -16,8 +16,11 @@ class Session implements SessionInterface
 
     protected function startSession()
     {
+        // If the configured hostname includes a port, we need to remove it
+        $cookieDomain = $this->config->getCookieDomain();
+
         session_name($this->config->get('sessionName'));
-        session_set_cookie_params(0, $this->config->get('basepath'), $this->config->get('hostname'), true, true);
+        session_set_cookie_params(0, $this->config->get('basepath'), $cookieDomain, true, true);
         session_start();
     }
 

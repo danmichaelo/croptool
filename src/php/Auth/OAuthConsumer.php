@@ -47,9 +47,9 @@ class OAuthConsumer implements AuthServiceInterface
     protected $rsaPublicKeyFile = '../mykey.public';
 
     /**
-     * The hostname, most likely 'croptool.toolforge.org'
+     * The cookie domain, from config.ini
      */
-    protected $hostname;
+    protected $cookieDomain;
 
     /**
      * The base path
@@ -65,7 +65,7 @@ class OAuthConsumer implements AuthServiceInterface
 
     public function __construct(Config $config, LoggerInterface $logger, SessionInterface $session, $keyFile, $callbackUrl)
     {
-        $this->hostname = $config->get('hostname');
+        $this->cookieDomain = $config->getCookieDomain();
         $this->basepath = $config->get('basepath');
         $this->gUserAgent = $config->get('userAgent');
         $this->gConsumerKey = $config->get('consumerKey');
@@ -191,7 +191,7 @@ class OAuthConsumer implements AuthServiceInterface
             Crypto::encrypt($this->gTokenKey, $this->cookieKey),
             $twoYears,
             $this->basepath,
-            $this->hostname,
+            $this->cookieDomain,
             true,  // only secure (https)
             true   // httponly
         )) {
@@ -205,7 +205,7 @@ class OAuthConsumer implements AuthServiceInterface
             Crypto::encrypt($this->gTokenSecret, $this->cookieKey), // ~ 150 bytes
             $twoYears,
             $this->basepath,
-            $this->hostname,
+            $this->cookieDomain,
             true,  // only secure (https)
             true   // httponly
         )) {
@@ -300,13 +300,13 @@ class OAuthConsumer implements AuthServiceInterface
     {
         $this->logger->info('[oauth] Destroy authorization (logout)');
 
-        setcookie('mwKey', '', time() - 3600, $this->basepath, $this->hostname, true, true);
-        setcookie('mwSecret', '', time() - 3600, $this->basepath, $this->hostname, true, true);
+        setcookie('mwKey', '', time() - 3600, $this->basepath, $this->cookieDomain, true, true);
+        setcookie('mwSecret', '', time() - 3600, $this->basepath, $this->cookieDomain, true, true);
 
         // The domain is sometimes prepended by a dot (http://stackoverflow.com/q/2285010):
         // To make sure the cookies are deleted:
-        setcookie('mwKey', '', time() - 3600, $this->basepath, '.' . $this->hostname, true, true);
-        setcookie('mwSecret', '', time() - 3600, $this->basepath, '.' . $this->hostname, true, true);
+        setcookie('mwKey', '', time() - 3600, $this->basepath, '.' . $this->cookieDomain, true, true);
+        setcookie('mwSecret', '', time() - 3600, $this->basepath, '.' . $this->cookieDomain, true, true);
         setcookie('mwKey', '', time() - 3600, $this->basepath, '', true, true);
         setcookie('mwSecret', '', time() - 3600, $this->basepath, '', true, true);
 

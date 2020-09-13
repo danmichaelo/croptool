@@ -55,6 +55,10 @@ class App extends \DI\Bridge\Slim\App
                 return $container->get('request')->getParam('site', 'commons.wikimedia.org');
             },
 
+            'host' => function (ContainerInterface $container) {
+                return $container->get(Config::class)->get('hostname');
+            },
+
             ApiService::class => \DI\object()
                 ->constructorParameter('site', \DI\get('site')),
 
@@ -81,7 +85,7 @@ class App extends \DI\Bridge\Slim\App
 
             OAuthConsumer::class => \DI\object()
                 ->constructorParameter('keyFile', \DI\string('{root_directory}/croptool-secret-key.txt'))
-                ->constructorParameter('callbackUrl', 'https://croptool.toolforge.org/api/auth/callback'),  // https://tools.wmflabs.org/croptool/api/auth/callback'),
+                ->constructorParameter('callbackUrl', \DI\string('https://{host}/api/auth/callback')),  // https://tools.wmflabs.org/croptool/api/auth/callback'),
 
             AuthServiceInterface::class => \DI\object(OAuthConsumer::class),
 

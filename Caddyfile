@@ -1,11 +1,15 @@
-# Add `127.0.0.1 croptool.toolforge.org` to your /etc/hosts
-
-https://croptool.toolforge.org:7890/
-tls self_signed
-root public_html
-proxy /api http://208.80.155.131/ {
-    header_upstream Host https://croptool.toolforge.org/
+{
+    auto_https disable_redirects
 }
-proxy /files http://208.80.155.131/ {
-    header_upstream Host https://croptool.toolforge.org/
+
+localhost:7878 {
+    tls internal
+
+    # Enable static file server
+    root * /croptool/public_html
+    file_server
+
+    # Serve PHP through php-fpm:
+    rewrite /api/* /backend.php
+    php_fastcgi * phpfpm:9000
 }

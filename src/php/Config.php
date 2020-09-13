@@ -29,4 +29,12 @@ class Config
     {
         return isset($this->data[$key]) && !empty($this->data[$key]);
     }
+
+    /**
+     * Get hostname without port
+     */
+    public function getCookieDomain()
+    {
+        return explode(':', $this->get('hostname'))[0];
+    }
 }

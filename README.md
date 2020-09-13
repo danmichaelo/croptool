@@ -39,21 +39,44 @@ at Wikimedia Commons and other Wikimedia sites using the MediaWiki API with OAut
 
 ### Setting up a development environment
 
-The easiest way to setup a development environment is by using Vagrant. If you have Vagrant installed, just type
+1. Request an OAuth 1.0 consumer at https://meta.wikimedia.org/wiki/Special:OAuthConsumerRegistration/propose with
+
+- Callback URL: https://localhost:7878/
+- Allow consumer to specify a callback in requests
+- Grants: "Edit existing pages", "Create, edit, and move pages", "Upload new files" and "Upload, replace, and move files"
+
+2. Copy `config.dist.ini` to `config.ini` and add the consumer token and secret token to `config.ini`
+
+3. Install dependencies using [Composer](https://getcomposer.org/) and [NPM](https://nodejs.org/en/):
+
 ```
-vagrant up
+composer install
+npm install
 ```
-This will create a virtual machine with the static IP 172.28.128.4 (you can change this in the `Vagrantfile` if needed). To test the MediaWiki OAuth authentication, you can redirect `croptool.toolforge.org` to your newly created virtualbox machine by adding an entry to your `/etc/hosts` file:
 
-    172.28.128.4 croptool.toolforge.org
+4. Build the frontend:
 
-If you then visit `https://croptool.toolforge.org` in your browser, the content will be fetched from your virtualbox machine. The Vagrant provisioner has generated a self-signed certificate, so https will work, but the browser will of course warn you about the certificate being self-signed.
+```
+npx gulp build
+```
 
-Of course you need to remember to remove the entry from `/etc/hosts` when you're done testing.
+5. Generate secret for encrypted cookies:
 
-### Setting up a lightweight development environment
+```
+php generate-key.php
+```
 
-As a lightweight alternative for a development environment, we provide a `Caddyfile` which is meant to be used with [Caddy](https://caddyserver.com/). This allows to do frontend development without the need to boot a virtual machine.
+6. Start the development server on https://localhost:7878/
+
+```
+docker-compose up
+```
+
+Note that you should be able to login and preview cropping without waiting for the OAuth consumer to be accepted.
+
+### Alternative development environment for frontend development only
+
+As a lightweight alternative for a development environment, we provide a `Caddyfile` which is meant to be used with [Caddy](https://caddyserver.com/). This allows to do frontend development without the need to install Docker and PHP.
 
 1. Run `caddy` in the source directory
 2. Add `127.0.0.1 croptool.toolforge.org` to your `/etc/hosts`
