@@ -74,14 +74,6 @@ docker-compose up
 
 Note that you should be able to login and preview cropping without waiting for the OAuth consumer to be accepted.
 
-### Alternative development environment for frontend development only
-
-As a lightweight alternative for a development environment, we provide a `Caddyfile` which is meant to be used with [Caddy](https://caddyserver.com/). This allows to do frontend development without the need to install Docker and PHP.
-
-1. Run `caddy` in the source directory
-2. Add `127.0.0.1 croptool.toolforge.org` to your `/etc/hosts`
-3. Open https://croptool.toolforge.org:7890/ and accept the certificate warning (since we issue a self-signed certificate)
-
 ### Deployment notes
 
 To get `jpegtran`, we fetch the latest `jpegsrc.xxx.tar.gz` from the Independent JPEG Group. Note that the server returns "403 Forbidden" if you use the default curl user agent string.
