@@ -2,7 +2,7 @@
     "name": "danmichaelo/croptool",
     "description": "Tool for cropping images at Wikimedia sites",
     "require": {
-        "php": "~5.5|~7.0",
+        "php": "~7.4",
         "ext-exif": "*",
         "ext-imagick": "*",
         "ext-curl": "*",
