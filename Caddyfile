@@ -12,4 +12,10 @@ localhost:7878 {
     # Serve PHP through php-fpm:
     rewrite /api/* /backend.php
     php_fastcgi * phpfpm:9000
+
+    log {
+        output stderr
+        format console
+        level  info
+    }
 }
