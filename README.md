@@ -50,7 +50,7 @@ at Wikimedia Commons and other Wikimedia sites using the MediaWiki API with OAut
 3. Install dependencies using [Composer](https://getcomposer.org/) and [NPM](https://nodejs.org/en/):
 
 ```
-composer install
+docker compose run phpfpm composer install
 npm install
 ```
 
@@ -63,7 +63,7 @@ npx gulp build
 5. Generate secret for encrypted cookies:
 
 ```
-php generate-key.php
+docker compose run phpfpm php generate-key.php
 ```
 
 6. Start the development server on https://localhost:7878/
