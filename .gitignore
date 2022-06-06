@@ -39,3 +39,8 @@ logs/.norotate
 replica.my.cnf
 *.pem
 *.public
+.toolskube
+.bash_eternal_history
+.gitconfig
+.hhvm.hhbc
+.ipython/
