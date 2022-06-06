@@ -15,6 +15,8 @@ RUN apt update \
     && docker-php-ext-install zip \
     && docker-php-ext-enable zip
 
+RUN mv "$PHP_INI_DIR/php.ini-development" "$PHP_INI_DIR/php.ini"
+
 RUN php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');" \
     && php composer-setup.php \
     && rm composer-setup.php \
