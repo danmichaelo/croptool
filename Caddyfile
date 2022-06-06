@@ -6,7 +6,7 @@ localhost:7878 {
     tls internal
 
     # Enable static file server
-    root * /croptool/public_html
+    root * /var/www/html/public_html
     file_server
 
     # Serve PHP through php-fpm:

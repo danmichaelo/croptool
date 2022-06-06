@@ -4,7 +4,7 @@ services:
   caddy:
     image: caddy
     volumes:
-      - .:/croptool
+      - .:/var/www/html
       - ./Caddyfile:/etc/caddy/Caddyfile
       - caddy_data:/data
     ports:
@@ -16,7 +16,7 @@ services:
     build:
       context: .
     volumes:
-      - .:/croptool
+      - .:/var/www/html
 
 volumes:
   caddy_data:
