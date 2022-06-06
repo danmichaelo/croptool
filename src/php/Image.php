@@ -33,7 +33,7 @@ class Image
     {
         $metadata = $this->fileClass::readMetadata($this->path);
 
-        if (!$metadata['width'] || !$metadata['height']) {
+        if (!$metadata  || !$metadata['width'] || !$metadata['height']) {
             // @TODO: This should move to a safer place:
             // unlink($this->path);
 

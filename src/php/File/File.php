@@ -169,6 +169,8 @@ class File implements FileInterface
     static public function readMetadata($path) {
         $sz = getimagesize($path);
 
+        if (!$sz) return false;
+
         return [
             'width' => $sz[0],
             'height' => $sz[1],
