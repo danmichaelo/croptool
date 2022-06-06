@@ -1,8 +1,7 @@
 # This file is used by Toolforge infrastructure.
 # Please do not edit manually at this time.
-# Tue Jul  7 19:20:01 2020
-backend: gridengine
+# Mon Jun  6 18:00:08 2022
+backend: kubernetes
 canonical: true
-distribution: debian
 version: 4
-web: lighttpd
+web: php7.4
