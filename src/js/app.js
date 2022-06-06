@@ -9,7 +9,6 @@ config(['$translateProvider', function($translateProvider) {
         prefix: 'locale/',
         suffix: '.json'
     });
-    $translateProvider.useSanitizeValueStrategy('sceParameters');
     $translateProvider.preferredLanguage('en');
 }]).
 
