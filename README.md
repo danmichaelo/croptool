@@ -2,8 +2,11 @@
 
 [CropTool](https://croptool.toolforge.org/) is a tool for cropping image files
 at Wikimedia Commons and other Wikimedia sites using the MediaWiki API with OAuth.
-[Help page on Commons](https://commons.wikimedia.org/wiki/Commons:CropTool).
 
+* [Help page on Commons](https://commons.wikimedia.org/wiki/Commons:CropTool).
+* [Tool info on WikiTech](https://wikitech.wikimedia.org/wiki/Tool:CropTool)
+
+Features:
 
 * Supports JPEG, PNG and (animated) GIF files, and also single pages from
   DJVU and PDF files.
