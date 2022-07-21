@@ -1,0 +1,11 @@
+# Toolforge webservice template
+# Provide default arguments for `webservice start` commands for this tool.
+#
+# Uncomment lines below and adjust as needed
+
+# Set backend cluster to run this webservice (--backend={gridengine,kubernetes})
+backend: gridengine
+
+# Runtime type
+# See "Supported webservice types" in `webservice --help` output for valid values.
+type: lighttpd
