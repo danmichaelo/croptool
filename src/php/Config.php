@@ -4,7 +4,7 @@ namespace CropTool;
 
 class Config
 {
-    protected $requiredKeys = ['hostname', 'basepath', 'consumerKey', 'consumerSecret', 'jpegtranPath', 'userAgent'];
+    protected $requiredKeys = ['hostname', 'basepath', 'consumerKey', 'consumerSecret', 'jpegtranPath', 'ddjvuPath', 'magickPath', 'userAgent'];
     protected $data;
 
     public function __construct($config_file)

@@ -4,6 +4,7 @@ namespace CropTool\File;
 
 use CropTool\Errors\InvalidMimeTypeException;
 use CropTool\QueryResponse;
+use CropTool\Config;
 use Imagick;
 use Psr\Log\LoggerInterface as Logger;
 
@@ -17,6 +18,11 @@ class File implements FileInterface
     protected $fileExt;
     protected $multipage = false;
     protected $logger;
+    protected $pathToJpegTran = '/usr/local/bin/jpegtran';
+    protected $pathToDdjvu = '/usr/local/bin/ddjvu';
+    protected $pathToMagick = '/usr/local/bin/magick';
+    protected $pathToGs = '/usr/bin/gs';
+
 
     protected $supportedMimeTypes = [
         'image/jpeg' => '.jpg',
@@ -24,7 +30,7 @@ class File implements FileInterface
         'image/gif' => '.gif',
     ];
 
-    public function __construct($publicDir, $filesDir, QueryResponse $imageinfo, Logger $logger)
+    public function __construct($publicDir, $filesDir, QueryResponse $imageinfo, Logger $logger, Config $config)
     {
         $this->publicDir = $publicDir;
         $this->filesDir = $filesDir;
@@ -32,6 +38,11 @@ class File implements FileInterface
         $this->sha1 = $imageinfo->sha1;
         $this->mime = $imageinfo->mime;
         $this->logger = $logger;
+
+        $this->pathToJpegTran = $config->get('jpegtranPath');
+        $this->pathToDdjvu = $config->get('ddjvuPath');
+        $this->pathToMagick = $config->get('magickPath');
+        $this->pathToGs = $config->get('gsPath');
 
         $this->fileExt = $this->getFileExt($this->mime);
     }

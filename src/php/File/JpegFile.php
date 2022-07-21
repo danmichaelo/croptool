@@ -2,19 +2,11 @@
 
 namespace CropTool\File;
 
-use CropTool\Config;
 use Imagick;
 use pastuhov\Command\Command;
 
 class JpegFile extends File implements FileInterface
 {
-    protected $pathToJpegTran = '/usr/local/bin/jpegtran';
-
-    public function __construct(Config $config)
-    {
-        $this->pathToJpegTran = $config->get('jpegtranPath');
-    }
-
     static public function readMetadata($path)
     {
         $exif = @exif_read_data($path, 'IFD0');
