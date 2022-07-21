@@ -3,7 +3,7 @@
 - name: cleanup
   command: ./jobs/cleanup.sh
   image: tf-php74
-  schedule: "17 * * * *"
+  schedule: "5 * * * *"
   emails: onfailure
 - name: check-server
   command: ./jobs/check-server.sh
