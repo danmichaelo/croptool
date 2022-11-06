@@ -225,7 +225,6 @@ class Image
         $h = $im->getImageHeight();
 
         $im->setImageCompressionQuality(75);
-        $im->stripImage();
 
         $this->fileClass::saveImage($im, $thumbPath, $this->path);
         $im->destroy();
