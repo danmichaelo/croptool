@@ -44,10 +44,11 @@ class JpegFile extends File implements FileInterface
         ];
     }
 
-    static public function crop($srcPath, $destPath, $method, $coords, $rotation)
+    public function crop($srcPath, $destPath, $method, $coords, $rotation)
     {
-        if ($method == 'precise') {
-            return parent::crop($srcPath, $destPath, $method, $coords, $rotation);
+        if ($method === 'precise') {
+            parent::crop($srcPath, $destPath, $method, $coords, $rotation);
+            return;
         }
 
         // Lossless

@@ -23,6 +23,8 @@ class FileRepository
     protected function getFileClass($mime)
     {
         switch ($mime) {
+            case 'image/jpeg':
+                return JpegFile::class;
             case 'image/tiff':
                 return TiffFile::class;
             case 'image/vnd.djvu':
