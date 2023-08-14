@@ -18,10 +18,10 @@ class File implements FileInterface
     protected $fileExt;
     protected $multipage = false;
     protected $logger;
-    protected $pathToJpegTran = '/usr/local/bin/jpegtran';
-    protected $pathToDdjvu = '/usr/local/bin/ddjvu';
-    protected $pathToMagick = '/usr/local/bin/magick';
-    protected $pathToGs = '/usr/bin/gs';
+    protected $pathToJpegTran;
+    protected $pathToDdjvu;
+    protected $pathToMagick;
+    protected $pathToGs;
 
 
     protected $supportedMimeTypes = [

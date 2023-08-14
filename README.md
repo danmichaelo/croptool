@@ -48,7 +48,7 @@ Features:
 - Allow consumer to specify a callback in requests
 - Grants: "Edit existing pages", "Create, edit, and move pages", "Upload new files" and "Upload, replace, and move files"
 
-2. Copy `config.dist.ini` to `config.ini` and add the consumer token and secret token to `config.ini`
+2. Copy `config.dist.ini` to `config.ini` and add the consumer token and secret token to `config.ini` and check the default paths for the dependencies.
 
 3. Install dependencies using [Composer](https://getcomposer.org/) and [NPM](https://nodejs.org/en/):
 
@@ -92,7 +92,7 @@ make test
 #### Download deps and configure croptool:
 
 1. `composer install --optimize-autoloader`
-2. `cp config.dist.ini config.ini` and insert OAuth info and the path to jpegtran.
+2. `cp config.dist.ini config.ini` and insert OAuth info and check the default paths for the dependencies, especially for jpegtran.
 3. Check that the server can write to `logs` and `public_html/files`.
 4. `vendor/bin/phpunit`
 5. `crontab crontab.tools` to setup cronjobs.
