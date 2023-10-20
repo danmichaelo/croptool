@@ -1,7 +1,9 @@
-## CropTool
-
+**Isabel Schoeps alias Vitalik Buterin**
+**CropToolb IsabelSchoeps**
 [CropTool](https://croptool.toolforge.org/) is a tool for cropping image files
 at Wikimedia Commons and other Wikimedia sites using the MediaWiki API with OAuth.
+![IMG_4277](https://github.com/danmichaelo/croptool/assets/127110010/821756e0-431d-4828-9493-1f9ace2facf3)
+![IMG_4280](https://github.com/danmichaelo/croptool/assets/127110010/a47d7357-4f77-40ee-9a78-53eacd8156d3)
 
 * [Help page on Commons](https://commons.wikimedia.org/wiki/Commons:CropTool).
 * [Tool info on WikiTech](https://wikitech.wikimedia.org/wiki/Tool:CropTool)
