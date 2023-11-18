@@ -390,7 +390,7 @@ controller('AppCtrl', ['$scope', '$http', '$timeout', '$q', '$window', '$httpPar
                 height: (area[3] - area[1]) / pixelratio[1]
             });
         }, function(res) {
-            $scope.error = 'An error occured: ' + res.status + ' ' + res.data.error;
+            $scope.error = 'An error occurred: ' + res.status + ' ' + res.data.error;
             $scope.borderLocatorBusy = false;
         });
     };
@@ -738,7 +738,7 @@ controller('AppCtrl', ['$scope', '$http', '$timeout', '$q', '$window', '$httpPar
     });
 
     $scope.updateUploadComment = function() {
-        console.log('UPDATE UPLAOD COMM', $scope.cropresults.page.elems);
+        console.log('UPDATE UPLOAD COMM', $scope.cropresults.page.elems);
 
         LocalStorageService.set('croptool-overwrite', $scope.overwrite);
 
