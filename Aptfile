@@ -1,4 +1,4 @@
-libc6-dev
+libc6
 build-essential
 libjpeg-progs
 djvulibre-bin
