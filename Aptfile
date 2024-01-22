@@ -1,8 +1,8 @@
+build-essential
 libjpeg-progs
 djvulibre-bin
 imagemagick
 libmagickwand-dev
 exiftool
 libzip-dev
-build-essential
 cronnie
