@@ -1,4 +1,4 @@
-libc-dev
+linux-libc-dev
 build-essential
 libjpeg-progs
 djvulibre-bin
