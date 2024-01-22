@@ -6,4 +6,4 @@ imagemagick
 libmagickwand-dev
 exiftool
 libzip-dev
-cronie
+cron
