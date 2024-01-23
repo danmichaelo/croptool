@@ -1,6 +1,4 @@
-libc6
-build-essential
-libjpeg-progs
+libjpeg-turbo-progs
 djvulibre-bin
 imagemagick
 libmagickwand-dev
