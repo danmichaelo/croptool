@@ -27,6 +27,17 @@
     "autoload-dev": {
         "psr-0": { "": "tests/integration" }
     },
+    "scripts": {
+        "pre-install-cmd": [
+            "pecl install imagick",
+            "pecl install exif",
+            "pecl install zip"
+        ],
+        "post-install-cmd": [
+            "vendor/bin/phpunit",
+            "php generate-key.php"
+        ]
+    },
     "license": "MIT",
     "authors": [
         {
