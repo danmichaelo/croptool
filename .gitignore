@@ -1,5 +1,4 @@
 config.ini
-composer.lock
 data/*
 public_html/files/*
 vendor
