@@ -2,24 +2,24 @@
     "name": "danmichaelo/croptool",
     "description": "Tool for cropping images at Wikimedia sites",
     "require": {
-        "php": "~7.4",
+        "php": "~8.2",
         "ext-exif": "*",
         "ext-imagick": "*",
         "ext-curl": "*",
         "ext-mbstring": "*",
         "danmichaelo/coma": "dev-master",
-        "monolog/monolog": "~1.13",
-        "defuse/php-encryption": "^2.0",
-        "php-di/php-di": "^5.3",
-        "php-di/slim-bridge": "^1.0",
-        "slim/slim": "^3.0",
+        "monolog/monolog": "~3.5",
+        "defuse/php-encryption": "^2.4",
+        "php-di/php-di": "^7.0",
+        "php-di/slim-bridge": "^3.4",
+        "slim/slim": "^4.2",
         "pastuhov/php-exec-command": "^1.1.0"
     },
     "require-dev": {
-        "phpunit/phpunit": "^4.8|5.*|6.*",
-        "there4/slim-test-helpers": "^2.1",
-        "mockery/mockery": "^1.3",
-        "fzaninotto/faker": "^1.6"
+        "phpunit/phpunit": "^10.5",
+        "nekofar/slim-test": "^3.2",
+        "mockery/mockery": "^1.6",
+        "mwangithegreat/faker": "^1.6"
     },
     "autoload": {
         "psr-4": { "CropTool\\": "src/php/" }

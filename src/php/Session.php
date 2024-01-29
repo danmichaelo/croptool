@@ -2,8 +2,9 @@
 
 namespace CropTool;
 
-use Slim\Http\Request;
-use Slim\Http\Response;
+use Psr\Http\Message\ResponseInterface as Response;
+use Psr\Http\Message\ServerRequestInterface as Request;
+use Psr\Http\Server\RequestHandlerInterface as RequestHandler;
 
 class Session implements SessionInterface
 {
@@ -33,11 +34,12 @@ class Session implements SessionInterface
      *
      * @return \Psr\Http\Message\ResponseInterface
      */
-    public function __invoke(Request $request, Response $response, callable $next)
+    public function __invoke(Request $request, RequestHandler $handler)
     {
         $this->startSession();
+        $response = $handler->handle($request);
 
-        return $next($request, $response);
+        return $response;
     }
 
     /**

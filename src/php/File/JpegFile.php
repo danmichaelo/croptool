@@ -60,7 +60,7 @@ class JpegFile extends File implements FileInterface
 
             $rotate = '-rotate ' . $rotation;
         }
-        Command::exec($this->pathToJpegTran . ' -copy all ' . $rotate . ' -crop {dim} {src} > {dest}', [
+        Command::exec('/usr/bin/jpegtrans' . ' -copy all ' . $rotate . ' -crop {dim} {src} > {dest}', [
             'src' => $srcPath,
             'dest' => $destPath,
             'dim' => $dim,
