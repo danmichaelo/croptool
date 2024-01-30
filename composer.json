@@ -13,7 +13,8 @@
         "php-di/php-di": "^7.0",
         "php-di/slim-bridge": "^3.4",
         "slim/slim": "^4.2",
-        "pastuhov/php-exec-command": "^1.1.0"
+        "pastuhov/php-exec-command": "^1.1.0",
+        "slim/psr7": "^1.6"
     },
     "require-dev": {
         "phpunit/phpunit": "^10.5",
