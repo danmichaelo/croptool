@@ -28,10 +28,6 @@
         "psr-0": { "": "tests/integration" }
     },
     "scripts": {
-        "pre-install-cmd": [
-            "pecl install imagick",
-            "pecl install exif"
-        ],
         "post-install-cmd": [
             "php generate-key.php"
         ]
