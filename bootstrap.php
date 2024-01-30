@@ -4,6 +4,7 @@ use CropTool\Controllers\AuthController;
 use CropTool\Controllers\FileController;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use Psr\Http\Server\RequestHandlerInterface as RequestHandler;
+use Slim\Psr7\Response;
 use \DI\Bridge\Slim\Bridge as App;
 use CropTool\Auth\AuthServiceInterface;
 use CropTool\Auth\OAuthConsumer;
@@ -57,8 +58,9 @@ if (! function_exists('array_get')) {
 $authMiddleware = function (Request $request, RequestHandler $handler) {
     $user = $this->get(\CropTool\Auth\UserService::class);
     $auth = $this->get(\CropTool\Auth\AuthServiceInterface::class);
-    $response = $handler->handle($request);
+
     if (!$user->loggedin()) {
+        $response =  new Response();
         $response->getBody()->write((string)json_encode([
             'error' => 'Unauthorized',
             'messages' => $auth->getMessages(),
@@ -66,23 +68,26 @@ $authMiddleware = function (Request $request, RequestHandler $handler) {
         return $response->withStatus(401);
     }
 
+    $response = $handler->handle($request);
+
     return $response;
 };
 
 $pageMiddleware = function (Request $request, RequestHandler $handler) {
     // Middleware that defines the current WikiPage
 
-    $response = $handler->handle($request);
-
     $requestParams = $request->getMethod() === 'GET' ? $request->getQueryParams() : $request->getParsedBody();
 
     if ( !array_key_exists( 'title', $requestParams ) ) {
+        $response =  new Response();
         $response->getBody()->write((string)json_encode([
             'error' => 'Invalid request',
             'messages' => 'No title parameter found',
         ]));
         return $response->withStatus(500);
     }
+
+    $response = $handler->handle($request);
 
     $title = $requestParams['title'];
 
@@ -105,7 +110,7 @@ $builder->addDefinitions([
     'root_directory' => ROOT_PATH,
 
     'site' => function (ContainerInterface $container) {
-        return $container->get('request')->getParam('site', 'commons.wikimedia.org');
+        return 'commons.wikimedia.org';//$container->get('request')->getParam('site', 'commons.wikimedia.org');
     },
 
     'host' => function (ContainerInterface $container) {

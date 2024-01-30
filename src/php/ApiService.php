@@ -19,6 +19,7 @@ class ApiService
     protected $logger;
     protected $userAgent;
     protected $site;
+    protected $factory;
     public $calls = 0;
 
     public function __construct(FactoryInterface $factory, LoggerInterface $logger, AuthServiceInterface $auth, Config $config, $site)
