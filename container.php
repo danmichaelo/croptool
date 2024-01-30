@@ -12,6 +12,8 @@ use Monolog\Handler\RotatingFileHandler;
 use Monolog\Processor\PsrLogMessageProcessor;
 use Psr\Log\LoggerInterface;
 
+$hasToolsDataDir = getenv('TOOL_DATA_DIR') != '';
+
 return [
     'root_directory' => ROOT_PATH,
 
@@ -21,9 +23,9 @@ return [
 
     \CropTool\ApiService::class => \DI\autowire(),
 
-    LoggerInterface::class => \DI\factory(function () {
+    LoggerInterface::class => \DI\factory(function () use ($hasToolsDataDir) {
         $formatter = new LineFormatter("[%datetime%] %channel%.%level_name%: %message% %extra%\n", null, false, true);
-        $streamHandler = new RotatingFileHandler(ROOT_PATH . '/logs/croptool.log', 30, Level::Info);
+        $streamHandler = new RotatingFileHandler( ($hasToolsDataDir ? getenv('TOOL_DATA_DIR') : ROOT_PATH) . '/logs/croptool.log', 30, Level::Info);
         $streamHandler->setFormatter($formatter);
         $handlers = [$streamHandler];
         $processors = [new PsrLogMessageProcessor()];
@@ -37,10 +39,10 @@ return [
     }),
 
     \CropTool\Config::class => \DI\create()
-        ->constructor(\DI\string((getenv('TOOL_DATA_DIR') ?? '{root_directory}') . '/config.ini')),
+        ->constructor(\DI\string(($hasToolsDataDir ? getenv('TOOL_DATA_DIR') : '{root_directory}') . '/config.ini')),
 
     FileRepository::class => \DI\autowire()
-        ->constructor(\DI\string((getenv('TOOL_DATA_DIR') ?? '{root_directory}') . '/public_html')),
+        ->constructor(\DI\string(($hasToolsDataDir ? getenv('TOOL_DATA_DIR') : '{root_directory}') . '/public_html')),
 
     OAuthConsumer::class => \DI\autowire()
         ->constructorParameter('keyFile', \DI\string('{root_directory}/croptool-secret-key.txt'))
