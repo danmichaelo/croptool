@@ -5,18 +5,8 @@ use CropTool\Controllers\FileController;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use Psr\Http\Server\RequestHandlerInterface as RequestHandler;
 use Slim\Psr7\Response;
+use CropTool\WikiPageService;
 use \DI\Bridge\Slim\Bridge as App;
-use CropTool\Auth\AuthServiceInterface;
-use CropTool\Auth\OAuthConsumer;
-use CropTool\File\FileRepository;
-use Psr\Container\ContainerInterface;
-use Monolog\Formatter\LineFormatter;
-use Monolog\Logger;
-use Monolog\Level;
-use Monolog\ErrorHandler;
-use Monolog\Handler\RotatingFileHandler;
-use Monolog\Processor\PsrLogMessageProcessor;
-use Psr\Log\LoggerInterface;
 
 if (!defined('ROOT_PATH')) {
     define('ROOT_PATH', __DIR__);
@@ -90,12 +80,12 @@ $pageMiddleware = function (Request $request, RequestHandler $handler) {
     $response = $handler->handle($request);
 
     $title = $requestParams['title'];
+    $site = $requestParams['site'];
 
-    $factory = $this->get('DI\FactoryInterface');
+    $pageService = $this->get(WikiPageService::class);
 
-    $this->set(CropTool\WikiPage::class, $factory->make(CropTool\WikiPage::class, [
-        'title' => $title,
-    ]));
+    $request->withAttribute('page', $pageService->getForTitle( $title ));
+    $request->withAttribute('site', $site);
 
     return $response;
 };
@@ -106,57 +96,14 @@ $pageMiddleware = function (Request $request, RequestHandler $handler) {
 
 $builder = new \DI\ContainerBuilder();
 
-$builder->addDefinitions([
-    'root_directory' => ROOT_PATH,
-
-    'site' => function (ContainerInterface $container) {
-        return 'commons.wikimedia.org';//$container->get('request')->getParam('site', 'commons.wikimedia.org');
-    },
-
-    'host' => function (ContainerInterface $container) {
-        return $container->get(\CropTool\Config::class)->get('hostname');
-    },
-
-    \CropTool\ApiService::class => \DI\autowire()
-        ->constructorParameter('site', \DI\get('site')),
-
-    LoggerInterface::class => \DI\factory(function () {
-        $formatter = new LineFormatter("[%datetime%] %channel%.%level_name%: %message% %extra%\n", null, false, true);
-        $streamHandler = new RotatingFileHandler(ROOT_PATH . '/logs/croptool.log', 30, Level::Info);
-        $streamHandler->setFormatter($formatter);
-        $handlers = [$streamHandler];
-        $processors = [new PsrLogMessageProcessor()];
-        $logger = new Logger('croptool', $handlers, $processors);
-
-        // IntrospectionProcessor adds filename, class, line to %extra%
-        // $streamHandler->pushProcessor(new IntrospectionProcessor(Logger::ERROR));
-
-        ErrorHandler::register($logger);
-        return $logger;
-    }),
-
-    \CropTool\Config::class => \DI\create()
-        ->constructor(\DI\string('{root_directory}/config.ini')),
-
-    FileRepository::class => \DI\create()
-        ->constructor(\DI\string('{root_directory}/public_html')),
-
-    OAuthConsumer::class => \DI\autowire()
-        ->constructorParameter('keyFile', \DI\string('{root_directory}/croptool-secret-key.txt'))
-        ->constructorParameter('callbackUrl', \DI\string('https://{host}/api/auth/callback')),  // https://tools.wmflabs.org/croptool/api/auth/callback'),
-
-    AuthServiceInterface::class => \DI\autowire(OAuthConsumer::class)
-    ->constructorParameter('keyFile', \DI\string('{root_directory}/croptool-secret-key.txt'))
-    ->constructorParameter('callbackUrl', \DI\string('https://{host}/api/auth/callback')),  // https://tools.wmflabs.org/croptool/api/auth/callback'),,
-
-    \CropTool\SessionInterface::class => \DI\autowire(\CropTool\Session::class),
-]);
+$builder->addDefinitions(require('./container.php'));
 
 $container = $builder->build();
 
 $app = App::create($container);
-//$app->addErrorMiddleware(true, true, true);
+$app->addErrorMiddleware(true, true, true);
 $app->add(\CropTool\SessionInterface::class);
+$app->addBodyParsingMiddleware();
 
 $app->get('/api/ping', function ($request, $response) {
     $response->getBody()->write('pong');
