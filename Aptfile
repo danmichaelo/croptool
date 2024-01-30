@@ -5,3 +5,4 @@ libmagickwand-dev
 exiftool
 libzip-dev
 cron
+lighttpd
