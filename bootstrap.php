@@ -96,7 +96,7 @@ $pageMiddleware = function (Request $request, RequestHandler $handler) {
 
 $builder = new \DI\ContainerBuilder();
 
-$builder->addDefinitions(require('./container.php'));
+$builder->addDefinitions(ROOT_PATH . '/container.php');
 
 $container = $builder->build();
 

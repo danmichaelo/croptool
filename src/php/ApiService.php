@@ -25,14 +25,12 @@ class ApiService
     protected $factory;
     public $calls = 0;
 
-    public function __construct(FactoryInterface $factory, LoggerInterface $logger, AuthServiceInterface $auth, Config $config, $site)
+    public function __construct(FactoryInterface $factory, LoggerInterface $logger, AuthServiceInterface $auth, Config $config)
     {
         $this->factory = $factory;
         $this->logger = $logger;
         $this->auth = $auth;
         $this->userAgent = $config->get('userAgent', 'CropTool');
-        $this->site = $site;
-        $this->endpoint = 'https://' . $site . '/w/api.php';
     }
 
     public function __invoke(Request $request, RequestHandler $handler)
@@ -49,6 +47,7 @@ class ApiService
         }
 
         $this->site = $requestParams['site'];
+        $this->endpoint = 'https://' . $this->site . '/w/api.php';
 
         $response = $handler->handle($request);
 
