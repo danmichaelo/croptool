@@ -80,12 +80,10 @@ $pageMiddleware = function (Request $request, RequestHandler $handler) {
     $response = $handler->handle($request);
 
     $title = $requestParams['title'];
-    $site = $requestParams['site'];
 
     $pageService = $this->get(WikiPageService::class);
 
     $request->withAttribute('page', $pageService->getForTitle( $title ));
-    $request->withAttribute('site', $site);
 
     return $response;
 };

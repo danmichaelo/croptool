@@ -37,10 +37,10 @@ return [
     }),
 
     \CropTool\Config::class => \DI\create()
-        ->constructor(\DI\string('{root_directory}/config.ini')),
+        ->constructor(\DI\string((getenv('TOOL_DATA_DIR') ?? '{root_directory}') . '/config.ini')),
 
     FileRepository::class => \DI\autowire()
-        ->constructor(\DI\string('{root_directory}/public_html')),
+        ->constructor(\DI\string((getenv('TOOL_DATA_DIR') ?? '{root_directory}') . '/public_html')),
 
     OAuthConsumer::class => \DI\autowire()
         ->constructorParameter('keyFile', \DI\string('{root_directory}/croptool-secret-key.txt'))

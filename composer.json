@@ -30,11 +30,9 @@
     "scripts": {
         "pre-install-cmd": [
             "pecl install imagick",
-            "pecl install exif",
-            "pecl install zip"
+            "pecl install exif"
         ],
         "post-install-cmd": [
-            "vendor/bin/phpunit",
             "php generate-key.php"
         ]
     },

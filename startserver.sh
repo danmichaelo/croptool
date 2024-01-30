@@ -1,3 +1,3 @@
 #!/bin/bash
-cp config.dist.ini config.ini
-heroku-php-apache2 .
+php generate-key.php
+exec lightpd -f .lightpd.conf -D
