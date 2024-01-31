@@ -1,1 +1,1 @@
-web: ./startserver.sh
+web: ./scripts/startserver.sh

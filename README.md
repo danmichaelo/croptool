@@ -48,7 +48,7 @@ Features:
 - Allow consumer to specify a callback in requests
 - Grants: "Edit existing pages", "Create, edit, and move pages", "Upload new files" and "Upload, replace, and move files"
 
-2. Copy `config.dist.ini` to `config.ini` and add the consumer token and secret token to `config.ini`
+2. Copy `config.dev.ini` to `config.ini` and add the consumer token and secret token to `config.ini`
 
 3. Install dependencies using [Composer](https://getcomposer.org/) and [NPM](https://nodejs.org/en/):
 
@@ -79,33 +79,7 @@ Note that you should be able to login and preview cropping without waiting for t
 
 ### Deployment notes
 
-To get `jpegtran`, we fetch the latest `jpegsrc.xxx.tar.gz` from the Independent JPEG Group. Note that the server returns "403 Forbidden" if you use the default curl user agent string.
-
-```bash
-curl -A "CropTool/0.1 (https://croptool.toolforge.org)" "http://www.ijg.org/files/jpegsrc.v9a.tar.gz" | tar -xz
-cd jpeg-*
-./configure
-make
-make test
-```
-
-#### Download deps and configure croptool:
-
-1. `composer install --optimize-autoloader`
-2. `cp config.dist.ini config.ini` and insert OAuth info and the path to jpegtran.
-3. Check that the server can write to `logs` and `public_html/files`.
-4. `vendor/bin/phpunit`
-5. `crontab crontab.tools` to setup cronjobs.
-6. `php generate-key.php`
-
-#### Frontend build:
-
-On Toolforge, to use an up-to-date version of Node for installing dependencies, run:
-
-    $ webservice --backend=kubernetes node10 shell
-
-This should start a new shell, from which you can run:
-
-    $ npm install npm
-    $ gulp build
-
+- Run `toolforge build start <public link to repo>`
+- Run `toolforge webservice --backend=kubernetes --mount=all buildservice start`
+- Copy `config.prod.ini` into the home directory, and add OAuth information
+- Creates a `public_files` directory in the home directory and set it to be readable and writable by others

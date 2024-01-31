@@ -42,7 +42,7 @@ return [
         ->constructor(\DI\string(($hasToolsDataDir ? getenv('TOOL_DATA_DIR') : '{root_directory}') . '/config.ini')),
 
     FileRepository::class => \DI\autowire()
-        ->constructor(\DI\string('{root_directory}/public_html')),
+        ->constructor(\DI\string(($hasToolsDataDir ? getenv('TOOL_DATA_DIR') . '/public_files' : '{root_directory}/public_html'))),
 
     OAuthConsumer::class => \DI\autowire()
         ->constructorParameter('keyFile', \DI\string('{root_directory}/croptool-secret-key.txt'))
