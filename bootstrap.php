@@ -102,6 +102,9 @@ $app = App::create($container);
 $app->addErrorMiddleware(true, true, true);
 $app->add(\CropTool\SessionInterface::class);
 $app->addBodyParsingMiddleware();
+$app->add( function () {
+    exec( './jobs/cleanup.sh &' );
+} );
 
 $app->get('/api/ping', function ($request, $response) {
     $response->getBody()->write('pong');
