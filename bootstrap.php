@@ -102,12 +102,15 @@ $app = App::create($container);
 $app->addErrorMiddleware(true, true, true);
 $app->add(\CropTool\SessionInterface::class);
 $app->addBodyParsingMiddleware();
-$app->add( function () {
-    exec( './jobs/cleanup.sh &' );
-} );
 
 $app->get('/api/ping', function ($request, $response) {
     $response->getBody()->write('pong');
+    return $response->withStatus(200);
+});
+
+$app->get('/api/server-cleanup', function ($request, $response) {
+    exec( ROOT_PATH . '/scripts/cleanup.sh &');
+    $response->getBody()->write('STARTED');
     return $response->withStatus(200);
 });
 
