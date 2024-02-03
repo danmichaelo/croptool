@@ -1,0 +1,1 @@
+web: ./scripts/startserver.sh

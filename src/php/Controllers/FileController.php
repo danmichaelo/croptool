@@ -9,11 +9,11 @@ use CropTool\Image;
 use CropTool\ImageEditor;
 use CropTool\WikidataItem;
 use CropTool\NoSuchEntity;
-use CropTool\WikiPage;
+use CropTool\WikiPageService;
 use DI\FactoryInterface;
 use Psr\Log\LoggerInterface;
-use Slim\Http\Request;
-use Slim\Http\Response;
+use Psr\Http\Message\ResponseInterface as Response;
+use Psr\Http\Message\ServerRequestInterface as Request;
 
 class FileController
 {
@@ -46,18 +46,21 @@ class FileController
         ];
     }
 
-    public function exists(Response $response, WikiPage $page)
+    public function exists(Response $response, Request $request, WikiPageService $pageService)
     {
-        return $response->withJson([
+        $page = $pageService->getForTitle( $request->getQueryParams()['title'] );
+        $response->getBody()->write((string)json_encode([
             'site' => $page->site,
             'title' => $page->title,
             'exists' => $page->exists,
-        ]);
+        ]));
+        return $response;
     }
 
-    public function info(Response $response, Request $request, WikiPage $page, ImageEditor $editor)
+    public function info(Response $response, Request $request, WikiPageService $pageService, ImageEditor $editor)
     {
-        $pageno = intval($request->getQueryParam('page', 0));
+        $page = $pageService->getForTitle($request->getQueryParams()['title']);
+        $pageno = intval($request->getQueryParams()['page'] ?? 0);
 
         $page->assertExists();
         $page->assertNotWaitingForLicenseReview();
@@ -71,7 +74,7 @@ class FileController
         $original = $editor->open($page->file, $pageno);     // instance of Image
         $thumb = $original->thumb($thumbPath);   // instance of Image or null
 
-        return $response->withJson([
+        $response->getBody()->write((string)json_encode([
             'site' => $page->site,
             'title' => $page->title,
             'description' => $page->imageinfo->descriptionurl,
@@ -82,29 +85,35 @@ class FileController
             'samplingFactor' => $original->samplingFactor,
             'orientation' => $original->orientation,
             'categories' => $page->imageinfo->categories,
-        ]);
+        ]));
+
+        return $response;
     }
 
-    public function autodetect(Response $response, Request $request, WikiPage $page, BorderLocator $bloc)
+    public function autodetect(Response $response, Request $request, WikiPageService $pageService, BorderLocator $bloc)
     {
-        $pageno = intval($request->getQueryParam('page', 0));
+        $page = $pageService->getForTitle($request->getQueryParams()['title']);
+        $pageno = intval($request->getQueryParams()['page'] ?? 0);
         $srcPath = $page->file->getAbsolutePathForPage($pageno);
 
-        return $response->withJson([
+        $response->getBody()->write((string)json_encode([
             'area' => $bloc->open($srcPath)->getSelection(),
-        ]);
+        ]));
+
+        return $response;
     }
 
-    public function crop(Response $response, Request $request, WikiPage $page, ImageEditor $editor, LoggerInterface $logger, FactoryInterface $factory)
+    public function crop(Response $response, Request $request, WikiPageService $pageService, ImageEditor $editor, LoggerInterface $logger, FactoryInterface $factory)
     {
+        $page = $pageService->getForTitle($request->getQueryParams()['title'] ?? 0);
         // @TODO: DRY
-        $pageno = intval($request->getQueryParam('page', 0));
-        $x = intval($request->getQueryParam('x', 0));
-        $y = intval($request->getQueryParam('y', 0));
-        $width = intval($request->getQueryParam('width', 0));
-        $height = intval($request->getQueryParam('height', 0));
-        $rotation = floatval($request->getQueryParam('rotate', 0));
-        $cropMethod = $request->getQueryParam('method', 'precise');
+        $pageno = intval($request->getQueryParams()['page'] ?? 0);
+        $x = intval($request->getQueryParams()['x'] ?? 0);
+        $y = intval($request->getQueryParams()['y'] ?? 0);
+        $width = intval($request->getQueryParams()['width'] ?? 0);
+        $height = intval($request->getQueryParams()['height'] ?? 0);
+        $rotation = floatval($request->getQueryParams()['rotate'] ?? 0);
+        $cropMethod = $request->getQueryParams()['method'] ??'precise';
 
         $t0 = microtime(true) * 1000;
 
@@ -137,7 +146,7 @@ class FileController
             $dim[] = ($cropPercentY ?: ' < 1') . ' % vertically';
         }
         if ($rotation) {
-            $dim[] = "rotated ${rotation}°";
+            $dim[] = "rotated {$rotation}°";
         }
 
         $options = $page->wikitext->possibleStuffToRemove();
@@ -154,7 +163,7 @@ class FileController
             }
         }
 
-        return $response->withJson([
+        $response->getBody()->write((string)json_encode(([
             'site' => $page->site,
             'title' => $page->title,
             'pageno' => $pageno,
@@ -170,10 +179,12 @@ class FileController
             'time' => time(),
             'wikidata' => $wd,
             'msecs' => round(microtime(true)*1000 - $t0),
-        ]);
+        ])));
+
+        return $response;
     }
 
-    public function publish(Response $response, Request $request, WikiPage $page, FactoryInterface $factory, LoggerInterface $logger)
+    public function publish(Response $response, Request $request, WikiPageService $pageService, FactoryInterface $factory, LoggerInterface $logger)
     {
         $sitesSupportingExtractedFromTemplate = [
             'commons.wikimedia.org',
@@ -184,6 +195,7 @@ class FileController
 
         // @TODO: DRY
         $body = $request->getParsedBody();
+        $page = $pageService->getForTitle(array_get($body, 'title'));
         $pageno = intval(array_get($body, 'page', 0));
         $overwrite = array_get($body, 'overwrite') == 'overwrite';
         $editComment = array_get($body, 'comment');
@@ -229,7 +241,7 @@ class FileController
             $page->setWikitext($wikitext)
                 ->save($editSummary->build());
         } else {
-            $newPage = $factory->make(WikiPage::class, ['title' => $newName]);
+            $newPage = $pageService->getForTitle( $newName );
             if (!$ignoreWarnings) {
                 $newPage->assertNotExists();
             }
@@ -271,6 +283,7 @@ class FileController
 
         $uploadResponse->elems = $elems;
 
-        return $response->withJson($uploadResponse);
+        $response->getBody()->write((string)json_encode($uploadResponse));
+        return $response;
     }
 }
