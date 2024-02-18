@@ -145,6 +145,8 @@ class FileController
             $cropPercentY = round(($original->height - $crop->height) / $original->height * 100);
             $dim[] = ($cropPercentY ?: ' < 1') . ' % vertically';
         }
+        $cropPercentXY = round((1 - $crop->width * $crop->height / ($original->width * $original->height)) * 100);
+        $dim[] = ($cropPercentXY ?: ' < 1') . ' % areawise';
         if ($rotation) {
             $dim[] = "rotated {$rotation}°";
         }
