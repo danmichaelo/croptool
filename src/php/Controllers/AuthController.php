@@ -6,17 +6,18 @@ use CropTool\Auth\AuthServiceInterface;
 use CropTool\Config;
 use CropTool\SessionInterface;
 use CropTool\Auth\UserService;
-use Slim\Http\Request as Request;
-use Slim\Http\Response as Response;
+use Psr\Http\Message\ResponseInterface as Response;
+use Psr\Http\Message\ServerRequestInterface as Request;
 
 class AuthController
 {
 
     public function getUser(Response $response, UserService $user)
     {
-        return $response->withJson([
+        $response->getBody()->write((string)json_encode([
             'user' =>  $user->username,
-        ]);
+        ]));
+        return $response;
     }
 
     public function login(Response $response, Request $request, AuthServiceInterface $auth, SessionInterface $session)
@@ -30,12 +31,12 @@ class AuthController
 
     public function authCallback(Response $response, Request $request, AuthServiceInterface $auth, Config $config, SessionInterface $session)
     {
-        $auth->handleCallbackRequest($request->getQueryParam('oauth_verifier'));
+        $auth->handleCallbackRequest($request->getQueryParams()['oauth_verifier']);
 
         $state = [];
         foreach (['site', 'title', 'page'] as $key) {
-            if ($request->getQueryParam($key)) {
-                $state[] = $key . '=' . $request->getQueryParam($key);
+            if ($request->getQueryParams()[$key]) {
+                $state[] = $key . '=' . $request->getQueryParams()[$key];
             }
         }
         $state = implode('&', $state);
@@ -48,8 +49,10 @@ class AuthController
         $auth->doLogout();
         $session->flush();
 
-        return $response->withJson([
+        $response->getBody()->write((string)json_encode([
             'user' =>  null,
-        ]);
+        ]));
+
+        return $response;
     }
 }

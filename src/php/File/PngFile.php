@@ -38,7 +38,7 @@ class PngFile extends File implements FileInterface
             return false; // wrong length for IHDR chunk.
 
         if ('IHDR'!==array_shift($info))
-            return false; // a non-IHDR chunk singals invalid data.
+            return false; // a non-IHDR chunk signals invalid data.
 
         $color = $info['color'];
 
