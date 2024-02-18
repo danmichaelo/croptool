@@ -188,7 +188,7 @@ class File implements FileInterface
         ];
     }
 
-    static public function crop($srcPath, $destPath, $method, $coords, $rotation)
+    public function crop($srcPath, $destPath, $method, $coords, $rotation)
     {
         $image = new Imagick($srcPath);
 

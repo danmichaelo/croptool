@@ -2,6 +2,7 @@
 
 namespace CropTool;
 
+use CropTool\File\File;
 use Imagick;
 use ImagickPixel;
 
@@ -18,12 +19,12 @@ class Image
     public $samplingFactor;
     public $width;
     public $height;
-    protected $fileClass;
+    protected $file;
 
-    public function __construct(ImageEditor $editor, string $fileClass, $path, $mime)
+    public function __construct(ImageEditor $editor, File $file, $path, $mime)
     {
         $this->editor = $editor;
-        $this->fileClass = $fileClass;
+        $this->file = $file;
         $this->path = $path;
         $this->mime = $mime;
         $this->load();
@@ -31,7 +32,7 @@ class Image
 
     protected function load()
     {
-        $metadata = $this->fileClass::readMetadata($this->path);
+        $metadata = $this->file::readMetadata($this->path);
 
         if (!$metadata  || !$metadata['width'] || !$metadata['height']) {
             // @TODO: This should move to a safer place:
@@ -178,11 +179,11 @@ class Image
         // Get coords orientated in the same direction as the image:
         $coords = $this->getCropCoordinates($x, $y, $width, $height, $rotation);
 
-        $this->fileClass::crop($this->path, $destPath, $method, $coords, $rotation);
+        $this->file->crop($this->path, $destPath, $method, $coords, $rotation);
 
         chmod($destPath, $this->filePermission);
 
-        return new Image($this->editor, $this->fileClass, $destPath, $this->mime);
+        return new Image($this->editor, $this->file, $destPath, $this->mime);
     }
 
 
@@ -226,7 +227,7 @@ class Image
 
         $im->setImageCompressionQuality(75);
 
-        $this->fileClass::saveImage($im, $thumbPath, $this->path);
+        $this->file::saveImage($im, $thumbPath, $this->path);
         $im->destroy();
 
         return array($w, $h);
@@ -260,6 +261,6 @@ class Image
         $this->genThumb($thumbPath, $this->thumbWidth, $this->thumbHeight);
         chmod($thumbPath, $this->filePermission);
 
-        return new Image($this->editor, $this->fileClass, $thumbPath, $mime);
+        return new Image($this->editor, $this->file, $thumbPath, $mime);
     }
 }

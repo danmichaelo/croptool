@@ -36,6 +36,6 @@ class ImageEditor
 
         $mime = $this->mimeFromPath($path);
 
-        return new Image($this, get_class($file), $path, $mime);
+        return new Image($this, $file, $path, $mime);
     }
 }
