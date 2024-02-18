@@ -48,7 +48,7 @@ Features:
 - Allow consumer to specify a callback in requests
 - Grants: "Edit existing pages", "Create, edit, and move pages", "Upload new files" and "Upload, replace, and move files"
 
-2. Copy `config.dev.ini` to `config.ini` and add the consumer token and secret token to `config.ini`
+2. Copy `config.dev.ini` to `config.ini` and add the consumer token and secret token to `config.ini` and check the default paths for the dependencies.
 
 3. Install dependencies using [Composer](https://getcomposer.org/) and [NPM](https://nodejs.org/en/):
 
