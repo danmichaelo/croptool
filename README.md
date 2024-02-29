@@ -12,9 +12,9 @@ Features:
   DJVU and PDF files.
 * JPEGs can be cropped either losslessly using [jpegtran](http://jpegclub.org/jpegtran/)
   or pixel perfect using [ImageMagick](https://www.imagemagick.org/).
-* Crop preview can be initialized from query string parameters:
-  `?title=Example.jpg&left=10&top=10&width=150&height=100`
-  or
+* Crop preview can be initialized from query string parameters:  
+  `?title=Example.jpg&left=10&top=10&width=150&height=100`  
+  or  
   `?title=Example.jpg&left=10&top=10&right=10&bottom=10`
 * Detects [`{{Remove border}}`](https://commons.wikimedia.org/wiki/Template:Remove_border),
   [Category:Images with borders](https://commons.wikimedia.org/wiki/Category:Images_with_borders),
