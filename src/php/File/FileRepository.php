@@ -33,6 +33,8 @@ class FileRepository
                 return PdfFile::class;
             case 'image/svg+xml':
                 return SvgFile::class;
+            case 'image/gif':
+		return GifFile::class;
             default:
                 return File::class;
         }
