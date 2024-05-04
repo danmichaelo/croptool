@@ -208,4 +208,8 @@ class File implements FileInterface
     {
         return $im->writeImage($destPath);
     }
+
+    public function supportsRotation() {
+        return true;
+    }
 }
