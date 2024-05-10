@@ -15,6 +15,7 @@ class ImageEditor
         '.gif' => 'image/gif',
         '.djvu' => 'image/vnd.djvu',
         '.pdf' => 'application/pdf',
+        '.webp' => 'image/webp',
     ];
 
     public function mimeFromPath($path)
