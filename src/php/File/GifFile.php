@@ -6,7 +6,7 @@ use pastuhov\Command\Command;
 
 class GifFile extends File implements FileInterface
 {
-    static public function crop($srcPath, $destPath, $method, $coords, $rotation)
+    public function crop($srcPath, $destPath, $method, $coords, $rotation)
     {
         $dim = $coords['width'] . 'x' . $coords['height'] . '+' . $coords['x'] .'+' . $coords['y'] . '!';
 
