@@ -28,6 +28,7 @@ class File implements FileInterface
         'image/jpeg' => '.jpg',
         'image/png' => '.png',
         'image/gif' => '.gif',
+        'image/webp' => '.webp',
     ];
 
     public function __construct($publicDir, $filesDir, QueryResponse $imageinfo, Logger $logger, Config $config)
