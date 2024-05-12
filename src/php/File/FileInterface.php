@@ -19,4 +19,6 @@ interface FileInterface
     public function crop($srcPath, $destPath, $method, $coords, $rotation);
 
     static public function saveImage($im, $destPath, $srcPath);
+
+    public function supportsRotation();
 }

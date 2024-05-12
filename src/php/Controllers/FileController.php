@@ -85,6 +85,7 @@ class FileController
             'samplingFactor' => $original->samplingFactor,
             'orientation' => $original->orientation,
             'categories' => $page->imageinfo->categories,
+            'supportsRotation' => $page->file->supportsRotation(),
         ]));
 
         return $response;
