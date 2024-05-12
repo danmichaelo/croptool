@@ -26,7 +26,7 @@ class QueryResponse
             }
             $this->exists = true;
             $this->parseImageInfo($page->imageinfo[0]);
-            $this->parseCategories($page->categories);
+            $this->parseCategories($page->categories ?? []);
         }
     }
 
