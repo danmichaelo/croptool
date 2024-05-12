@@ -145,11 +145,11 @@ class SvgFile extends File implements FileInterface
 
         $metadata = self::readMetadata( $srcPath );
 
-        $viewBoxHorizUnits = $metadata['width'] / $metadata['viewBox'][2];
+        $viewBoxHorizUnits = $metadata['viewBox'][2] / $metadata['width'];
         $newViewBoxXOffset = $metadata['viewBox'][0] + $coords['x'] * $viewBoxHorizUnits;
         $newViewBoxWidth = $coords['width'] * $viewBoxHorizUnits;
 
-        $viewBoxVertUnits = $metadata['height'] / $metadata['viewBox'][3];
+        $viewBoxVertUnits = $metadata['viewBox'][3] / $metadata['height'];
         $newViewBoxYOffset = $metadata['viewBox'][1] + $coords['y'] * $viewBoxVertUnits;
         $newViewBoxHeight = $coords['height'] * $viewBoxVertUnits;
 
