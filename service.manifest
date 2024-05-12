@@ -1,8 +1,9 @@
 # This file is used by Toolforge infrastructure.
 # Please do not edit manually at this time.
-# Thu Jul 21 21:39:33 2022
-backend: gridengine
+# Sun May 12 21:20:59 2024
+backend: kubernetes
+buildservice-image: tool-croptool/tool-croptool:latest
 canonical: true
-release: buster
+mount: all
 version: 4
-web: lighttpd
+web: buildservice
