@@ -13,7 +13,7 @@
     </script>
 
     <link rel="stylesheet" type="text/css"
-        href="//tools-static.wmflabs.org/cdnjs/ajax/libs/twitter-bootstrap/3.3.7/css/bootstrap.min.css">
+        href="//tools-static.wmflabs.org/cdnjs/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css">
     <link rel="stylesheet" type="text/css"
         href="//tools-static.wmflabs.org/cdnjs/ajax/libs/font-awesome/4.6.3/css/font-awesome.min.css">
     <link rel="stylesheet" type="text/css"
@@ -26,7 +26,7 @@
     <!-- endbuild -->
 
     <script src="//tools-static.wmflabs.org/cdnjs/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
-    <script src="//tools-static.wmflabs.org/cdnjs/ajax/libs/twitter-bootstrap/3.3.7/js/bootstrap.min.js"></script>
+    <script src="//tools-static.wmflabs.org/cdnjs/ajax/libs/bootstrap/5.3.0/js/bootstrap.min.js"></script>
     <script src="//tools-static.wmflabs.org/cdnjs/ajax/libs/angular.js/1.6.5/angular.min.js"></script>
     <script src="//tools-static.wmflabs.org/cdnjs/ajax/libs/angular.js/1.6.5/angular-sanitize.min.js"></script>
     <script
@@ -50,533 +50,589 @@
 
 <body ng-controller="AppCtrl">
 
-    <div class="container2">
-
-        <!-- ********************************************************************************************************
+    <!-- ********************************************************************************************************
         Notice
         **************************************************************************************************** -->
-        <!--
+    <!--
     <div ng-show="showNotice" style="padding: .3em; background: #eeee88; text-align:center; border-bottom-right-radius: 5px; border-bottom-left-radius: 5px;">
         <a style="float:right; padding: .1em 2em;" href="#" ng-click="dismissNotice();">[Dismiss]</a>
         New: Support for cropping pages from DJVU and PDF files.
         <a href="https://github.com/danmichaelo/croptool/issues">Report issues here</a>
     </div>-->
 
-        <!-- ********************************************************************************************************
+    <!-- ********************************************************************************************************
         Header
         **************************************************************************************************** -->
+    <header class="mb-3 border-bottom">
+        <nav id="mainnav" class="navbar navbar-expand-lg shadow">
+            <div class="container-fluid" id="navbardiv">
+                <a class="navbar-brand mb-0 h1" href ng-click="currentUrlParams = {}; openFile()">
+                    <i class="fa fa-crop"></i>
+                    <span translate>CropTool</span>
+                </a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
+                    data-bs-target="#collapsibleNavbar" aria-controls="collapsibleNavbar" aria-expanded="false"
+                    aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="collapse navbar-collapse" id="collapsibleNavbar">
+                    <ul class="navbar-nav flex-row flex-wrap bd-navbar-nav">
 
-        <div ng-show="user" style="float:right; padding:.3em 0;" ng-controller="LoginCtrl">
-            <div class="panel-body">
-                <span translate translate-value-user="{{user.name}}">logged-in</span>
-                <a href ng-click="logout()" translate>logout</a>
+                        <li class="nav-item col-4 col-lg-auto">
+                            <a class="nav-link py-2 px-0 px-lg-2" href="https://github.com/MrIbrahem/nccroptool"
+                                target="_blank">
+                                <span class="navtitles">Github</span>
+                            </a>
+                        </li>
+                    </ul>
+                    <hr class="d-lg-none text-black-50">
+                    <ul class="navbar-nav flex-row flex-wrap bd-navbar-nav ms-lg-auto">
+                        <li class="nav-item col-4 col-lg-auto" ng-show="user" style="float:right; padding:.3em 0;"
+                            ng-controller="LoginCtrl">
+                            <div>
+                                <span translate translate-value-user="{{user.name}}">logged-in</span>
+                                <a href ng-click="logout()" translate>logout</a>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
             </div>
-        </div>
+        </nav>
+    </header>
+    <main id="body">
+        <div id="maindiv" class="container-fluid">
 
-        <h1>
-            <a href ng-click="currentUrlParams = {}; openFile()">
-                <i class="fa fa-crop"></i>
-                <span translate>CropTool</span>
-            </a>
-            <span ng-show="metadata">
-                : {{currentUrlParams.title}}
-            </span>
-        </h1>
 
-        <!-- ********************************************************************************************************
+            <!-- ********************************************************************************************************
         If not authorized, show "login form"
         **************************************************************************************************** -->
 
-        <div ng-controller="LoginCtrl" ng-show="!ready">
-            <span translate>initial-loading</span>
-            <div class="mainLoader" style="margin-top: 1em;"></div>
-        </div>
-
-        <div ng-controller="LoginCtrl" ng-show="ready && !user">
-
-            <div ng-show="oauthError" class="alert alert-danger" role="alert">
-                <span class="fa fa-warning"></span>
-                <span ng-bind-html="oauthError"></span>
+            <div ng-controller="LoginCtrl" ng-show="!ready">
+                <span translate>initial-loading</span>
+                <div class="mainLoader" style="margin-top: 1em;"></div>
             </div>
 
-            <div ng-repeat="warning in oauthWarnings" class="alert alert-warning" role="alert">
-                <span class="fa fa-info-circle"></span>
-                <span>{{ warning | translate }}</span>
-            </div>
+            <div ng-controller="LoginCtrl" ng-show="ready && !user">
 
-            <form class="form-inline panel panel-primary" role="form">
-
-                <div class="panel-heading" translate>loginform-header</div>
-
-                <div class="panel-body">
-
-                    <p translate translate-value-url="//commons.wikimedia.org/wiki/Special:MyLanguage/Commons:CropTool">
-                        loginform-blurb
-                    </p>
-
-                    <p translate>loginform-help</p>
-
-                    <button type="submit" class="btn btn-primary" ng-click="oauthLogin()">
-                        <i class="fa fa-lock"></i>
-                        <span translate>loginform-submit-button</span>
-                    </button>
-
+                <div ng-show="oauthError" class="alert alert-danger" role="alert">
+                    <span class="fa fa-warning"></span>
+                    <span ng-bind-html="oauthError"></span>
                 </div>
-            </form>
 
-        </div>
+                <div ng-repeat="warning in oauthWarnings" class="alert alert-warning" role="alert">
+                    <span class="fa fa-info-circle"></span>
+                    <span>{{ warning | translate }}</span>
+                </div>
 
-        <!-- ********************************************************************************************************
+                <form class="form-inline">
+                    <div class="card card-primary">
+
+                        <div class="card-header" translate>loginform-header</div>
+
+                        <div class="card-body">
+
+                            <p translate
+                                translate-value-url="//commons.wikimedia.org/wiki/Special:MyLanguage/Commons:CropTool">
+                                loginform-blurb
+                            </p>
+
+                            <p translate>loginform-help</p>
+
+                            <button type="submit" class="btn btn-primary" ng-click="oauthLogin()">
+                                <i class="fa fa-lock"></i>
+                                <span translate>loginform-submit-button</span>
+                            </button>
+
+                        </div>
+                    </div>
+                </form>
+
+            </div>
+
+            <!-- ********************************************************************************************************
         If authorized, but no title given, show "enter title form"
         **************************************************************************************************** -->
+            <div class="container2">
 
-        <div ng-show="user && !metadata && !busy">
+                <div ng-show="user && !metadata && !busy">
 
-            <div class="panel panel-primary">
+                    <div class="card card-primary">
 
-                <div class="panel-heading" translate>titleform-header</div>
-                <div class="panel-body">
+                        <div class="card-header" translate>titleform-header</div>
+                        <div class="card-body">
 
-                    <p translate>titleform-help</p>
+                            <p translate>titleform-help</p>
 
-                    <form role="form" ng-submit="openFile()">
+                            <form role="form" ng-submit="openFile()">
 
-                        <div class="row">
+                                <div class="row">
 
-                            <div class="form-group col-sm-8"
-                                ng-class="{ 'has-error': exists[currentUrlParams.site+':'+currentUrlParams.title] === false, 'has-success': exists[currentUrlParams.site+':'+currentUrlParams.title] === true }">
-                                <label class="sr-only" for="titleInput">
-                                    <span translate>titleform-file-label</span>
-                                </label>
-                                <input type="text" ng-model="titleInput" class="form-control"
-                                    placeholder="{{'titleform-file-label' | translate}}">
-                                <span class="help-block"
-                                    ng-show="exists[currentUrlParams.site+':'+currentUrlParams.title] === false">
-                                    <span translate translate-value-title="{{currentUrlParams.title}}"
-                                        translate-value-site="{{currentUrlParams.site}}">titleform-file-not-found</span>
-                                </span>
-                                <span class="help-block"
-                                    ng-show="exists[currentUrlParams.site+':'+currentUrlParams.title] === true">
-                                    <span translate translate-value-title="{{currentUrlParams.title}}"
-                                        translate-value-site="{{currentUrlParams.site}}">titleform-file-found</span>
-                                </span>
-                            </div>
+                                    <div class="form-group col-sm-8"
+                                        ng-class="{ 'has-error': exists[currentUrlParams.site+':'+currentUrlParams.title] === false, 'has-success': exists[currentUrlParams.site+':'+currentUrlParams.title] === true }">
+                                        <label class="sr-only" for="titleInput">
+                                            <span translate>titleform-file-label</span>
+                                        </label>
+                                        <input type="text" ng-model="titleInput" class="form-control"
+                                            placeholder="{{'titleform-file-label' | translate}}">
+                                        <span class="help-block"
+                                            ng-show="exists[currentUrlParams.site+':'+currentUrlParams.title] === false">
+                                            <span translate translate-value-title="{{currentUrlParams.title}}"
+                                                translate-value-site="{{currentUrlParams.site}}">titleform-file-not-found</span>
+                                        </span>
+                                        <span class="help-block"
+                                            ng-show="exists[currentUrlParams.site+':'+currentUrlParams.title] === true">
+                                            <span translate translate-value-title="{{currentUrlParams.title}}"
+                                                translate-value-site="{{currentUrlParams.site}}">titleform-file-found</span>
+                                        </span>
+                                    </div>
 
-                            <div class="col-sm-4">
-                                <button type="submit" class="btn btn-primary" translate>titleform-submit-button</button>
-                            </div>
+                                    <div class="col-sm-4">
+                                        <button type="submit" class="btn btn-primary"
+                                            translate>titleform-submit-button</button>
+                                    </div>
+
+                                </div>
+
+                                <div ng-show="error" class="alert alert-danger" role="alert">
+                                    <span class="fa fa-warning"></span>
+                                    <span ng-bind-html="error"></span>
+                                </div>
+
+                            </form>
 
                         </div>
 
-                        <div ng-show="error" class="alert alert-danger" role="alert">
-                            <span class="fa fa-warning"></span>
-                            <span ng-bind-html="error"></span>
+                        <div class="card-footer" translate
+                            translate-value-url="//commons.wikimedia.org/wiki/Special:MyLanguage/Commons:CropTool">
+                            titleform-footer
                         </div>
 
-                    </form>
+                    </div>
 
                 </div>
 
-                <div class="panel-footer" translate
-                    translate-value-url="//commons.wikimedia.org/wiki/Special:MyLanguage/Commons:CropTool">
-                    titleform-footer
-                </div>
-
-            </div>
-
-        </div>
-
-        <!-- ********************************************************************************************************
+                <!-- ********************************************************************************************************
         Fetching image data and metadata
         **************************************************************************************************** -->
 
-        <div ng-show="user && !metadata && busy">
+                <div ng-show="user && !metadata && busy">
 
-            <p translate>fetching-progress</p>
+                    <p translate>fetching-progress</p>
 
-            <div class="mainLoader" style="margin-top: 1em;"></div>
-
-        </div>
-
-        <!-- ********************************************************************************************************
-        If authorized and given a title
-        **************************************************************************************************** -->
-
-        <div ng-show="user && metadata">
-
-            <!-- ********************************************************************************************************
-             Header
-             **************************************************************************************************** -->
-            <div>
-                <p>
-                    <a href="{{metadata.description}}" translate
-                        translate-value-site="{{currentUrlParams.site}}">view-at-site</a>.
-                    <span translate translate-value-width="{{metadata.original.width}}"
-                        translate-value-height="{{metadata.original.height}}">original-dimensions</span>
-
-                    <span ng-show="crop_dim && !cropresults">
-                        <span translate translate-value-width="{{crop_dim.w}}"
-                            translate-value-height="{{crop_dim.h}}">crop-dimensions</span>
-                    </span>
-
-                    <span ng-show="cropresults">
-                        <span translate translate-value-width="{{cropresults.crop.width}}"
-                            translate-value-height="{{cropresults.crop.height}}">crop-dimensions</span>
-                    </span>
-
-                    <span ng-show="currentUrlParams.page">
-                        <span translate>page</span>:
-                        <select ng-model="currentUrlParams.page"
-                            ng-options="option for option in availablePages track by option"
-                            ng-change="pageChanged()"></select>
-                    </span>
-                </p>
-            </div>
-
-
-            <!-- ********************************************************************************************************
-             Main form
-             **************************************************************************************************** -->
-            <div class="row2" ng-show="metadata && !metadata.error" style="padding-bottom:1.5em;">
-
-
-                <!-- ********************************************************************************************************
-                 Left column
-                 **************************************************************************************************** -->
-                <div class="leftcol">
-
-
-                    <!-- ********************************************************************************************************
-                     Step 1
-                     **************************************************************************************************** -->
-                    <div ng-show="!cropresults" class="inner cropboxContainer">
-
-                        <img id="cropbox" ng-class="{imageloading: busy}" ct-cropper aspect-ratio="{{aspectratio_cxy}}"
-                            rotation="{{rotation.angle}}" on-crop="updateCoords($event.detail)"
-                            ng-src="{{metadata.thumb ? metadata.thumb.name : metadata.original.name}}">
-
-                    </div>
-
-                    <!-- ********************************************************************************************************
-                     Step 2 & Step 3
-                     **************************************************************************************************** -->
-                    <div ng-show="cropresults" class="inner transparentBg"
-                        ng-style="{'width': (cropresults.thumb ? cropresults.thumb.width : cropresults.crop.width) + 'px', 'margin-left': 'auto', 'margin-right': 'auto'}">
-
-                        <img ng-src="{{(cropresults.thumb ? cropresults.thumb.name : cropresults.crop.name) + '?ts=' + cropresults.time }}"
-                            class="img-responsive" />
-
-                    </div>
+                    <div class="mainLoader" style="margin-top: 1em;"></div>
 
                 </div>
 
-
                 <!-- ********************************************************************************************************
+        If authorized and given a title
+        **************************************************************************************************** -->
+                <div ng-show="user && metadata">
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title">
+                                <span ng-show="metadata">
+                                    {{currentUrlParams.title}}
+                                </span>
+                            </h3>
+                        </div>
+                        <div class="card-body">
+
+                            <!-- ********************************************************************************************************
+             Header
+             **************************************************************************************************** -->
+                            <div>
+                                <p>
+                                    <a href="{{metadata.description}}" translate
+                                        translate-value-site="{{currentUrlParams.site}}">view-at-site</a>.
+                                    <span translate translate-value-width="{{metadata.original.width}}"
+                                        translate-value-height="{{metadata.original.height}}">original-dimensions</span>
+
+                                    <span ng-show="crop_dim && !cropresults">
+                                        <span translate translate-value-width="{{crop_dim.w}}"
+                                            translate-value-height="{{crop_dim.h}}">crop-dimensions</span>
+                                    </span>
+
+                                    <span ng-show="cropresults">
+                                        <span translate translate-value-width="{{cropresults.crop.width}}"
+                                            translate-value-height="{{cropresults.crop.height}}">crop-dimensions</span>
+                                    </span>
+
+                                    <span ng-show="currentUrlParams.page">
+                                        <span translate>page</span>:
+                                        <select ng-model="currentUrlParams.page"
+                                            ng-options="option for option in availablePages track by option"
+                                            ng-change="pageChanged()"></select>
+                                    </span>
+                                </p>
+                            </div>
+
+
+                            <!-- ********************************************************************************************************
+             Main form
+             **************************************************************************************************** -->
+                            <div class="row2" ng-show="metadata && !metadata.error" style="padding-bottom:1.5em;">
+
+
+                                <!-- ********************************************************************************************************
+                 Left column
+                 **************************************************************************************************** -->
+                                <div class="leftcol">
+
+
+                                    <!-- ********************************************************************************************************
+                     Step 1
+                     **************************************************************************************************** -->
+                                    <div ng-show="!cropresults" class="inner cropboxContainer">
+
+                                        <img id="cropbox" ng-class="{imageloading: busy}" ct-cropper
+                                            aspect-ratio="{{aspectratio_cxy}}" rotation="{{rotation.angle}}"
+                                            on-crop="updateCoords($event.detail)"
+                                            ng-src="{{metadata.thumb ? metadata.thumb.name : metadata.original.name}}">
+
+                                    </div>
+
+                                    <!-- ********************************************************************************************************
+                     Step 2 & Step 3
+                     **************************************************************************************************** -->
+                                    <div ng-show="cropresults" class="inner transparentBg"
+                                        ng-style="{'width': (cropresults.thumb ? cropresults.thumb.width : cropresults.crop.width) + 'px', 'margin-left': 'auto', 'margin-right': 'auto'}">
+
+                                        <img ng-src="{{(cropresults.thumb ? cropresults.thumb.name : cropresults.crop.name) + '?ts=' + cropresults.time }}"
+                                            class="img-responsive" />
+
+                                    </div>
+
+                                </div>
+
+
+                                <!-- ********************************************************************************************************
                  Right column
                  **************************************************************************************************** -->
-                <div class="rightcol">
+                                <div class="rightcol">
 
-                    <!-- ********************************************************************************************************
+                                    <!-- ********************************************************************************************************
                      Step 1: Select crop region
                      **************************************************************************************************** -->
 
-                    <form ng-show="!cropresults" ng-submit="preview()" role="form">
+                                    <form ng-show="!cropresults" ng-submit="preview()" role="form">
 
-                        <input type="hidden" id="x" name="x" />
-                        <input type="hidden" id="y" name="y" />
-                        <input type="hidden" id="w" name="w" />
-                        <input type="hidden" id="h" name="h" />
+                                        <input type="hidden" id="x" name="x" />
+                                        <input type="hidden" id="y" name="y" />
+                                        <input type="hidden" id="w" name="w" />
+                                        <input type="hidden" id="h" name="h" />
 
-                        <input type="hidden" name="title" ng-model="currentUrlParams.title" />
+                                        <input type="hidden" name="title" ng-model="currentUrlParams.title" />
 
-                        <p>
-                            <span translate translate-compile
-                                translate-value-url="locateBorder()">cropform-select-region</span>
-                            <img src="res/spinner1.gif" ng-show="borderLocatorBusy">
-                        </p>
+                                        <p>
+                                            <span translate translate-compile
+                                                translate-value-url="locateBorder()">cropform-select-region</span>
+                                            <img src="res/spinner1.gif" ng-show="borderLocatorBusy">
+                                        </p>
 
-                        <div class="cropdim">
-                            <label>
-                                {{ 'top' | translate }}:
-                                <input type="number" ng-model="crop_dim.y" ng-change="onCropDimChange('y')">
-                            </label>
-                            <label>
-                                {{ 'left' | translate }}:
-                                <input type="number" ng-model="crop_dim.x" ng-change="onCropDimChange('x')">
-                            </label>
-                            <label>
-                                {{ 'width' | translate }}:
-                                <input type="number" ng-model="crop_dim.w" ng-change="onCropDimChange('w')">
-                            </label>
-                            <label>
-                                {{ 'height' | translate }}:
-                                <input type="number" ng-model="crop_dim.h" ng-change="onCropDimChange('h')">
-                            </label>
-                            <label>
-                                {{ 'cropform-rotation' | translate }}
-                                <input ng-if="cropmethod === 'precise'" type="number" ng-model="rotation.angle"
-                                    step="0.01">
-                                <input ng-if="cropmethod === 'lossless'" type="range" ng-input-range
-                                    ng-model="rotation.angle" min="0" step="90" max="270">
-                            </label>
-                        </div>
+                                        <div class="cropdim">
+                                            <label>
+                                                {{ 'top' | translate }}:
+                                                <input type="number" ng-model="crop_dim.y"
+                                                    ng-change="onCropDimChange('y')">
+                                            </label>
+                                            <label>
+                                                {{ 'left' | translate }}:
+                                                <input type="number" ng-model="crop_dim.x"
+                                                    ng-change="onCropDimChange('x')">
+                                            </label>
+                                            <label>
+                                                {{ 'width' | translate }}:
+                                                <input type="number" ng-model="crop_dim.w"
+                                                    ng-change="onCropDimChange('w')">
+                                            </label>
+                                            <label>
+                                                {{ 'height' | translate }}:
+                                                <input type="number" ng-model="crop_dim.h"
+                                                    ng-change="onCropDimChange('h')">
+                                            </label>
+                                            <label>
+                                                {{ 'cropform-rotation' | translate }}
+                                                <input ng-if="cropmethod === 'precise'" type="number"
+                                                    ng-model="rotation.angle" step="0.01">
+                                                <input ng-if="cropmethod === 'lossless'" type="range" ng-input-range
+                                                    ng-model="rotation.angle" min="0" step="90" max="270">
+                                            </label>
+                                        </div>
 
-                        <div style="margin-bottom:.8em;">
-                            <span translate>cropform-aspect-ratio</span>
+                                        <div style="margin-bottom:.8em;">
+                                            <span translate>cropform-aspect-ratio</span>
 
-                            <div>
-                                <label class="radio-inline">
-                                    <input type="radio" name="aspectratio" value="free" ng-model="aspectratio"
-                                        ng-change="aspectRatioChanged()">
-                                    <span translate>cropform-aspect-ratio-free</span>
-                                </label>
-                                <label class="radio-inline">
-                                    <input type="radio" name="aspectratio" value="keep" ng-model="aspectratio"
-                                        ng-change="aspectRatioChanged()">
-                                    <span translate>cropform-aspect-ratio-keep</span>
-                                </label>
-                                <label class="radio-inline">
-                                    <input type="radio" name="aspectratio" value="fixed" ng-model="aspectratio"
-                                        ng-change="aspectRatioChanged()">
-                                    <span translate>cropform-aspect-ratio-fixed</span>
-                                </label>
-                                <div ng-show="aspectratio=='fixed'"
-                                    style="border:1px solid #ccc; display:inline-block;">
-                                    <input type="text" ng-model="aspectratio_cx" ng-change="aspectRatioChanged()"
-                                        style="width:22px; text-align: right; border:none; outline: none;">:<input
-                                        type="text" ng-model="aspectratio_cy" ng-change="aspectRatioChanged()"
-                                        style="width:22px; border:none; outline: none;">
-                                </div>
-                            </div>
-                        </div>
+                                            <div>
+                                                <label class="radio-inline">
+                                                    <input type="radio" name="aspectratio" value="free"
+                                                        ng-model="aspectratio" ng-change="aspectRatioChanged()">
+                                                    <span translate>cropform-aspect-ratio-free</span>
+                                                </label>
+                                                <label class="radio-inline">
+                                                    <input type="radio" name="aspectratio" value="keep"
+                                                        ng-model="aspectratio" ng-change="aspectRatioChanged()">
+                                                    <span translate>cropform-aspect-ratio-keep</span>
+                                                </label>
+                                                <label class="radio-inline">
+                                                    <input type="radio" name="aspectratio" value="fixed"
+                                                        ng-model="aspectratio" ng-change="aspectRatioChanged()">
+                                                    <span translate>cropform-aspect-ratio-fixed</span>
+                                                </label>
+                                                <div ng-show="aspectratio=='fixed'"
+                                                    style="border:1px solid #ccc; display:inline-block;">
+                                                    <input type="text" ng-model="aspectratio_cx"
+                                                        ng-change="aspectRatioChanged()"
+                                                        style="width:22px; text-align: right; border:none; outline: none;">:<input
+                                                        type="text" ng-model="aspectratio_cy"
+                                                        ng-change="aspectRatioChanged()"
+                                                        style="width:22px; border:none; outline: none;">
+                                                </div>
+                                            </div>
+                                        </div>
 
-                        <div ng-show="metadata.mime == 'image/jpeg'" style="margin-bottom:.8em;">
-                            <span translate>cropform-method</span>
+                                        <div ng-show="metadata.mime == 'image/jpeg'" style="margin-bottom:.8em;">
+                                            <span translate>cropform-method</span>
 
-                            <div class="form-group">
-                                <label class="radio-inline" uib-popover="{{'cropform-method-precise-help' | translate}}"
-                                    popover-trigger="'mouseenter'" popover-animation="false" popover-placement="bottom"
-                                    popover-popup-delay="0.5">
-                                    <input type="radio" name="cropmethod" value="precise" ng-model="cropmethod"
-                                        ng-change="cropMethodChanged()">
-                                    <span translate>cropform-method-precise</span>
-                                </label>
-                                <label class="radio-inline"
-                                    uib-popover="{{'cropform-method-lossless-help' | translate}}"
-                                    popover-trigger="'mouseenter'" popover-animation="false" popover-placement="bottom"
-                                    popover-popup-delay="0.5">
-                                    <input type="radio" name="cropmethod" value="lossless" ng-model="cropmethod"
-                                        ng-change="cropMethodChanged()">
-                                    <span translate>cropform-method-lossless</span>
-                                </label>
-                            </div>
-                        </div>
+                                            <div class="form-group">
+                                                <label class="radio-inline"
+                                                    uib-popover="{{'cropform-method-precise-help' | translate}}"
+                                                    popover-trigger="'mouseenter'" popover-animation="false"
+                                                    popover-placement="bottom" popover-popup-delay="0.5">
+                                                    <input type="radio" name="cropmethod" value="precise"
+                                                        ng-model="cropmethod" ng-change="cropMethodChanged()">
+                                                    <span translate>cropform-method-precise</span>
+                                                </label>
+                                                <label class="radio-inline"
+                                                    uib-popover="{{'cropform-method-lossless-help' | translate}}"
+                                                    popover-trigger="'mouseenter'" popover-animation="false"
+                                                    popover-placement="bottom" popover-popup-delay="0.5">
+                                                    <input type="radio" name="cropmethod" value="lossless"
+                                                        ng-model="cropmethod" ng-change="cropMethodChanged()">
+                                                    <span translate>cropform-method-lossless</span>
+                                                </label>
+                                            </div>
+                                        </div>
 
-                        <div style="color:red; padding:1em 0;" ng-show="error">
-                            {{error}}
-                        </div>
+                                        <div style="color:red; padding:1em 0;" ng-show="error">
+                                            {{error}}
+                                        </div>
 
-                        <button type="submit" class="btn btn-primary" ng-disabled="!crop_dim" ladda="ladda"
-                            data-style="slide-up">
-                            <span translate>cropform-preview-btn</span>
-                        </button>
+                                        <button type="submit" class="btn btn-primary" ng-disabled="!crop_dim"
+                                            ladda="ladda" data-style="slide-up">
+                                            <span translate>cropform-preview-btn</span>
+                                        </button>
 
-                    </form>
+                                    </form>
 
 
-                    <!-- ********************************************************************************************************
+                                    <!-- ********************************************************************************************************
                      Step 2: Preview crop
                      **************************************************************************************************** -->
 
-                    <div ng-show="cropresults && !uploadresults">
+                                    <div ng-show="cropresults && !uploadresults">
+                                        <p ng-show="cropresults.method=='precise'">
+                                            <span translate>previewform-precise</span>
+                                        </p>
 
-                        <p ng-show="cropresults.method=='precise'">
-                            <span translate>previewform-precise</span>
-                        </p>
-
-                        <p ng-show="cropresults.method=='lossless'">
-                            <span translate>previewform-lossless</span>
-                            <span ng-show="cropresults.crop.width!=crop_dim.w || cropresults.crop.height!=crop_dim.h">
-                                <span translate translate-value-wider="{{cropresults.crop.width - crop_dim.w}}"
-                                    translate-value-higher="{{cropresults.crop.height - crop_dim.h}}"
-                                    translate-value-url="//en.wikipedia.org/wiki/JPEG#Lossless_editing">previewform-lossless-explanation</span>
-                            </span>
-                        </p>
-
-                        <form ng-submit="upload()" role="form">
-
-                            <div>
-
-                                <div class="form-group">
-                                    <label class="radio-inline">
-                                        <input type="radio" name="overwrite"
-                                            ng-disabled="cropresults.page.hasAssessmentTemplates || cropresults.page.hasDoNotCropTemplate"
-                                            ng-model="overwrite" value="overwrite"
-                                            ng-disabled="ladda2 || currentUrlParams.page"
-                                            ng-change="updateUploadComment()">
-                                        <span translate>previewform-overwrite</span>
-                                    </label>
-                                    <label class="radio-inline">
-                                        <input type="radio" name="overwrite" ng-model="overwrite" value="rename"
-                                            ng-disabled="ladda2" ng-change="updateUploadComment()">
-                                        <span translate>previewform-create-new</span>
-                                    </label>
-                                </div>
-
-                                <p ng-show="cropresults.page.hasAssessmentTemplates" class="text-danger">
-                                    <i class="fa fa-warning"></i>
-                                    <span translate>previewform-assessment-template</span>
-                                </p>
-
-                                <p ng-show="cropresults.page.hasDoNotCropTemplate" class="text-danger">
-                                    <i class="fa fa-warning"></i>
-                                    <span translate>previewform-donotcrop-template</span>
-                                </p>
-
-                                <p ng-show="currentUrlParams.site == 'nccommons.org' && overwrite=='overwrite'">
-                                    <i class="fa fa-warning"></i>
-                                    <span translate
-                                        translate-value-url="https://commons.wikimedia.org/wiki/Special:MyLanguage/Commons:Overwriting existing files">previewform-overwrite-policy</span>
-                                </p>
-
-                                <p ng-show="currentUrlParams.page">
-                                    <i class="fa fa-warning"></i>
-                                    <span translate>previewform-multipage-file</span>
-                                </p>
-
-                                <p ng-show="overwrite=='rename'">
-                                    <i class="fa fa-hand-o-down"></i>
-                                    <span translate>previewform-rename-tip</span>
-                                </p>
-
-                                <div class="form-group" ng-show="overwrite=='rename'"
-                                    ng-class="{ 'has-error': exists[currentUrlParams.site + ':' + newTitle] === true, 'has-success': exists[currentUrlParams.site + ':' + newTitle] === false }">
-                                    <label class="sr-only" for="newTitle">
-                                        <span translate>previewform-new-title</span>
-                                    </label>
-                                    <input id="newTitle" type="text" class="form-control" ng-model="newTitle"
-                                        ng-disabled="ladda2">
-                                    <div class="help-block"
-                                        ng-show="exists[currentUrlParams.site + ':' + newTitle] === true">
-                                        <span translate
-                                            translate-value-title="{{newTitle}}">previewform-new-title-exists</span>
-                                        <div>
-                                            <label>
-                                                <input type="checkbox" ng-model="confirmOverwrite">
-                                                <span translate>previewform-new-title-exists-confirm-overwrite</span>
-                                            </label>
-                                            <p ng-show="currentUrlParams.site == 'nccommons.org' && confirmOverwrite">
-                                                <i class="fa fa-warning"></i>
+                                        <p ng-show="cropresults.method=='lossless'">
+                                            <span translate>previewform-lossless</span>
+                                            <span
+                                                ng-show="cropresults.crop.width!=crop_dim.w || cropresults.crop.height!=crop_dim.h">
                                                 <span translate
-                                                    translate-value-url="https://commons.wikimedia.org/wiki/Special:MyLanguage/Commons:Overwriting existing files">previewform-overwrite-policy</span>
-                                            </p>
-                                        </div>
+                                                    translate-value-wider="{{cropresults.crop.width - crop_dim.w}}"
+                                                    translate-value-higher="{{cropresults.crop.height - crop_dim.h}}"
+                                                    translate-value-url="//en.wikipedia.org/wiki/JPEG#Lossless_editing">previewform-lossless-explanation</span>
+                                            </span>
+                                        </p>
+
+                                        <form ng-submit="upload()" role="form">
+
+                                            <div>
+
+                                                <div class="form-group">
+                                                    <label class="radio-inline">
+                                                        <input type="radio" name="overwrite"
+                                                            ng-disabled="cropresults.page.hasAssessmentTemplates || cropresults.page.hasDoNotCropTemplate"
+                                                            ng-model="overwrite" value="overwrite"
+                                                            ng-disabled="ladda2 || currentUrlParams.page"
+                                                            ng-change="updateUploadComment()">
+                                                        <span translate>previewform-overwrite</span>
+                                                    </label>
+                                                    <label class="radio-inline">
+                                                        <input type="radio" name="overwrite" ng-model="overwrite"
+                                                            value="rename" ng-disabled="ladda2"
+                                                            ng-change="updateUploadComment()">
+                                                        <span translate>previewform-create-new</span>
+                                                    </label>
+                                                </div>
+
+                                                <p ng-show="cropresults.page.hasAssessmentTemplates"
+                                                    class="text-danger">
+                                                    <i class="fa fa-warning"></i>
+                                                    <span translate>previewform-assessment-template</span>
+                                                </p>
+
+                                                <p ng-show="cropresults.page.hasDoNotCropTemplate" class="text-danger">
+                                                    <i class="fa fa-warning"></i>
+                                                    <span translate>previewform-donotcrop-template</span>
+                                                </p>
+
+                                                <p
+                                                    ng-show="currentUrlParams.site == 'nccommons.org' && overwrite=='overwrite'">
+                                                    <i class="fa fa-warning"></i>
+                                                    <span translate
+                                                        translate-value-url="https://commons.wikimedia.org/wiki/Special:MyLanguage/Commons:Overwriting existing files">previewform-overwrite-policy</span>
+                                                </p>
+
+                                                <p ng-show="currentUrlParams.page">
+                                                    <i class="fa fa-warning"></i>
+                                                    <span translate>previewform-multipage-file</span>
+                                                </p>
+
+                                                <p ng-show="overwrite=='rename'">
+                                                    <i class="fa fa-hand-o-down"></i>
+                                                    <span translate>previewform-rename-tip</span>
+                                                </p>
+
+                                                <div class="form-group" ng-show="overwrite=='rename'"
+                                                    ng-class="{ 'has-error': exists[currentUrlParams.site + ':' + newTitle] === true, 'has-success': exists[currentUrlParams.site + ':' + newTitle] === false }">
+                                                    <label class="sr-only" for="newTitle">
+                                                        <span translate>previewform-new-title</span>
+                                                    </label>
+                                                    <input id="newTitle" type="text" class="form-control"
+                                                        ng-model="newTitle" ng-disabled="ladda2">
+                                                    <div class="help-block"
+                                                        ng-show="exists[currentUrlParams.site + ':' + newTitle] === true">
+                                                        <span translate
+                                                            translate-value-title="{{newTitle}}">previewform-new-title-exists</span>
+                                                        <div>
+                                                            <label>
+                                                                <input type="checkbox" ng-model="confirmOverwrite">
+                                                                <span
+                                                                    translate>previewform-new-title-exists-confirm-overwrite</span>
+                                                            </label>
+                                                            <p
+                                                                ng-show="currentUrlParams.site == 'nccommons.org' && confirmOverwrite">
+                                                                <i class="fa fa-warning"></i>
+                                                                <span translate
+                                                                    translate-value-url="https://commons.wikimedia.org/wiki/Special:MyLanguage/Commons:Overwriting existing files">previewform-overwrite-policy</span>
+                                                            </p>
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                            </div>
+
+                                            <div class="form-group" ng-if="cropresults.page.elems.border !== undefined">
+                                                <label title="{{'previewform-removed-border-help' | translate}}">
+                                                    <input type="checkbox" ng-model="cropresults.page.elems.border"
+                                                        ng-change="updateUploadComment()">
+                                                    <span translate>previewform-removed-border</span>
+                                                </label>
+                                            </div>
+
+                                            <div class="form-group"
+                                                ng-if="cropresults.page.elems.trimming !== undefined">
+                                                <label title="{{'previewform-trimmed-help' | translate}}">
+                                                    <input type="checkbox" ng-model="cropresults.page.elems.trimming"
+                                                        ng-change="updateUploadComment()">
+                                                    <span translate>previewform-trimmed</span>
+                                                </label>
+                                            </div>
+
+                                            <div class="form-group"
+                                                ng-if="cropresults.page.elems.watermark !== undefined">
+                                                <label title="{{'previewform-removed-watermark-help' | translate}}">
+                                                    <input type="checkbox" ng-model="cropresults.page.elems.watermark"
+                                                        ng-change="updateUploadComment()">
+                                                    <span translate>previewform-removed-watermark</span>
+                                                </label>
+                                            </div>
+
+                                            <div class="form-group"
+                                                ng-if="cropresults.page.elems.wikidata !== undefined && overwrite=='rename'">
+                                                <label title="{{'previewform-wikidata-crop-help' | translate}}">
+                                                    <input type="checkbox" ng-model="cropresults.page.elems.wikidata"
+                                                        ng-change="updateUploadComment()">
+                                                    <span translate
+                                                        translate-values="{ link: cropresults.wikidataLink }">previewform-wikidata-crop</span>
+                                                </label>
+                                            </div>
+
+                                            <div class="form-group">
+                                                <label for="uploadComment">
+                                                    <span translate>previewform-upload-comment</span>
+                                                </label>
+                                                <textarea rows="4" id="uploadComment" type="text" class="form-control"
+                                                    ng-model="uploadComment" ng-disabled="ladda2"></textarea>
+                                            </div>
+
+                                            <div style="color:red; margin-bottom: 1em;" ng-show="error">
+                                                {{error}}
+                                            </div>
+
+                                            <div ng-show="allowIgnoreWarnings">
+                                                <label>
+                                                    <input type="checkbox" ng-model="ignoreWarnings">
+                                                    Ignore warnings (please use with care)
+                                                </label>
+                                            </div>
+
+                                            <button type="button" class="btn btn-secondary btn-large" ng-click="back()"
+                                                ng-disabled="ladda2">
+                                                <span translate>previewform-back-btn</span>
+                                            </button>
+
+                                            <button type="submit" class="btn btn-large btn-primary" ladda="ladda2"
+                                                data-style="slide-up">
+                                                <span translate>previewform-upload-btn</span>
+                                            </button>
+
+                                        </form>
+
                                     </div>
-                                </div>
 
-                            </div>
-
-                            <div class="form-group" ng-if="cropresults.page.elems.border !== undefined">
-                                <label title="{{'previewform-removed-border-help' | translate}}">
-                                    <input type="checkbox" ng-model="cropresults.page.elems.border"
-                                        ng-change="updateUploadComment()">
-                                    <span translate>previewform-removed-border</span>
-                                </label>
-                            </div>
-
-                            <div class="form-group" ng-if="cropresults.page.elems.trimming !== undefined">
-                                <label title="{{'previewform-trimmed-help' | translate}}">
-                                    <input type="checkbox" ng-model="cropresults.page.elems.trimming"
-                                        ng-change="updateUploadComment()">
-                                    <span translate>previewform-trimmed</span>
-                                </label>
-                            </div>
-
-                            <div class="form-group" ng-if="cropresults.page.elems.watermark !== undefined">
-                                <label title="{{'previewform-removed-watermark-help' | translate}}">
-                                    <input type="checkbox" ng-model="cropresults.page.elems.watermark"
-                                        ng-change="updateUploadComment()">
-                                    <span translate>previewform-removed-watermark</span>
-                                </label>
-                            </div>
-
-                            <div class="form-group"
-                                ng-if="cropresults.page.elems.wikidata !== undefined && overwrite=='rename'">
-                                <label title="{{'previewform-wikidata-crop-help' | translate}}">
-                                    <input type="checkbox" ng-model="cropresults.page.elems.wikidata"
-                                        ng-change="updateUploadComment()">
-                                    <span translate
-                                        translate-values="{ link: cropresults.wikidataLink }">previewform-wikidata-crop</span>
-                                </label>
-                            </div>
-
-                            <div class="form-group">
-                                <label for="uploadComment">
-                                    <span translate>previewform-upload-comment</span>
-                                </label>
-                                <textarea rows="4" id="uploadComment" type="text" class="form-control"
-                                    ng-model="uploadComment" ng-disabled="ladda2"></textarea>
-                            </div>
-
-                            <div style="color:red; margin-bottom: 1em;" ng-show="error">
-                                {{error}}
-                            </div>
-
-                            <div ng-show="allowIgnoreWarnings">
-                                <label>
-                                    <input type="checkbox" ng-model="ignoreWarnings">
-                                    Ignore warnings (please use with care)
-                                </label>
-                            </div>
-
-                            <button type="button" class="btn btn-large" ng-click="back()" ng-disabled="ladda2">
-                                <span translate>previewform-back-btn</span>
-                            </button>
-
-                            <button type="submit" class="btn btn-large btn-primary" ladda="ladda2"
-                                data-style="slide-up">
-                                <span translate>previewform-upload-btn</span>
-                            </button>
-
-                        </form>
-
-                    </div>
-
-                    <!-- ********************************************************************************************************
+                                    <!-- ********************************************************************************************************
                      Step 3: Upload complete
                      **************************************************************************************************** -->
 
-                    <div ng-show="uploadresults">
-                        <div ng-show="status">
-                            {{status}}
+                                    <div ng-show="uploadresults">
+                                        <div ng-show="status">
+                                            {{status}}
+                                        </div>
+
+                                        <p ng-show="uploadresults.result == 'Success'"
+                                            style="background: url(res/yes_check-24px.png) left no-repeat; padding: 5px 5px 5px 30px;">
+                                            <span translate>results-success</span>
+                                        </p>
+                                        <p ng-show="uploadresults.result == 'Success'">
+                                            <span translate
+                                                translate-value-url="{{uploadresults.imageinfo.descriptionurl}}">results-success-details</span>
+                                        </p>
+                                        <p ng-show="uploadresults.result == 'Success' && uploadresults.elems.wikidata">
+                                            <span translate
+                                                translate-values="{ link: cropresults.wikidataLink }">results-success-wikidata</span>
+                                        </p>
+
+                                        <p ng-show="uploadresults.error"
+                                            style="background: url(res/x_mark-24px.png) left no-repeat; padding: 5px 5px 5px 30px;">
+                                            <span translate
+                                                translate-value-error="{{uploadresults.error.info}}">results-failure</span>
+                                        </p>
+                                    </div>
+
+                                </div>
+                            </div>
+
+
+                                </div>
+                            </div>
                         </div>
+                        <div class="push"></div>
 
-                        <p ng-show="uploadresults.result == 'Success'"
-                            style="background: url(res/yes_check-24px.png) left no-repeat; padding: 5px 5px 5px 30px;">
-                            <span translate>results-success</span>
-                        </p>
-                        <p ng-show="uploadresults.result == 'Success'">
-                            <span translate
-                                translate-value-url="{{uploadresults.imageinfo.descriptionurl}}">results-success-details</span>
-                        </p>
-                        <p ng-show="uploadresults.result == 'Success' && uploadresults.elems.wikidata">
-                            <span translate
-                                translate-values="{ link: cropresults.wikidataLink }">results-success-wikidata</span>
-                        </p>
-
-                        <p ng-show="uploadresults.error"
-                            style="background: url(res/x_mark-24px.png) left no-repeat; padding: 5px 5px 5px 30px;">
-                            <span translate translate-value-error="{{uploadresults.error.info}}">results-failure</span>
-                        </p>
                     </div>
-
                 </div>
-            </div>
-        </div>
-
-        <div class="push"></div>
-    </div>
-
+    </main>
     <footer>
         <span>
             <a href="https://commons.wikimedia.org/wiki/Commons:CropTool">Tutorial</a>
