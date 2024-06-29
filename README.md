@@ -1,6 +1,13 @@
 ## CropTool for nccommons.org
 * [Change I made to the code.](https://github.com/MrIbrahem/nccroptool/pull/2/files)
 
+```
+mkdir $HOME/local
+mkdir $HOME/local/bin
+cp /usr/bin/convert $HOME/local/bin/convert
+
+```
+
 ### install
 
 
