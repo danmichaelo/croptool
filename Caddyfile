@@ -2,11 +2,13 @@
     auto_https disable_redirects
 }
 
-localhost:7878 {
+#localhost:7878 {
+ncc2c.toolforge.org {
     tls internal
 
     # Enable static file server
-    root * /var/www/html/public_html
+    #root * /var/www/html/public_html
+    root * /ncc2c/public_html
     file_server
 
     # Serve PHP through php-fpm:

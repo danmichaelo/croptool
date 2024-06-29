@@ -30,7 +30,7 @@ class ApiService
         $this->factory = $factory;
         $this->logger = $logger;
         $this->auth = $auth;
-        $this->site = 'commons.wikimedia.org';
+        $this->site = 'nccommons.org';
         $this->endpoint = 'https://' . $this->site . '/w/api.php';
         $this->userAgent = $config->get('userAgent', 'CropTool');
     }

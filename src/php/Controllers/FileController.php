@@ -189,10 +189,10 @@ class FileController
     public function publish(Response $response, Request $request, WikiPageService $pageService, FactoryInterface $factory, LoggerInterface $logger)
     {
         $sitesSupportingExtractedFromTemplate = [
-            'commons.wikimedia.org',
+            'nccommons.org',
         ];
         $sitesSupportingImageExtractedTemplate = [
-            'commons.wikimedia.org',
+            'nccommons.org',
         ];
 
         // @TODO: DRY

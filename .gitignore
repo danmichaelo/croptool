@@ -1,4 +1,3 @@
-config.ini
 data/*
 public_html/files/*
 vendor
@@ -43,3 +42,5 @@ replica.my.cnf
 .gitconfig
 .hhvm.hhbc
 .ipython/
+src/index222.html
+src/index_new.html

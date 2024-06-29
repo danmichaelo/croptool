@@ -12,7 +12,8 @@ class GifFile extends File implements FileInterface
 
         $rotate = $rotation ? '-rotate ' . intval($rotation) . ' +repage' : '';
 
-        Command::exec('convert {src} ' . $rotate . ' -crop {dim} {dest}', [
+        //Command::exec('convert {src} ' . $rotate . ' -crop {dim} {dest}', [
+        Command::exec($this->pathToGif . ' {src} ' . $rotate . ' -crop {dim} {dest}', [
             'src' => $srcPath,
             'dest' => $destPath,
             'dim' => $dim,

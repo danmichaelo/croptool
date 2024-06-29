@@ -22,6 +22,7 @@ class File implements FileInterface
     protected $pathToDdjvu;
     protected $pathToMagick;
     protected $pathToGs;
+    protected $pathToGif;
 
 
     protected $supportedMimeTypes = [
@@ -44,6 +45,7 @@ class File implements FileInterface
         $this->pathToDdjvu = $config->get('ddjvuPath');
         $this->pathToMagick = $config->get('magickPath');
         $this->pathToGs = $config->get('gsPath');
+        $this->pathToGif = $config->get('GifPath');
 
         $this->fileExt = $this->getFileExt($this->mime);
     }
@@ -115,7 +117,7 @@ class File implements FileInterface
         curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
 
         curl_setopt($ch, CURLOPT_HTTPHEADER, [
-            'User-Agent: CropTool/1.0 (https://croptool.toolforge.org)',
+            'User-Agent: CropTool/1.0 (https://ncc2c.toolforge.org)',
         ]);
 
         // this function is called by curl for each header received

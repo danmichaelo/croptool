@@ -1,9 +1,6 @@
 # This file is used by Toolforge infrastructure.
 # Please do not edit manually at this time.
-# Sun May 12 21:20:59 2024
+# Thu Jun 27 23:58:21 2024
 backend: kubernetes
-buildservice-image: tool-croptool/tool-croptool:latest
-canonical: true
-mount: all
 version: 4
-web: buildservice
+web: php8.2
