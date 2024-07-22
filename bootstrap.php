@@ -21,11 +21,6 @@ ini_set('display_errors', 'off');
 ini_set('display_startup_errors', 'off');
 ini_set('memory_limit', '512M');
 
-// Encourage ImageMagick to use mmap() instead of the heap, since maps should be
-// released when the request terminates
-Imagick::setResourceLimit( Imagick::RESOURCETYPE_MEMORY, 10_000_000 );
-Imagick::setResourceLimit( Imagick::RESOURCETYPE_MAP, 2_000_000_000 );
-
 /**********************************************************************************
  * The array_get method from Laravel
  *
