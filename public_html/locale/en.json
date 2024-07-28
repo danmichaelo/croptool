@@ -4,7 +4,7 @@
     "logged-in": "Authorized as {{user}}",
     "logout": "Logout",
     "loginform-header": "Authorization required",
-    "loginform-blurb": "CropTool is a tool for cropping images (JPG, PNG or GIF files) at Wikimedia sites. <a href=\"{{url}}\">Learn more<\/a>.",
+    "loginform-blurb": "CropTool is a tool for cropping images (JPG, PNG, GIF, SVG, WebP, PDF, TIFF or DjVu files) at Wikimedia sites. <a href=\"{{url}}\">Learn more<\/a>.",
     "loginform-help": "To use CropTool you need to connect it to your Wikimedia account. This process is secure and your password will not be given to CropTool.",
     "INVALID_COOKIE": "Your session has expired. Please re-authorize.",
     "loginform-submit-button": "Connect",
