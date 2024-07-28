@@ -245,9 +245,8 @@ class Image
         }
 
         $mime = $this->editor->mimeFromPath($thumbPath);
-
-        if ($mime == 'image/gif') {
-            // We never create thumbnails for GIFs
+        if ($mime == 'image/gif' || $mime === 'image/svg+xml' ) {
+            // We never create thumbnails for GIFs & SVGs
             return null;
         } else if ($this->mime == 'image/tiff' or $this->orientation > 0) {
             // We always create a thumbnail
