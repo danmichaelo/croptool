@@ -75,6 +75,7 @@ class WikiText
         'picture[_ ]of[_ ]week',
         '(permission|Разрешение|ConfirmationImage)? ?OTRS[ -]?(ID|permission)?',
         'PermissionTicket',
+        'Book', // https://github.com/danmichaelo/croptool/issues/198
     );
 
     /*
