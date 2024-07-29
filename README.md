@@ -8,13 +8,13 @@ at Wikimedia Commons and other Wikimedia sites using the MediaWiki API with OAut
 
 Features:
 
-* Supports JPEG, PNG and (animated) GIF files, and also single pages from
-  DJVU and PDF files.
+* Supports JPEG, PNG, SVG and (animated) GIF files, and also single pages from
+  DjVu and PDF files.
 * JPEGs can be cropped either losslessly using [jpegtran](http://jpegclub.org/jpegtran/)
   or pixel perfect using [ImageMagick](https://www.imagemagick.org/).
-* Crop preview can be initialized from query string parameters:  
-  `?title=Example.jpg&left=10&top=10&width=150&height=100`  
-  or  
+* Crop preview can be initialized from query string parameters:
+  `?title=Example.jpg&left=10&top=10&width=150&height=100`
+  or
   `?title=Example.jpg&left=10&top=10&right=10&bottom=10`
 * Detects [`{{Remove border}}`](https://commons.wikimedia.org/wiki/Template:Remove_border),
   [Category:Images with borders](https://commons.wikimedia.org/wiki/Category:Images_with_borders),
@@ -79,7 +79,12 @@ Note that you should be able to login and preview cropping without waiting for t
 
 ### Deployment notes
 
-- Run `toolforge build start <public link to repo>`
-- Run `toolforge webservice --backend=kubernetes --mount=all buildservice start`
+* `ssh tools-login.wmflabs.org`
+* `become croptool`
+* `toolforge build start https://github.com/danmichaelo/croptool.git`
+* `toolforge webservice --backend=kubernetes --mount=all buildservice restart`
+
+First-time setup:
+
 - Copy `config.prod.ini` into the home directory, and add OAuth information
 - Creates a `public_files` directory in the home directory and set it to be readable and writable by others
