@@ -87,6 +87,7 @@ class WikiText
     */
     protected $categoriesNotToBeCopied = array(
         '(valued|quality)[_ ]images[_ ](by|of)[^\]]+',
+        '(DjVu|PDF) files.*', // https://github.com/danmichaelo/croptool/issues/198
     );
 
     /*
