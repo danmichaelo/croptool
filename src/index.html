@@ -232,7 +232,7 @@
                      **************************************************************************************************** -->
                 <div ng-show="!cropresults" class="inner cropboxContainer">
 
-                    <img id="cropbox" ng-class="{imageloading: busy}" ct-cropper aspect-ratio="{{aspectratio_cxy}}" rotation="{{rotation.angle}}" on-crop="updateCoords($event.detail)" ng-src="{{metadata.thumb ? metadata.thumb.name : metadata.original.name}}">
+                    <img id="cropbox" ng-class="{imageloading: busy}" ct-cropper aspect-ratio="{{aspectratio_cxy}}" rotation="{{rotation.angle}}" on-crop="updateCoords($event.detail)" ng-src="{{metadata.thumb ? metadata.thumb.name : metadata.original.name}}" width="{{metadata.thumb ? metadata.thumb.width : metadata.original.width}}" height="{{metadata.thumb ? metadata.thumb.height : metadata.original.height}}">
 
                 </div>
 
