@@ -46,9 +46,10 @@ class WikiPageService
         $this->dirty = false;
     }
 
-    public function getForTitle($title) : WikiPage {
+    public function getForTitle($title, $site) : WikiPage {
         return $this->factory->make(WikiPage::class, [
-            'title' => $title
+            'title' => $title,
+            'site' => $site
         ]);
     }
 }

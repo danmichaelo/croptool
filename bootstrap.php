@@ -67,7 +67,7 @@ $pageMiddleware = function (Request $request, RequestHandler $handler) {
 
     $requestParams = $request->getMethod() === 'GET' ? $request->getQueryParams() : $request->getParsedBody();
 
-    if ( !array_key_exists( 'title', $requestParams ) ) {
+    if ( !array_key_exists( 'title', $requestParams ) || !array_key_exists( 'site', $requestParams ) ) {
         $response =  new Response();
         $response->getBody()->write((string)json_encode([
             'error' => 'Invalid request',
@@ -79,10 +79,11 @@ $pageMiddleware = function (Request $request, RequestHandler $handler) {
     $response = $handler->handle($request);
 
     $title = $requestParams['title'];
+    $site = $requestParams['site'];
 
     $pageService = $this->get(WikiPageService::class);
 
-    $request->withAttribute('page', $pageService->getForTitle( $title ));
+    $request->withAttribute('page', $pageService->getForTitle( $title, $site ));
 
     return $response;
 };

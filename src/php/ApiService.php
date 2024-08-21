@@ -6,9 +6,6 @@ use CropTool\Auth\AuthServiceInterface;
 use CropTool\Errors\ApiError;
 use DI\FactoryInterface;
 use Psr\Log\LoggerInterface;
-use Psr\Http\Message\ResponseInterface as Response;
-use Psr\Http\Message\ServerRequestInterface as Request;
-use Psr\Http\Server\RequestHandlerInterface as RequestHandler;
 
 /**
  * Simple MediaWiki API client
@@ -25,35 +22,14 @@ class ApiService
     protected $factory;
     public $calls = 0;
 
-    public function __construct(FactoryInterface $factory, LoggerInterface $logger, AuthServiceInterface $auth, Config $config)
+    public function __construct(FactoryInterface $factory, LoggerInterface $logger, AuthServiceInterface $auth, Config $config, $site = 'commons.wikimedia.org')
     {
         $this->factory = $factory;
         $this->logger = $logger;
         $this->auth = $auth;
-        $this->site = 'commons.wikimedia.org';
+        $this->site = $site;
         $this->endpoint = 'https://' . $this->site . '/w/api.php';
         $this->userAgent = $config->get('userAgent', 'CropTool');
-    }
-
-    public function __invoke(Request $request, RequestHandler $handler)
-    {
-        $requestParams = $request->getMethod() === 'GET' ? $request->getQueryParams() : $request->getParsedBody();
-
-        if ( !array_key_exists( 'site', $requestParams ) ) {
-            $response =  new Response();
-            $response->getBody()->write((string)json_encode([
-                'error' => 'Invalid request',
-                'messages' => 'No site parameter found',
-            ]));
-            return $response->withStatus(500);
-        }
-
-        $this->site = $requestParams['site'];
-        $this->endpoint = 'https://' . $this->site . '/w/api.php';
-
-        $response = $handler->handle($request);
-
-        return $response;
     }
 
     public function getSite()

@@ -2,6 +2,7 @@
 
 namespace CropTool;
 
+use DI\FactoryInterface;
 use CropTool\File\FileInterface;
 use CropTool\File\FileRepository;
 use Psr\Log\LoggerInterface;
@@ -34,9 +35,11 @@ class WikiPage
      * @param string $title
      * @param string $namespace
      */
-    public function __construct(ApiService $api, FileRepository $files, LoggerInterface $logger, $title, $namespace = 'File:')
+    public function __construct(FileRepository $files, FactoryInterface $factory, LoggerInterface $logger, $title, $site = 'commons.wikimedia.org', $namespace = 'File:')
     {
-        $this->api = $api;
+        $this->api = $factory->make(ApiService::class, [
+            'site' => $site
+        ]);
         $this->files = $files;
         $this->logger = $logger;
         $this->_title = $title;

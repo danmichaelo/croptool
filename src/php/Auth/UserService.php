@@ -2,7 +2,7 @@
 
 namespace CropTool\Auth;
 
-use CropTool\ApiService;
+use DI\FactoryInterface;
 use CropTool\Auth\AuthServiceInterface;
 use CropTool\MagicParameterTrait;
 use Psr\Log\LoggerInterface;
@@ -18,9 +18,9 @@ class UserService
     protected $auth;
     protected $logger;
 
-    public function __construct(ApiService $api, AuthServiceInterface $auth, LoggerInterface $logger)
+    public function __construct(AuthServiceInterface $auth, FactoryInterface $factory, LoggerInterface $logger)
     {
-        $this->api = $api;
+        $this->api = $factory->make(\CropTool\ApiService::class);
         $this->auth = $auth;
         $this->logger = $logger;
     }
