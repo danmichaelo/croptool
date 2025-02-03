@@ -48,7 +48,7 @@ class FileController
 
     public function exists(Response $response, Request $request, WikiPageService $pageService)
     {
-        $page = $pageService->getForTitle( $request->getQueryParams()['title'] );
+        $page = $pageService->getForTitle( $request->getQueryParams()['title'], $request->getQueryParams()['site'] );
         $response->getBody()->write((string)json_encode([
             'site' => $page->site,
             'title' => $page->title,
@@ -59,7 +59,7 @@ class FileController
 
     public function info(Response $response, Request $request, WikiPageService $pageService, ImageEditor $editor)
     {
-        $page = $pageService->getForTitle($request->getQueryParams()['title']);
+        $page = $pageService->getForTitle($request->getQueryParams()['title'], $request->getQueryParams()['site']);
         $pageno = intval($request->getQueryParams()['page'] ?? 0);
 
         $page->assertExists();
@@ -93,7 +93,7 @@ class FileController
 
     public function autodetect(Response $response, Request $request, WikiPageService $pageService, BorderLocator $bloc)
     {
-        $page = $pageService->getForTitle($request->getQueryParams()['title']);
+        $page = $pageService->getForTitle($request->getQueryParams()['title'], $request->getQueryParams()['site']);
         $pageno = intval($request->getQueryParams()['page'] ?? 0);
         $srcPath = $page->file->getAbsolutePathForPage($pageno);
 
@@ -106,7 +106,7 @@ class FileController
 
     public function crop(Response $response, Request $request, WikiPageService $pageService, ImageEditor $editor, LoggerInterface $logger, FactoryInterface $factory)
     {
-        $page = $pageService->getForTitle($request->getQueryParams()['title'] ?? 0);
+        $page = $pageService->getForTitle($request->getQueryParams()['title'] ?? 0, $request->getQueryParams()['site'] ?? 'commons.wikimedia.org');
         // @TODO: DRY
         $pageno = intval($request->getQueryParams()['page'] ?? 0);
         $x = intval($request->getQueryParams()['x'] ?? 0);
@@ -198,7 +198,8 @@ class FileController
 
         // @TODO: DRY
         $body = $request->getParsedBody();
-        $page = $pageService->getForTitle(array_get($body, 'title'));
+        $site = array_get($body, 'site', 'commons.wikimedia.org');
+        $page = $pageService->getForTitle(array_get($body, 'title'), $site);
         $pageno = intval(array_get($body, 'page', 0));
         $overwrite = array_get($body, 'overwrite') == 'overwrite';
         $editComment = array_get($body, 'comment');
@@ -244,7 +245,7 @@ class FileController
             $page->setWikitext($wikitext)
                 ->save($editSummary->build());
         } else {
-            $newPage = $pageService->getForTitle( $newName );
+            $newPage = $pageService->getForTitle( $newName, $site );
             if (!$ignoreWarnings) {
                 $newPage->assertNotExists();
             }
