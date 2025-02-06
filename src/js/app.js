@@ -333,7 +333,7 @@ controller('AppCtrl', ['$scope', '$http', '$timeout', '$q', '$window', '$httpPar
                     }
 
                     $scope.crop_dim = crop_dim;
-                    if ($scope.currentUrlParams.ratio !== '' && $scope.currentUrlParams.ratio.split(':').length == 2) {
+                    if (typeof $scope.currentUrlParams.ratio === 'string' && $scope.currentUrlParams.ratio !== '' && $scope.currentUrlParams.ratio.split(':').length == 2) {
                         var parts = $scope.currentUrlParams.ratio.split(':');
                         $scope.aspectratio = 'fixed';
                         $scope.aspectratio_cx = parts[0];
