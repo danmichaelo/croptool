@@ -368,11 +368,17 @@ controller('AppCtrl', ['$scope', '$http', '$timeout', '$q', '$window', '$httpPar
             if (!response.error) {
 
                 var p = $scope.currentUrlParams.title.lastIndexOf('.');
-                if ($scope.currentUrlParams.page && $scope.metadata.pagecount > 1) {
-                    $scope.newTitle = $scope.currentUrlParams.title.substr(0, p) + ' (page ' + $scope.currentUrlParams.page + ' crop).jpg';
-                } else {
-                    $scope.newTitle = $scope.currentUrlParams.title.substr(0, p) + ' (cropped)' + $scope.currentUrlParams.title.substr(p);
+                var cropText;
+		var ext = $scope.currentUrlParams.title.substr(p);
+                if ( $scope.metadata.overrideResultExtension ) {
+                    ext = '.' + $scope.metadata.overrideResultExtension
                 }
+                if ($scope.currentUrlParams.page && $scope.metadata.pagecount > 1) {
+                    cropText = ' (page ' + $scope.currentUrlParams.page + ' crop)';
+                } else {
+                    cropText = ' (cropped)';
+                }
+                $scope.newTitle = $scope.currentUrlParams.title.substr(0, p) + cropText + ext;
             }
 
         }, function(res) {

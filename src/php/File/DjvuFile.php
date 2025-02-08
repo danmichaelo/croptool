@@ -48,4 +48,8 @@ class DjvuFile extends File implements FileInterface
 
         return $jpgFile;
     }
+
+    public function overrideResultExtension() {
+        return 'jpg';
+    }
 }

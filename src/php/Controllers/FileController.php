@@ -86,6 +86,7 @@ class FileController
             'orientation' => $original->orientation,
             'categories' => $page->imageinfo->categories,
             'supportsRotation' => $page->file->supportsRotation(),
+            'overrideResultExtension' => $page->file->overrideResultExtension()
         ]));
 
         return $response;

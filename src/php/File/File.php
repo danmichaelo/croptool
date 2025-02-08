@@ -212,4 +212,11 @@ class File implements FileInterface
     public function supportsRotation() {
         return true;
     }
+
+    /**
+     * Return extension if the cropped result will have different format than original
+     */
+    public function overrideResultExtension() {
+        return false;
+    }
 }

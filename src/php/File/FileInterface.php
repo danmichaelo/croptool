@@ -21,4 +21,6 @@ interface FileInterface
     static public function saveImage($im, $destPath, $srcPath);
 
     public function supportsRotation();
+
+    public function overrideResultExtension();
 }
