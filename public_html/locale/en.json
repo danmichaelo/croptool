@@ -21,7 +21,7 @@
     "thumb-dimensions": "Thumbnail: {{width}}\u00d7{{height}} px.",
     "crop-dimensions": "Crop: {{width}}\u00d7{{height}} px.",
     "cropped-dimensions": "Cropped: {{width}}\u00d7{{height}} px.",
-    "cropform-select-region": "Select a crop region by click-and-drag, or try the <a href ng-click=\"{{url}}\">magic border locator<\/a>.",
+    "cropform-select-region": "Select a crop region by click-and-drag, or try the <a href ng-click=\"{{url}}\">magic border locator<\/a>, or <a href ng-click=\"{{url2}}\">select a structured data region<\/a>.",
     "left": "Left",
     "top": "Top",
     "width": "Width",
