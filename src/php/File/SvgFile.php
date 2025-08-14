@@ -173,9 +173,9 @@ class SvgFile extends File implements FileInterface
                 $openingElm = '<' . $reader->name;
                 $closingElm = '</' . $reader->name . '>';
 
-                $openingElm .= ' width="' . htmlspecialchars( $coords['width'], ENT_XML1 ) . '"';
-                $openingElm .= ' height="' . htmlspecialchars( $coords['height'], ENT_XML1 ) . '"';
-                $openingElm .= ' viewBox="' . htmlspecialchars( $newViewBox, ENT_XML1 ) . '"';
+                $openingElm .= ' width="' . htmlspecialchars( $coords['width'], ENT_XML1 | ENT_QUOTES ) . '"';
+                $openingElm .= ' height="' . htmlspecialchars( $coords['height'], ENT_XML1 | ENT_QUOTES ) . '"';
+                $openingElm .= ' viewBox="' . htmlspecialchars( $newViewBox, ENT_XML1 | ENT_QUOTES ) . '"';
                 while( $reader->moveToNextAttribute() ) {
                     if (
                         $reader->namespaceURI === '' &&
@@ -183,7 +183,7 @@ class SvgFile extends File implements FileInterface
                         continue;
                     }
                     $openingElm .= ' ' . $reader->name . '=';
-                    $openingElm .= '"' . htmlspecialchars( $reader->value, ENT_XML1 ) . '"';
+                    $openingElm .= '"' . htmlspecialchars( $reader->value, ENT_XML1 | ENT_QUOTES ) . '"';
                 }
 
                 $openingElm .= '>';
