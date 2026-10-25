@@ -1,36 +1,47 @@
 <?php
 
 use Mockery as m;
+use PHPUnit\Framework\TestCase;
+use Slim\App;
 
-class WebTestCase extends \There4\Slim\Test\WebTestCase
+class WebTestCase extends TestCase
 {
+	protected App $app;
+	/** HTTP test client compatible with the legacy test API. */
+	protected object $client;
 
-    // Run before each unit test
-    public function setUp()
-    {
-        parent::setup();
+	// Run before each unit test
+	protected function setUp(): void
+	{
+		parent::setUp();
 
-        // Mock ApiService by default to prevent http requests
-        $this->mockApiService();
+		$this->app = $this->getSlimInstance();
 
-        // Mock session by default
-        $this->mockSession();
+		// Mock ApiService by default to prevent http requests
+		$this->mockApiService();
 
-        // Mock logger by default
-        $this->mockLogger();
-    }
+		// Mock session by default
+		$this->mockSession();
 
-    // Run after each unit test
-    public function tearDown()
-    {
-        m::close();
-    }
+		// Mock logger by default
+		$this->mockLogger();
 
-    // Return the configured Slim App object
-    public function getSlimInstance()
-    {
-        return require dirname(dirname(__DIR__)) . '/bootstrap.php';
-    }
+		// Initialize the HTTP test client
+		$this->setUpClient();
+	}
+
+	// Run after each unit test
+	protected function tearDown(): void
+	{
+		m::close();
+		parent::tearDown();
+	}
+
+	// Return the configured Slim App object
+	public function getSlimInstance(): App
+	{
+		return require dirname(__DIR__, 2) . '/bootstrap.php';
+	}
 
     protected function makeImageInfoResponse($exists=true, $data=[])
     {
@@ -136,4 +147,37 @@ class WebTestCase extends \There4\Slim\Test\WebTestCase
 
         return $service;
     }
+
+	// Initialize the HTTP test client
+	private function setUpClient() {
+		$this->client = new class($this->app) {
+			public ?\Psr\Http\Message\ResponseInterface $response = null;
+
+			public function __construct(private \Slim\App $app)
+			{
+			}
+
+			public function get(string $uri): void
+			{
+				$this->request('GET', $uri);
+			}
+
+			public function post(string $uri, array $data = []): void
+			{
+				$this->request('POST', $uri, $data);
+			}
+
+			private function request(string $method, string $uri, array $data = []): void
+			{
+				$factory = new \Slim\Psr7\Factory\ServerRequestFactory();
+				$request = $factory->createServerRequest($method, $uri);
+
+				if ($data) {
+					$request = $request->withParsedBody($data);
+				}
+
+				$this->response = $this->app->handle($request);
+			}
+		};		
+	}
 }

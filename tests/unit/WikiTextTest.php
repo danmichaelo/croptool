@@ -5,8 +5,10 @@ use PHPUnit\Framework\TestCase;
 
 class WikiTextTest extends TestCase
 {
+	/** Test samples. */
+	protected array $samples = [];
 
-	public function setUp()
+	protected function setUp(): void
 	{
 		$samples = [
 	        'abc [[Category:SomeCategory]] {{flickrreview}} def',
@@ -345,10 +347,13 @@ Sault-S<sup>te</sup>-Marie, Ontario, Canada<br>
         $wt = new WikiText('abc {{Crop for Wikidata | Q16218635 }} def');
         $stuff = $wt->possibleStuffToRemove();
 
-        $this->assertArraySubset([
-        	'wikidata' => true,
-        	'wikidata-item' => 'Q16218635'
-        ], $stuff);
+        $this->assertEquals([
+			'wikidata' => true,
+			'wikidata-item' => 'Q16218635',
+		], array_intersect_key($stuff, [
+			'wikidata' => true,
+			'wikidata-item' => true,
+		]));
     }
 
     public function testItRecognizesCropForWikidataTemplateWithExtraParam()
@@ -356,10 +361,13 @@ Sault-S<sup>te</sup>-Marie, Ontario, Canada<br>
         $wt = new WikiText('abc {{Crop for Wikidata|Q16218635|Person on left (silver medal)}} def');
         $stuff = $wt->possibleStuffToRemove();
 
-        $this->assertArraySubset([
-        	'wikidata' => true,
-        	'wikidata-item' => 'Q16218635'
-        ], $stuff);
+		$this->assertEquals([
+			'wikidata' => true,
+			'wikidata-item' => 'Q16218635',
+		], array_intersect_key($stuff, [
+			'wikidata' => true,
+			'wikidata-item' => true,
+		]));
     }
 
     public function testItDoesntCopyOtrsTemplates()

@@ -1,12 +1,20 @@
-<phpunit bootstrap="vendor/autoload.php" colors="true" stopOnFailure="true" verbose="true">
-    <filter>
-        <whitelist>
-            <directory suffix=".php">src/php</directory>
-        </whitelist>
-    </filter>
+<?xml version="1.0" encoding="UTF-8"?>
+<phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:noNamespaceSchemaLocation="https://schema.phpunit.de/10.5/phpunit.xsd"
+         bootstrap="vendor/autoload.php"
+         colors="true"
+         stopOnFailure="false"
+         displayDetailsOnTestsThatTriggerErrors="true"
+         displayDetailsOnTestsThatTriggerWarnings="true"
+         displayDetailsOnTestsThatTriggerDeprecations="true">
+    <source>
+        <include>
+            <directory suffix="Test.php">./tests</directory>
+        </include>
+    </source>
     <testsuites>
         <testsuite name="TestSuite">
-            <directory suffix=".php">./tests</directory>
+            <directory suffix="Test.php">./tests</directory>
             <exclude>./tests/integration/WebTestCase.php</exclude>
         </testsuite>
     </testsuites>

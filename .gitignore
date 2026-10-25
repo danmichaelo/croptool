@@ -43,3 +43,4 @@ replica.my.cnf
 .gitconfig
 .hhvm.hhbc
 .ipython/
+.phpunit.result.cache
